@@ -12,12 +12,31 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+  TextEditingController _confirmPasswordController = TextEditingController();
   bool _isLoading = false; // Betöltési állapot
+  String _errorMessage = ''; // Hibaüzenet megjelenítéséhez
 
   Future<void> registerUsingEmailPassword() async {
     setState(() {
       _isLoading = true; // Betöltés mutatása
+      _errorMessage = ''; // Hibaüzenet törlése
     });
+
+    if (_passwordController.text.length < 6) {
+      setState(() {
+        _errorMessage = 'The password must be at least 6 characters long.';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        _errorMessage = 'Passwords do not match.';
+        _isLoading = false;
+      });
+      return;
+    }
 
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -33,23 +52,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('The password provided is too weak.')),
-        );
+        setState(() {
+          _errorMessage = 'The password provided is too weak.';
+        });
       } else if (e.code == 'email-already-in-use') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('The account already exists for that email.')),
-        );
+        setState(() {
+          _errorMessage = 'The account already exists for that email.';
+        });
       } else if (e.code == 'invalid-email') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('The email address is not valid.')),
-        );
+        setState(() {
+          _errorMessage = 'The email address is not valid.';
+        });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
-      );
+      setState(() {
+        _errorMessage = 'An error occurred: $e';
+      });
     } finally {
       setState(() {
         _isLoading = false; // Betöltés befejezése
@@ -95,6 +113,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 26.0),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  hintText: "Confirm Password",
+                  prefixIcon: Icon(Icons.lock, color: Colors.black),
+                ),
+              ),
+              const SizedBox(height: 26.0),
+              // Hibaüzenet megjelenítése, ha van
+              _errorMessage.isNotEmpty
+                  ? Center(
+                      child: Text(
+                        _errorMessage,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 14.0,
+                        ),
+                      ),
+                    )
+                  : Container(),
+              const SizedBox(height: 20.0),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : Container(
