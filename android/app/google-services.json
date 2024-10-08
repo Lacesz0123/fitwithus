@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1021216281357",
+    "project_id": "fitwithus-c4ae9",
+    "storage_bucket": "fitwithus-c4ae9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021216281357:android:fa7e6fb84b4364ef4c1644",
+        "android_client_info": {
+          "package_name": "com.example.fitwithus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDKVmoNIM2rZl9P_1kaejdVgolcWxhL4w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
