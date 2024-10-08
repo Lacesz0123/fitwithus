@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     WorkoutsScreen(),
     const AIChatScreen(),
-    const RecipesScreen(),
+    RecipesScreen(),
     const ProfileScreen(),
   ];
 
