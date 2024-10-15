@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'meditation_workouts_screen.dart'; // Importáljuk az új képernyőt
+import 'category_workouts_screen.dart'; // Az általános edzések listázó képernyő importálása
 
 class WorkoutsScreen extends StatelessWidget {
   WorkoutsScreen({super.key});
@@ -35,19 +35,19 @@ class WorkoutsScreen extends StatelessWidget {
           ),
           itemCount: categories.length,
           itemBuilder: (BuildContext context, int index) {
+            String categoryTitle = categories[index]['title']!;
+
             return GestureDetector(
               onTap: () {
-                // Navigálás a meditációs gyakorlatok listájára
-                if (categories[index]['title'] == 'Meditation') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MeditationWorkoutsScreen(),
+                // Navigálás a megfelelő kategóriához tartozó edzések listájára
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoryWorkoutsScreen(
+                      category: categoryTitle,
                     ),
-                  );
-                } else {
-                  print("Selected category: ${categories[index]['title']}");
-                }
+                  ),
+                );
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -64,7 +64,7 @@ class WorkoutsScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     color: Colors.black54, // Félig átlátszó fekete háttér
                     child: Text(
-                      categories[index]['title']!,
+                      categoryTitle,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16.0,

@@ -51,4 +51,6 @@ dependencies {
     // Add the dependencies for Firebase products you want to use
     implementation 'com.google.firebase:firebase-auth-ktx' // Példa
     // További Firebase függőségek
+
+    implementation 'com.google.firebase:firebase-firestore-ktx' // Ez kell a Firestore használatához
 }   

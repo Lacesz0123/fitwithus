@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // Importáljuk a HomeScreen-t, hogy regisztráció után oda irányíthassunk
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import
+import 'home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,13 +14,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _confirmPasswordController = TextEditingController();
-  bool _isLoading = false; // Betöltési állapot
-  String _errorMessage = ''; // Hibaüzenet megjelenítéséhez
+  TextEditingController _weightController =
+      TextEditingController(); // Új mező a súlyhoz
+  bool _isLoading = false;
+  String _errorMessage = '';
 
   Future<void> registerUsingEmailPassword() async {
     setState(() {
-      _isLoading = true; // Betöltés mutatása
-      _errorMessage = ''; // Hibaüzenet törlése
+      _isLoading = true;
+      _errorMessage = '';
     });
 
     if (_passwordController.text.length < 6) {
@@ -44,35 +47,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: _passwordController.text,
       );
 
-      // Sikeres regisztráció után átirányítás a HomeScreen-re
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await addUserData(user, _weightController.text); // Súly mentése
+      }
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const HomeScreen(),
         ),
       );
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        setState(() {
-          _errorMessage = 'The password provided is too weak.';
-        });
-      } else if (e.code == 'email-already-in-use') {
-        setState(() {
-          _errorMessage = 'The account already exists for that email.';
-        });
-      } else if (e.code == 'invalid-email') {
-        setState(() {
-          _errorMessage = 'The email address is not valid.';
-        });
-      }
-    } catch (e) {
       setState(() {
-        _errorMessage = 'An error occurred: $e';
+        _errorMessage = e.message ?? 'An error occurred';
       });
     } finally {
       setState(() {
-        _isLoading = false; // Betöltés befejezése
+        _isLoading = false;
       });
     }
+  }
+
+  Future<void> addUserData(User user, String weight) async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    await firestore.collection('users').doc(user.uid).set({
+      'email': user.email,
+      'weight': int.parse(weight), // Súly mentése
+      'completedWorkouts': 0
+    });
   }
 
   @override
@@ -122,7 +124,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 26.0),
-              // Hibaüzenet megjelenítése, ha van
+              TextField(
+                controller: _weightController, // Súly mező
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: "Your Weight (kg)",
+                  prefixIcon: Icon(Icons.fitness_center, color: Colors.black),
+                ),
+              ),
+              const SizedBox(height: 26.0),
               _errorMessage.isNotEmpty
                   ? Center(
                       child: Text(
@@ -162,8 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    Navigator.of(context)
-                        .pop(); // Visszatérés a bejelentkezéshez
+                    Navigator.of(context).pop();
                   },
                   child: const Text(
                     "Back to Login",
