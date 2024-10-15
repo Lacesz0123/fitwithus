@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart'; // Importáld a home_screen oldalt
-import 'register_step1_screen.dart'; // Importáld az új regisztrációs képernyőt
+import 'register/register_step1_screen.dart'; // Importáld az új regisztrációs képernyőt
 
 void main() {
   runApp(const MainApp());

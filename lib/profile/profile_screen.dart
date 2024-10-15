@@ -17,7 +17,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Firestore-ból adat lekérő függvény
   Future<Map<String, dynamic>?> getUserData() async {
     if (user != null) {
-      // Lekérjük a felhasználó adatait az 'users' gyűjteményből a felhasználó UID-ja alapján
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user!.uid)
@@ -27,81 +26,131 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return null;
   }
 
+  Future<void> _deleteAccount() async {
+    // Megerősítés kérdése a felhasználótól
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+            'Are you sure you want to delete your account? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmDelete) {
+      try {
+        // Törlés a Firestore 'users' gyűjteményéből
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .delete();
+
+        // Felhasználó törlése a Firebase Authentication-ből
+        await user!.delete();
+
+        // Kijelentkezés és átirányítás a bejelentkezési oldalra
+        await FirebaseAuth.instance.signOut();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Your account has been successfully deleted.')),
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'requires-recent-login') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content:
+                    Text('Please log in again to confirm account deletion.')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${e.message}')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: FutureBuilder<Map<String, dynamic>?>(
-          future: getUserData(), // Lekérjük a Firestore adatokat
+          future: getUserData(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator(); // Betöltés jelzése
+              return const CircularProgressIndicator();
             }
             if (snapshot.hasError) {
-              return const Text('Error loading user data'); // Hiba esetén
+              return const Text('Error loading user data');
             }
-
             if (!snapshot.hasData || snapshot.data == null) {
-              return const Text('No user data found'); // Ha nincs adat
+              return const Text('No user data found');
             }
 
-            // Lekérjük az adatokat a Firestore-ból
             Map<String, dynamic> userData = snapshot.data!;
             String email = user?.email ?? 'N/A';
-            int weight = userData['weight'] ?? 0; // Súly
-            int completedWorkouts =
-                userData['completedWorkouts'] ?? 0; // Completed Workouts
+            int weight = userData['weight'] ?? 0;
+            int completedWorkouts = userData['completedWorkouts'] ?? 0;
 
-            // Adatok megjelenítése
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Welcome, $email", // Email megjelenítése
+                  "Welcome, $email",
                   style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  "Weight: $weight kg", // Súly megjelenítése
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
+                  "Weight: $weight kg",
+                  style: const TextStyle(fontSize: 18),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "Completed Workouts: $completedWorkouts", // Teljesített edzések
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
+                  "Completed Workouts: $completedWorkouts",
+                  style: const TextStyle(fontSize: 18),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    // Navigáció a Kedvenc edzések képernyőre
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (context) => const FavoriteWorkoutsScreen()),
+                        builder: (context) => const FavoriteWorkoutsScreen(),
+                      ),
                     );
                   },
-                  child: const Text(
-                      "Favorite Workouts"), // Gomb a Kedvenc edzésekhez
+                  child: const Text("Favorite Workouts"),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
-                    // Firebase kijelentkezés
                     await FirebaseAuth.instance.signOut();
-                    // Átirányítás a bejelentkezési oldalra
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ),
+                          builder: (context) => const LoginScreen()),
                     );
                   },
-                  child: const Text("Log Out"), // Kijelentkezés gomb
+                  child: const Text("Log Out"),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _deleteAccount, // Felhasználói fiók törlése
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text("Delete Account"),
                 ),
               ],
             );
