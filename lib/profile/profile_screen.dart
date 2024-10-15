@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore importálása
+import 'package:image_picker/image_picker.dart'; // Image picker importálása
+import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage importálása
+import 'dart:io'; // Fájlkezelés
 import '../main.dart'; // Importáljuk a login_screen fájlt, hogy oda irányítsuk vissza a felhasználót
 import 'favorite_workouts_screen.dart'; // Importáljuk a kedvenc edzések képernyőt
 
@@ -13,6 +16,29 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   User? user = FirebaseAuth.instance.currentUser;
+  String? _profileImageUrl; // Profilkép URL tárolása
+  String? _defaultProfileImageUrl; // Default profilkép URL
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDefaultProfileImageUrl(); // Default kép URL betöltése a Firebase Storage-ból
+  }
+
+  // Default profilkép URL lekérdezése Firebase Storage-ból
+  Future<void> _loadDefaultProfileImageUrl() async {
+    try {
+      final defaultRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_images/defaultImage/default.jpg');
+      final url = await defaultRef.getDownloadURL();
+      setState(() {
+        _defaultProfileImageUrl = url;
+      });
+    } catch (e) {
+      print('Error loading default profile image URL: $e');
+    }
+  }
 
   // Firestore-ból adat lekérő függvény
   Future<Map<String, dynamic>?> getUserData() async {
@@ -21,9 +47,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .collection('users')
           .doc(user!.uid)
           .get();
-      return doc.data() as Map<String, dynamic>?;
+      Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+      _profileImageUrl = data?['profileImageUrl']; // Profilkép URL lekérése
+      return data;
     }
     return null;
+  }
+
+  // Profilkép feltöltése Firebase Storage-ba
+  Future<void> _uploadProfileImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      try {
+        // Kép feltöltése Firebase Storage-ba
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('profile_images')
+            .child('${user!.uid}.jpg');
+
+        await storageRef.putFile(File(pickedFile.path));
+        final downloadUrl = await storageRef.getDownloadURL();
+
+        // Profilkép URL elmentése a Firestore 'users' dokumentumba
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .update({'profileImageUrl': downloadUrl});
+
+        setState(() {
+          _profileImageUrl =
+              downloadUrl; // Kép frissítése a felhasználói felületen
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile image updated successfully')),
+        );
+      } catch (e) {
+        print('Error uploading profile image: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error uploading profile image')),
+        );
+      }
+    }
   }
 
   Future<void> _deleteAccount() async {
@@ -109,20 +176,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                GestureDetector(
+                  onTap: _uploadProfileImage,
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundImage: _profileImageUrl != null
+                        ? NetworkImage(_profileImageUrl!)
+                        : (_defaultProfileImageUrl != null
+                            ? NetworkImage(_defaultProfileImageUrl!)
+                            : const AssetImage('assets/default.jpg')
+                                as ImageProvider),
+                    backgroundColor: Colors.grey[300],
+                  ),
+                ),
+                const SizedBox(height: 10),
                 Text(
-                  "Welcome, $email",
+                  userData['username'] ?? 'N/A',
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 Text(
+                  "Email: $email",
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 10),
+                Text(
                   "Weight: $weight kg",
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   "Completed Workouts: $completedWorkouts",
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
@@ -148,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _deleteAccount, // Felhasználói fiók törlése
+                  onPressed: _deleteAccount,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: const Text("Delete Account"),
                 ),
