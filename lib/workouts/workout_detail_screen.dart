@@ -36,7 +36,9 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
           .collection('users')
           .doc(user.uid)
           .get();
-      List<dynamic> favoriteWorkouts = doc['favorites'] ?? [];
+      // Ellenőrizzük, hogy létezik-e a 'favorites' mező, ha nem, akkor üres listát adunk
+      List<dynamic> favoriteWorkouts =
+          (doc.data() as Map<String, dynamic>)['favorites'] ?? [];
 
       setState(() {
         isFavorite = favoriteWorkouts.contains(widget.workoutId);

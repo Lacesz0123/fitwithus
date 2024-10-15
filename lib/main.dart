@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart'; // Importáld a home_screen oldalt
-import 'register_screen.dart'; // Importáld a regisztrációs képernyőt
+import 'register_step1_screen.dart'; // Importáld az új regisztrációs képernyőt
 
 void main() {
   runApp(const MainApp());
@@ -172,10 +172,10 @@ class _LoginScreenState extends State<LoginScreen> {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    // Navigáció a regisztrációs képernyőre
+                    // Navigáció az első regisztrációs oldalra
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const RegisterScreen(),
+                        builder: (context) => const RegisterStep1Screen(),
                       ),
                     );
                   },
