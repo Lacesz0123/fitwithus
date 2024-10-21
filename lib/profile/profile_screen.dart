@@ -61,7 +61,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (pickedFile != null) {
       try {
-        // Kép feltöltése Firebase Storage-ba a profile_images/userImages mappába
+        // Előző kép törlése a Storage-ból, ha van
+        if (_profileImageUrl != null) {
+          try {
+            final oldImageRef =
+                FirebaseStorage.instance.refFromURL(_profileImageUrl!);
+            await oldImageRef.delete();
+          } catch (e) {
+            print('Error deleting previous profile image: $e');
+          }
+        }
+
+        // Új kép feltöltése Firebase Storage-ba a profile_images/userImages mappába
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('profile_images/userImages')
@@ -116,6 +127,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (confirmDelete) {
       try {
+        // Profilkép törlése a Storage-ból, ha van
+        if (_profileImageUrl != null) {
+          try {
+            final imageRef =
+                FirebaseStorage.instance.refFromURL(_profileImageUrl!);
+            await imageRef.delete();
+          } catch (e) {
+            print('Error deleting profile image from Storage: $e');
+          }
+        }
+
         // Törlés a Firestore 'users' gyűjteményéből
         await FirebaseFirestore.instance
             .collection('users')
@@ -184,8 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ? NetworkImage(_profileImageUrl!)
                         : (_defaultProfileImageUrl != null
                             ? NetworkImage(_defaultProfileImageUrl!)
-                            : const AssetImage('assets/default.jpg')
-                                as ImageProvider),
+                            : null),
                     backgroundColor: Colors.grey[300],
                   ),
                 ),
