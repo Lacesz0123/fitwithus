@@ -371,9 +371,15 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         },
       ),
       floatingActionButton: userRole == 'admin'
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
               onPressed: () => addCategory(context),
-              child: const Icon(Icons.add),
+              label: Row(
+                children: const [
+                  Text('Add New'), // A szöveg
+                  SizedBox(width: 5), // Kis távolság a szöveg és az ikon között
+                  Icon(Icons.add), // Az ikon a szöveg után
+                ],
+              ),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

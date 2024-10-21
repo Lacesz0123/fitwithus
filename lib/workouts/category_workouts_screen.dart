@@ -111,10 +111,19 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                 child: Container(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3), // Árnyék pozíciója
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -151,7 +160,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
         },
       ),
       floatingActionButton: userRole == 'admin'
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -160,7 +169,13 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                   ),
                 );
               },
-              child: const Icon(Icons.add),
+              label: Row(
+                children: const [
+                  Text('Add New'), // A szöveg
+                  SizedBox(width: 5), // Kis távolság a szöveg és az ikon között
+                  Icon(Icons.add), // Az ikon a szöveg után
+                ],
+              ),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

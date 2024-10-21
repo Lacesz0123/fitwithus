@@ -58,10 +58,11 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               Map<String, dynamic> workout = favoriteWorkouts[index];
               String workoutTitle = workout['title'] ?? 'No title';
+              String workoutCategory =
+                  workout['category'] ?? 'Unknown category';
               String workoutId = workout['id'];
 
-              return ListTile(
-                title: Text(workoutTitle),
+              return GestureDetector(
                 onTap: () {
                   // Navigálás az edzés részletező oldalra
                   Navigator.of(context).push(
@@ -71,6 +72,42 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
                     ),
                   );
                 },
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3), // Árnyék pozíciója
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        workoutTitle,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'Category: $workoutCategory',
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           );
