@@ -36,7 +36,6 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
           .collection('users')
           .doc(user.uid)
           .get();
-      // Ellenőrizzük, hogy létezik-e a 'favorites' mező, ha nem, akkor üres listát adunk
       List<dynamic> favoriteWorkouts =
           (doc.data() as Map<String, dynamic>)['favorites'] ?? [];
 
@@ -81,15 +80,6 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Details'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isFavorite ? Icons.star : Icons.star_border,
-              color: isFavorite ? Colors.yellow : Colors.grey,
-            ),
-            onPressed: _toggleFavorite, // Kedvenc állapot váltása
-          ),
-        ],
       ),
       body: FutureBuilder<Map<String, dynamic>?>(
         future: getWorkoutData(),
@@ -115,12 +105,34 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _toggleFavorite,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black54, // Halvány fekete háttér
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          isFavorite ? Icons.star : Icons.star_border,
+                          color: isFavorite ? Colors.yellow : Colors.grey,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -136,10 +148,32 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                ...steps.map((step) => Text(
-                      '- $step',
-                      style: const TextStyle(fontSize: 18),
-                    )),
+                // Lépések számozott listázása
+                ...steps.asMap().entries.map((entry) {
+                  int index = entry.key + 1; // Számozás 1-től kezdődően
+                  String step = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$index. ',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            step,
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ],
             ),
           );
