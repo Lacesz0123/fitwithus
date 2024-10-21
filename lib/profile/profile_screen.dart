@@ -54,17 +54,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return null;
   }
 
-  // Profilkép feltöltése Firebase Storage-ba
+  // Profilkép feltöltése Firebase Storage-ba a profile_images/userImages/ mappába
   Future<void> _uploadProfileImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       try {
-        // Kép feltöltése Firebase Storage-ba
+        // Kép feltöltése Firebase Storage-ba a profile_images/userImages mappába
         final storageRef = FirebaseStorage.instance
             .ref()
-            .child('profile_images')
+            .child('profile_images/userImages')
             .child('${user!.uid}.jpg');
 
         await storageRef.putFile(File(pickedFile.path));

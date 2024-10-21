@@ -1,10 +1,8 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // Importáld a home_screen oldalt
-import 'register/register_step1_screen.dart'; // Importáld az új regisztrációs képernyőt
+import 'package:firebase_core/firebase_core.dart';
+import 'home_screen.dart';
+import 'register/register_step1_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -29,7 +27,6 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  // Initialize Firebase App
   Future<FirebaseApp> _initializeFireBase() async {
     FirebaseApp firebaseApp = await Firebase.initializeApp();
     return firebaseApp;
@@ -61,43 +58,78 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Login function
-  static Future<User?> loginUsingEmailPassword({
-    required String email,
-    required String password,
-    required BuildContext context,
-  }) async {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user;
-    try {
-      UserCredential userCredential = await auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      user = userCredential.user;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == "user-not-found") {
-        print("No User found for that email");
-      }
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  String _errorMessage = ''; // Hibaüzenet tárolása
+  bool _isPasswordVisible = false; // Jelszó láthatóságának állapota
+
+  Future<void> _signIn() async {
+    setState(() {
+      _errorMessage = ''; // Hibaüzenet alaphelyzetbe állítása
+    });
+
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please fill in both email and password.';
+      });
+      return;
     }
-    return user;
+
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      // Sikeres bejelentkezés
+      if (userCredential.user != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        switch (e.code) {
+          case 'user-not-found':
+            _errorMessage = 'No user found for this email.';
+            break;
+          case 'wrong-password':
+            _errorMessage = 'Incorrect password. Please try again.';
+            break;
+          case 'invalid-email':
+            _errorMessage = 'The email address is badly formatted.';
+            break;
+          case 'user-disabled':
+            _errorMessage =
+                'This user has been disabled. Please contact support.';
+            break;
+          case 'too-many-requests':
+            _errorMessage = 'Too many login attempts. Please try again later.';
+            break;
+          default:
+            _errorMessage = 'An error occurred: ${e.message}';
+            break;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unknown error occurred.';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController _emailController = TextEditingController();
-    TextEditingController _passwordController = TextEditingController();
-
     return Scaffold(
       body: SingleChildScrollView(
-        // Ez a megoldás gördíthetővé teszi a képernyőt
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 80.0), // Adjunk egy kis helyet a tetején
+              const SizedBox(height: 80.0),
               const Text(
                 "FitWithUs",
                 style: TextStyle(
@@ -126,18 +158,34 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 26.0),
               TextField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: !_isPasswordVisible,
+                decoration: InputDecoration(
                   hintText: "User Password",
                   prefixIcon: Icon(Icons.lock, color: Colors.black),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 12.0),
-              const Text(
-                "Don't Remember your Password?",
-                style: TextStyle(color: Colors.blue),
-              ),
-              const SizedBox(height: 88.0),
+              if (_errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                    _errorMessage,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
               Container(
                 width: double.infinity,
                 child: RawMaterialButton(
@@ -147,18 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.00),
                   ),
-                  onPressed: () async {
-                    User? user = await loginUsingEmailPassword(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                      context: context,
-                    );
-                    if (user != null) {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => HomeScreen(),
-                      ));
-                    }
-                  },
+                  onPressed: _signIn,
                   child: const Text(
                     "Login",
                     style: TextStyle(
@@ -172,7 +209,6 @@ class _LoginScreenState extends State<LoginScreen> {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    // Navigáció az első regisztrációs oldalra
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const RegisterStep1Screen(),

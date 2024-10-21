@@ -23,14 +23,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-  - assets/meditation.jpg
-  - assets/rehab.jpg
-  - assets/mobility.jpg
-  - assets/hot_new.jpg
-  - assets/yoga.jpg
-  - assets/low_impact.jpg
-  - assets/stretch.jpg
-  - assets/strength.jpg
-  - assets/hiit.jpg
-  - assets/cardio.jpg
