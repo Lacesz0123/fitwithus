@@ -51,6 +51,7 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
             'gender': _selectedGender,
             'birthDate': _birthDate?.toIso8601String(),
             'completedWorkouts': 0,
+            'role': 'user', // Alapértelmezett szerepkör hozzáadása
           });
 
           // Sikeres regisztráció után átirányítás a HomeScreen-re

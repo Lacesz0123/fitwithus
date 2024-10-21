@@ -1,35 +1,63 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Felhasználó ellenőrzéséhez
 import 'workout_detail_screen.dart';
+import 'add_workout_screen.dart'; // Az új edzés hozzáadásának képernyője
 
-class CategoryWorkoutsScreen extends StatelessWidget {
+class CategoryWorkoutsScreen extends StatefulWidget {
   final String category;
 
   const CategoryWorkoutsScreen({super.key, required this.category});
 
-  Future<List<Map<String, dynamic>>> getWorkoutsByCategory() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('workouts')
-        .where('category', isEqualTo: category)
-        .get();
+  @override
+  _CategoryWorkoutsScreenState createState() => _CategoryWorkoutsScreenState();
+}
 
-    // Minden edzés adatait listává alakítjuk és hozzáadjuk a Firestore dokumentum ID-ját
-    return querySnapshot.docs.map((doc) {
-      Map<String, dynamic> workoutData = doc.data() as Map<String, dynamic>;
-      workoutData['id'] =
-          doc.id; // Hozzáadjuk a dokumentum ID-ját az edzés adataihoz
-      return workoutData;
-    }).toList();
+class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
+  String? userRole;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentUserRole();
+  }
+
+  // Felhasználó szerepkörének lekérdezése Firestore-ból
+  Future<void> _getCurrentUserRole() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+      setState(() {
+        userRole = userDoc['role'];
+      });
+    }
+  }
+
+  Stream<List<Map<String, dynamic>>> getWorkoutsByCategory() {
+    return FirebaseFirestore.instance
+        .collection('workouts')
+        .where('category', isEqualTo: widget.category)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              Map<String, dynamic> workoutData =
+                  doc.data() as Map<String, dynamic>;
+              workoutData['id'] =
+                  doc.id; // Hozzáadjuk a dokumentum ID-ját az edzés adataihoz
+              return workoutData;
+            }).toList());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('$category Workouts'),
+        title: Text('${widget.category} Workouts'),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: getWorkoutsByCategory(),
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: getWorkoutsByCategory(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -70,6 +98,20 @@ class CategoryWorkoutsScreen extends StatelessWidget {
           );
         },
       ),
+      floatingActionButton: userRole == 'admin'
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AddWorkoutScreen(category: widget.category),
+                  ),
+                );
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
