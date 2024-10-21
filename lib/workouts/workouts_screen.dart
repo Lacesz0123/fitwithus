@@ -211,26 +211,52 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ),
           TextButton(
             onPressed: () async {
-              // Kategória és kép törlése
-              await FirebaseFirestore.instance
-                  .collection('categories')
-                  .doc(docId)
-                  .delete();
+              // Kategória és kapcsolódó gyakorlatok törlése
+              try {
+                // Először töröljük a kategóriához tartozó összes gyakorlatot
+                QuerySnapshot workoutsSnapshot = await FirebaseFirestore
+                    .instance
+                    .collection('workouts')
+                    .where('category', isEqualTo: currentTitle)
+                    .get();
 
-              if (currentImage.isNotEmpty) {
-                try {
-                  final storageRef =
-                      FirebaseStorage.instance.refFromURL(currentImage);
-                  await storageRef.delete();
-                } catch (e) {
-                  print('Error deleting image from Storage: $e');
+                for (DocumentSnapshot workoutDoc in workoutsSnapshot.docs) {
+                  await FirebaseFirestore.instance
+                      .collection('workouts')
+                      .doc(workoutDoc.id)
+                      .delete();
                 }
-              }
 
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Category deleted successfully')),
-              );
+                // Ezután töröljük a kategóriát
+                await FirebaseFirestore.instance
+                    .collection('categories')
+                    .doc(docId)
+                    .delete();
+
+                // Ha van kép a kategóriához, töröljük azt is
+                if (currentImage.isNotEmpty) {
+                  try {
+                    final storageRef =
+                        FirebaseStorage.instance.refFromURL(currentImage);
+                    await storageRef.delete();
+                  } catch (e) {
+                    print('Error deleting image from Storage: $e');
+                  }
+                }
+
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content:
+                          Text('Category and workouts deleted successfully')),
+                );
+              } catch (e) {
+                print('Error deleting category and workouts: $e');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Error deleting category and workouts')),
+                );
+              }
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
