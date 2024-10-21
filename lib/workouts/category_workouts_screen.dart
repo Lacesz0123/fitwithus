@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Felhasználó ellenőrzéséhez
 import 'workout_detail_screen.dart';
 import 'add_workout_screen.dart'; // Az új edzés hozzáadásának képernyője
+import 'edit_workout_screen.dart'; // Importálás az edzés módosítási képernyőhöz
 
 class CategoryWorkoutsScreen extends StatefulWidget {
   final String category;
@@ -50,6 +51,22 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
             }).toList());
   }
 
+  // Edzés módosítása
+  void editWorkout(BuildContext context, Map<String, dynamic> workout) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditWorkoutScreen(
+          workoutId: workout['id'], // Az edzés azonosítója
+          initialTitle: workout['title'] ?? 'No title', // Eredeti cím
+          initialDescription:
+              workout['description'] ?? 'No description', // Eredeti leírás
+          initialSteps:
+              List<String>.from(workout['steps'] ?? []), // Eredeti lépések
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,9 +97,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
               String workoutDescription =
                   workout['description'] ?? 'No description';
 
-              return ListTile(
-                title: Text(workoutTitle),
-                subtitle: Text(workoutDescription),
+              return GestureDetector(
                 onTap: () {
                   // Navigálás az edzés részletező oldalra
                   Navigator.of(context).push(
@@ -93,6 +108,43 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                     ),
                   );
                 },
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              workoutTitle,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              workoutDescription,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (userRole == 'admin')
+                        IconButton(
+                          icon: const Icon(Icons.settings),
+                          onPressed: () => editWorkout(context, workout),
+                        ),
+                    ],
+                  ),
+                ),
               );
             },
           );

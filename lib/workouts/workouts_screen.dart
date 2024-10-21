@@ -169,7 +169,16 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
             onPressed: () async {
               if (titleController.text.isNotEmpty) {
                 String imageUrl = currentImage;
+                // Ha új kép van kiválasztva, töröljük a régit
                 if (pickedImage != null) {
+                  try {
+                    final oldImageRef =
+                        FirebaseStorage.instance.refFromURL(currentImage);
+                    await oldImageRef.delete();
+                  } catch (e) {
+                    print('Error deleting previous image from Storage: $e');
+                  }
+
                   final storageRef = FirebaseStorage.instance
                       .ref()
                       .child('category_images/categoryImages')
@@ -202,6 +211,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ),
           TextButton(
             onPressed: () async {
+              // Kategória és kép törlése
               await FirebaseFirestore.instance
                   .collection('categories')
                   .doc(docId)
