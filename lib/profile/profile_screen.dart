@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:fl_chart/fl_chart.dart';
 import '../main.dart';
 import 'favorite_workouts_screen.dart';
+import 'settings_screen.dart'; // Új SettingsScreen importálása
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -208,9 +209,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               } else if (value == 'Delete Account') {
                 _deleteAccount();
+              } else if (value == 'Settings') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()),
+                );
               }
             },
             itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'Settings',
+                child: Text('Settings'),
+              ),
               const PopupMenuItem(
                 value: 'Logout',
                 child: Text('Logout'),
@@ -239,7 +249,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
 
               Map<String, dynamic> userData = snapshot.data!;
-              String email = user?.email ?? 'N/A';
               int completedWorkouts = userData['completedWorkouts'] ?? 0;
 
               return Column(
@@ -265,11 +274,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    "Email: $email",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
                     "Completed Workouts: $completedWorkouts",
                     style: const TextStyle(fontSize: 16),
                   ),
@@ -283,20 +287,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       );
                     },
                     child: const Text("Favorite Workouts"),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _weightController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Enter Weight (kg)',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: _addWeight,
-                    child: const Text('Add Weight'),
                   ),
                   const SizedBox(height: 20),
                   const Text(
@@ -354,6 +344,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       );
                     },
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width *
+                        0.8, // Keskenyebb mező
+                    child: TextField(
+                      controller: _weightController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Enter Weight (kg)',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: _addWeight,
+                    child: const Text('Add Weight'),
                   ),
                 ],
               );
