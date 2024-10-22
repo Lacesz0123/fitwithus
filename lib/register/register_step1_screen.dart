@@ -23,7 +23,9 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
 
   bool _isUsernameValid(String username) {
     final validCharacters = RegExp(r'^[a-zA-Z0-9]+$');
-    return username.length >= 5 && validCharacters.hasMatch(username);
+    return username.length >= 5 &&
+        username.length <= 15 &&
+        validCharacters.hasMatch(username);
   }
 
   Future<void> _continueRegistration() async {
@@ -43,7 +45,7 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
     if (!_isUsernameValid(_usernameController.text)) {
       setState(() {
         _errorMessage =
-            'Username must be at least 5 characters long and contain only letters and numbers.';
+            'Username must be 5-15 characters long and contain only letters and numbers.';
       });
       return;
     }
