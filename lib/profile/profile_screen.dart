@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-import 'package:fl_chart/fl_chart.dart'; // FL Chart importálása
+import 'package:fl_chart/fl_chart.dart';
 import '../main.dart';
 import 'favorite_workouts_screen.dart';
 
@@ -196,6 +196,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'Logout') {
+                FirebaseAuth.instance.signOut();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              } else if (value == 'Delete Account') {
+                _deleteAccount();
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'Logout',
+                child: Text('Logout'),
+              ),
+              const PopupMenuItem(
+                value: 'Delete Account',
+                child: Text('Delete Account'),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: FutureBuilder<Map<String, dynamic>?>(
@@ -258,33 +285,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: const Text("Favorite Workouts"),
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await FirebaseAuth.instance.signOut();
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
-                      );
-                    },
-                    child: const Text("Log Out"),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _deleteAccount,
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text("Delete Account"),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: 200, // Reduced width for the text field
-                    child: TextField(
-                      controller: _weightController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Enter Weight (kg)',
-                        border: OutlineInputBorder(),
-                      ),
+                  TextField(
+                    controller: _weightController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Enter Weight (kg)',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
                     ),
                   ),
                   ElevatedButton(
@@ -308,7 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       List<Map<String, dynamic>> weightEntries = snapshot.data!;
                       return SizedBox(
-                        height: 150, // Reduced height for the chart
+                        height: 200,
                         child: LineChart(
                           LineChartData(
                             lineBarsData: [
@@ -335,31 +342,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     DateTime date =
                                         DateTime.fromMillisecondsSinceEpoch(
                                             value.toInt());
-                                    return Text(
-                                      '${date.month}/${date.day}',
-                                      style: const TextStyle(fontSize: 10),
-                                    );
+                                    return Text('${date.month}/${date.day}');
                                   },
                                 ),
                               ),
                               leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  interval: 5,
-                                  reservedSize: 28,
-                                ),
-                              ),
-                            ),
-                            gridData: FlGridData(
-                              show: true,
-                              drawVerticalLine: true,
-                              horizontalInterval: 5,
-                            ),
-                            borderData: FlBorderData(
-                              show: true,
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 1,
+                                sideTitles: SideTitles(showTitles: true),
                               ),
                             ),
                           ),
