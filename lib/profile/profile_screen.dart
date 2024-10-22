@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore importálása
-import 'package:image_picker/image_picker.dart'; // Image picker importálása
-import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage importálása
-import 'dart:io'; // Fájlkezelés
-import '../main.dart'; // Importáljuk a login_screen fájlt, hogy oda irányítsuk vissza a felhasználót
-import 'favorite_workouts_screen.dart'; // Importáljuk a kedvenc edzések képernyőt
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import 'package:fl_chart/fl_chart.dart'; // FL Chart importálása
+import '../main.dart';
+import 'favorite_workouts_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,16 +17,16 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   User? user = FirebaseAuth.instance.currentUser;
-  String? _profileImageUrl; // Profilkép URL tárolása
-  String? _defaultProfileImageUrl; // Default profilkép URL
+  String? _profileImageUrl;
+  String? _defaultProfileImageUrl;
+  TextEditingController _weightController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadDefaultProfileImageUrl(); // Default kép URL betöltése a Firebase Storage-ból
+    _loadDefaultProfileImageUrl();
   }
 
-  // Default profilkép URL lekérdezése Firebase Storage-ból
   Future<void> _loadDefaultProfileImageUrl() async {
     try {
       final defaultRef = FirebaseStorage.instance
@@ -40,7 +41,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Firestore-ból adat lekérő függvény
   Future<Map<String, dynamic>?> getUserData() async {
     if (user != null) {
       DocumentSnapshot doc = await FirebaseFirestore.instance
@@ -48,20 +48,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .doc(user!.uid)
           .get();
       Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
-      _profileImageUrl = data?['profileImageUrl']; // Profilkép URL lekérése
+      _profileImageUrl = data?['profileImageUrl'];
       return data;
     }
     return null;
   }
 
-  // Profilkép feltöltése Firebase Storage-ba a profile_images/userImages/ mappába
   Future<void> _uploadProfileImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       try {
-        // Előző kép törlése a Storage-ból, ha van
         if (_profileImageUrl != null) {
           try {
             final oldImageRef =
@@ -72,7 +70,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         }
 
-        // Új kép feltöltése Firebase Storage-ba a profile_images/userImages mappába
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('profile_images/userImages')
@@ -81,15 +78,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await storageRef.putFile(File(pickedFile.path));
         final downloadUrl = await storageRef.getDownloadURL();
 
-        // Profilkép URL elmentése a Firestore 'users' dokumentumba
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user!.uid)
             .update({'profileImageUrl': downloadUrl});
 
         setState(() {
-          _profileImageUrl =
-              downloadUrl; // Kép frissítése a felhasználói felületen
+          _profileImageUrl = downloadUrl;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -105,7 +100,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    // Megerősítés kérdése a felhasználótól
     bool confirmDelete = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -127,7 +121,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (confirmDelete) {
       try {
-        // Profilkép törlése a Storage-ból, ha van
         if (_profileImageUrl != null) {
           try {
             final imageRef =
@@ -138,16 +131,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         }
 
-        // Törlés a Firestore 'users' gyűjteményéből
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user!.uid)
             .delete();
 
-        // Felhasználó törlése a Firebase Authentication-ből
         await user!.delete();
 
-        // Kijelentkezés és átirányítás a bejelentkezési oldalra
         await FirebaseAuth.instance.signOut();
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -173,95 +163,214 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _addWeight() async {
+    if (_weightController.text.isNotEmpty) {
+      double weight = double.parse(_weightController.text);
+      await FirebaseFirestore.instance
+          .collection('weights')
+          .doc(user!.uid)
+          .collection('entries')
+          .add({
+        'weight': weight,
+        'date': Timestamp.now(),
+      });
+      _weightController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Weight added successfully')),
+      );
+    }
+  }
+
+  Stream<List<Map<String, dynamic>>> _getWeightEntries() {
+    return FirebaseFirestore.instance
+        .collection('weights')
+        .doc(user!.uid)
+        .collection('entries')
+        .orderBy('date', descending: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: FutureBuilder<Map<String, dynamic>?>(
-          future: getUserData(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
-            if (snapshot.hasError) {
-              return const Text('Error loading user data');
-            }
-            if (!snapshot.hasData || snapshot.data == null) {
-              return const Text('No user data found');
-            }
+      body: SingleChildScrollView(
+        child: Center(
+          child: FutureBuilder<Map<String, dynamic>?>(
+            future: getUserData(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (snapshot.hasError) {
+                return const Text('Error loading user data');
+              }
+              if (!snapshot.hasData || snapshot.data == null) {
+                return const Text('No user data found');
+              }
 
-            Map<String, dynamic> userData = snapshot.data!;
-            String email = user?.email ?? 'N/A';
-            int weight = userData['weight'] ?? 0;
-            int completedWorkouts = userData['completedWorkouts'] ?? 0;
+              Map<String, dynamic> userData = snapshot.data!;
+              String email = user?.email ?? 'N/A';
+              int completedWorkouts = userData['completedWorkouts'] ?? 0;
 
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: _uploadProfileImage,
-                  child: CircleAvatar(
-                    radius: 60,
-                    backgroundImage: _profileImageUrl != null
-                        ? NetworkImage(_profileImageUrl!)
-                        : (_defaultProfileImageUrl != null
-                            ? NetworkImage(_defaultProfileImageUrl!)
-                            : null),
-                    backgroundColor: Colors.grey[300],
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: _uploadProfileImage,
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundImage: _profileImageUrl != null
+                          ? NetworkImage(_profileImageUrl!)
+                          : (_defaultProfileImageUrl != null
+                              ? NetworkImage(_defaultProfileImageUrl!)
+                              : null),
+                      backgroundColor: Colors.grey[300],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  userData['username'] ?? 'N/A',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "Email: $email",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Weight: $weight kg",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Completed Workouts: $completedWorkouts",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const FavoriteWorkoutsScreen(),
+                  const SizedBox(height: 10),
+                  Text(
+                    userData['username'] ?? 'N/A',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "Email: $email",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Completed Workouts: $completedWorkouts",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const FavoriteWorkoutsScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text("Favorite Workouts"),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) => const LoginScreen()),
+                      );
+                    },
+                    child: const Text("Log Out"),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _deleteAccount,
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text("Delete Account"),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: 200, // Reduced width for the text field
+                    child: TextField(
+                      controller: _weightController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Enter Weight (kg)',
+                        border: OutlineInputBorder(),
                       ),
-                    );
-                  },
-                  child: const Text("Favorite Workouts"),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) => const LoginScreen()),
-                    );
-                  },
-                  child: const Text("Log Out"),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _deleteAccount,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  child: const Text("Delete Account"),
-                ),
-              ],
-            );
-          },
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: _addWeight,
+                    child: const Text('Add Weight'),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Weight Change Over Time',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: _getWeightEntries(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No weight data available');
+                      }
+
+                      List<Map<String, dynamic>> weightEntries = snapshot.data!;
+                      return SizedBox(
+                        height: 150, // Reduced height for the chart
+                        child: LineChart(
+                          LineChartData(
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: weightEntries.map((entry) {
+                                  DateTime date =
+                                      (entry['date'] as Timestamp).toDate();
+                                  return FlSpot(
+                                      date.millisecondsSinceEpoch.toDouble(),
+                                      (entry['weight'] as num).toDouble());
+                                }).toList(),
+                                isCurved: true,
+                                color: Colors.blue,
+                                barWidth: 2,
+                                belowBarData: BarAreaData(show: false),
+                              ),
+                            ],
+                            titlesData: FlTitlesData(
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 604800000, // 1 week in milliseconds
+                                  getTitlesWidget: (value, meta) {
+                                    DateTime date =
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                            value.toInt());
+                                    return Text(
+                                      '${date.month}/${date.day}',
+                                      style: const TextStyle(fontSize: 10),
+                                    );
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  reservedSize: 28,
+                                ),
+                              ),
+                            ),
+                            gridData: FlGridData(
+                              show: true,
+                              drawVerticalLine: true,
+                              horizontalInterval: 5,
+                            ),
+                            borderData: FlBorderData(
+                              show: true,
+                              border: Border.all(
+                                color: Colors.grey,
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
