@@ -15,6 +15,7 @@ class WorkoutsScreen extends StatefulWidget {
 
 class _WorkoutsScreenState extends State<WorkoutsScreen> {
   String? userRole;
+  String searchQuery = ''; // Keresési lekérdezés
 
   @override
   void initState() {
@@ -270,6 +271,18 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Categories'),
+        actions: [
+          // Keresés ikon hozzáadása
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: CategorySearchDelegate(),
+              );
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('categories').snapshots(),
@@ -384,5 +397,84 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+  }
+}
+
+// Keresési funkció implementációja
+class CategorySearchDelegate extends SearchDelegate {
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = ''; // Keresési lekérdezés törlése
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null); // Keresés bezárása
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('categories')
+          .where('title', isGreaterThanOrEqualTo: query)
+          .where('title', isLessThanOrEqualTo: query + '\uf8ff')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error loading categories'));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No categories found'));
+        }
+
+        List<QueryDocumentSnapshot> categories = snapshot.data!.docs;
+
+        return ListView.builder(
+          itemCount: categories.length,
+          itemBuilder: (context, index) {
+            String categoryTitle = categories[index]['title'] ?? 'No title';
+            String categoryImage = categories[index]['image'] ?? '';
+
+            return ListTile(
+              leading: categoryImage.isNotEmpty
+                  ? Image.network(categoryImage, width: 50, height: 50)
+                  : const Icon(Icons.category),
+              title: Text(categoryTitle),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoryWorkoutsScreen(
+                      category: categoryTitle,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return buildResults(context);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart'; // Email validátor csomag
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore importálása
 import 'register_step2_screen.dart'; // Importáljuk a második regisztrációs oldalt
 
 class RegisterStep1Screen extends StatefulWidget {
@@ -16,13 +17,16 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _confirmPasswordController = TextEditingController();
   String _errorMessage = '';
+  bool _passwordVisible = false; // Jelszó láthatóságának állapota
+  bool _confirmPasswordVisible =
+      false; // Jelszó megerősítés láthatóságának állapota
 
   bool _isUsernameValid(String username) {
     final validCharacters = RegExp(r'^[a-zA-Z0-9]+$');
     return username.length >= 5 && validCharacters.hasMatch(username);
   }
 
-  void _continueRegistration() {
+  Future<void> _continueRegistration() async {
     setState(() {
       _errorMessage = ''; // Üzenet resetelése minden ellenőrzés előtt
     });
@@ -56,6 +60,26 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _errorMessage = 'Passwords do not match.';
+      });
+      return;
+    }
+
+    // Ellenőrizzük, hogy az e-mail cím már létezik-e
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: _emailController.text)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        setState(() {
+          _errorMessage = 'Email is already in use.';
+        });
+        return;
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error checking email existence: $e';
       });
       return;
     }
@@ -104,19 +128,43 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
               const SizedBox(height: 16.0),
               TextField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: !_passwordVisible,
+                decoration: InputDecoration(
                   hintText: "Password",
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 16.0),
               TextField(
                 controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: !_confirmPasswordVisible,
+                decoration: InputDecoration(
                   hintText: "Confirm Password",
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _confirmPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _confirmPasswordVisible = !_confirmPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 16.0),
