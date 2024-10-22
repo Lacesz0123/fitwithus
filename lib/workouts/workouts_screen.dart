@@ -15,7 +15,6 @@ class WorkoutsScreen extends StatefulWidget {
 
 class _WorkoutsScreenState extends State<WorkoutsScreen> {
   String? userRole;
-  String searchQuery = ''; // Keresési lekérdezés
 
   @override
   void initState() {
@@ -58,8 +57,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           children: [
             TextField(
               controller: titleController,
+              maxLength: 18, // Maximális karakterhossz beállítása
               decoration: const InputDecoration(
                 hintText: 'Category Title',
+                counterText: '', // Karakter számláló elrejtése
               ),
             ),
             const SizedBox(height: 10),
@@ -85,7 +86,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ),
           TextButton(
             onPressed: () async {
-              if (titleController.text.isNotEmpty && pickedImage != null) {
+              if (titleController.text.isNotEmpty &&
+                  titleController.text.length <=
+                      18 && // Karakterhossz ellenőrzés
+                  pickedImage != null) {
                 final storageRef = FirebaseStorage.instance
                     .ref()
                     .child('category_images/categoryImages')
@@ -106,8 +110,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content:
-                          Text('Please enter a title and select an image')),
+                      content: Text(
+                          'Please enter a title (max 18 characters) and select an image')),
                 );
               }
             },
@@ -141,8 +145,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           children: [
             TextField(
               controller: titleController,
+              maxLength: 18, // Maximális karakterhossz beállítása
               decoration: const InputDecoration(
                 hintText: 'Category Title',
+                counterText: '', // Karakter számláló elrejtése
               ),
             ),
             const SizedBox(height: 10),
@@ -168,7 +174,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ),
           TextButton(
             onPressed: () async {
-              if (titleController.text.isNotEmpty) {
+              if (titleController.text.isNotEmpty &&
+                  titleController.text.length <= 18) {
+                // Karakterhossz ellenőrzés
                 String imageUrl = currentImage;
                 // Ha új kép van kiválasztva, töröljük a régit
                 if (pickedImage != null) {
@@ -204,7 +212,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please enter a title')),
+                  const SnackBar(
+                      content:
+                          Text('Please enter a title (max 18 characters)')),
                 );
               }
             },
