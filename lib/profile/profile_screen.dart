@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitwithus/main.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-import 'package:fl_chart/fl_chart.dart';
-import '../main.dart';
 import 'favorite_workouts_screen.dart';
-import 'settings_screen.dart'; // Új SettingsScreen importálása
+import 'settings_screen.dart';
+import 'statistics_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,7 +20,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User? user = FirebaseAuth.instance.currentUser;
   String? _profileImageUrl;
   String? _defaultProfileImageUrl;
-  TextEditingController _weightController = TextEditingController();
 
   @override
   void initState() {
@@ -164,34 +163,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _addWeight() async {
-    if (_weightController.text.isNotEmpty) {
-      double weight = double.parse(_weightController.text);
-      await FirebaseFirestore.instance
-          .collection('weights')
-          .doc(user!.uid)
-          .collection('entries')
-          .add({
-        'weight': weight,
-        'date': Timestamp.now(),
-      });
-      _weightController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Weight added successfully')),
-      );
-    }
-  }
-
-  Stream<List<Map<String, dynamic>>> _getWeightEntries() {
-    return FirebaseFirestore.instance
-        .collection('weights')
-        .doc(user!.uid)
-        .collection('entries')
-        .orderBy('date', descending: false)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList());
+  Widget _buildMenuButton(String title, VoidCallback onPressed,
+      {Color? color, Color textColor = Colors.black}) {
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          color: color, // Beállítjuk a háttérszínt, ha meg van adva
+          child: TextButton(
+            onPressed: onPressed,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              foregroundColor: textColor,
+              backgroundColor: Colors.transparent, // Átlátszó háttér a gombon
+            ),
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const Divider(
+          color: Colors.black,
+          thickness: 0.5,
+          height: 0,
+        ),
+      ],
+    );
   }
 
   @override
@@ -199,39 +203,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'Logout') {
-                FirebaseAuth.instance.signOut();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              } else if (value == 'Delete Account') {
-                _deleteAccount();
-              } else if (value == 'Settings') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const SettingsScreen()),
-                );
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: 'Settings',
-                child: Text('Settings'),
-              ),
-              const PopupMenuItem(
-                value: 'Logout',
-                child: Text('Logout'),
-              ),
-              const PopupMenuItem(
-                value: 'Delete Account',
-                child: Text('Delete Account'),
-              ),
-            ],
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -273,95 +244,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
-                  Text(
-                    "Completed Workouts: $completedWorkouts",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const FavoriteWorkoutsScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text("Favorite Workouts"),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Weight Change Over Time',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  StreamBuilder<List<Map<String, dynamic>>>(
-                    stream: _getWeightEntries(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      }
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Text('No weight data available');
-                      }
-
-                      List<Map<String, dynamic>> weightEntries = snapshot.data!;
-                      return SizedBox(
-                        height: 200,
-                        child: LineChart(
-                          LineChartData(
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: weightEntries.map((entry) {
-                                  DateTime date =
-                                      (entry['date'] as Timestamp).toDate();
-                                  return FlSpot(
-                                      date.millisecondsSinceEpoch.toDouble(),
-                                      (entry['weight'] as num).toDouble());
-                                }).toList(),
-                                isCurved: true,
-                                color: Colors.blue,
-                                barWidth: 2,
-                                belowBarData: BarAreaData(show: false),
-                              ),
-                            ],
-                            titlesData: FlTitlesData(
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  interval: 604800000, // 1 week in milliseconds
-                                  getTitlesWidget: (value, meta) {
-                                    DateTime date =
-                                        DateTime.fromMillisecondsSinceEpoch(
-                                            value.toInt());
-                                    return Text('${date.month}/${date.day}');
-                                  },
-                                ),
-                              ),
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: true),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width *
-                        0.8, // Keskenyebb mező
-                    child: TextField(
-                      controller: _weightController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Enter Weight (kg)',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  _buildMenuButton("Favorite Workouts", () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const FavoriteWorkoutsScreen(),
                       ),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: _addWeight,
-                    child: const Text('Add Weight'),
+                    );
+                  }),
+                  _buildMenuButton("Statistics", () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const StatisticsScreen(),
+                      ),
+                    );
+                  }),
+                  _buildMenuButton("Settings", () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsScreen(),
+                      ),
+                    );
+                  }),
+                  _buildMenuButton("Logout", () async {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()),
+                    );
+                  }),
+                  _buildMenuButton(
+                    "Delete Account",
+                    _deleteAccount,
+                    color: Colors.red, // Piros háttér teljes szélességben
+                    textColor: Colors.white,
                   ),
                 ],
               );
