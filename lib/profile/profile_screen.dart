@@ -8,6 +8,7 @@ import 'dart:io';
 import 'favorite_workouts_screen.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
+import 'favorite_recipes_screen.dart'; // Importáljuk a kedvenc receptek képernyőt
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -247,6 +248,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const FavoriteWorkoutsScreen(),
+                      ),
+                    );
+                  }),
+                  _buildMenuButton("Favorite Recipes", () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const FavoriteRecipesScreen(),
                       ),
                     );
                   }),

@@ -48,6 +48,7 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
             'weight': int.parse(_weightController.text),
             'height': int.parse(_heightController.text),
             'favorites': [], // Üres kedvenc lista létrehozása
+            'favoriteRecipes': [], // Üres kedvenc recept lista létrehozása
             'gender': _selectedGender,
             'birthDate': _birthDate?.toIso8601String(),
             'completedWorkouts': 0,

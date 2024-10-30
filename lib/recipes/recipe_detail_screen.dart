@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final String recipeId;
@@ -17,11 +18,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   String description = '';
   int prepTime = 0;
   List<String> steps = [];
+  bool isFavorite = false; // Kedvenc állapot
 
   @override
   void initState() {
     super.initState();
     _fetchRecipeDetails();
+    _checkIfFavorite();
   }
 
   Future<void> _fetchRecipeDetails() async {
@@ -44,6 +47,43 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     });
   }
 
+  Future<void> _checkIfFavorite() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      List<dynamic> favoriteRecipes = userDoc['favoriteRecipes'] ?? [];
+      setState(() {
+        isFavorite = favoriteRecipes.contains(widget.recipeId);
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+    setState(() {
+      isFavorite = !isFavorite;
+    });
+
+    if (isFavorite) {
+      await userRef.update({
+        'favoriteRecipes': FieldValue.arrayUnion([widget.recipeId])
+      });
+    } else {
+      await userRef.update({
+        'favoriteRecipes': FieldValue.arrayRemove([widget.recipeId])
+      });
+    }
+  }
+
   void _toggleIngredientStatus(String ingredient) {
     setState(() {
       ingredientsStatus[ingredient] = !(ingredientsStatus[ingredient] ?? false);
@@ -53,7 +93,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Recipe Details")),
+      appBar: AppBar(
+        title: const Text("Recipe Details"),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isFavorite ? Icons.star : Icons.star_border,
+              color: isFavorite ? Colors.yellow : Colors.grey,
+            ),
+            onPressed: _toggleFavorite,
+          ),
+        ],
+      ),
       body: name.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
