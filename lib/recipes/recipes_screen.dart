@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'recipe_detail_screen.dart';
-import 'add_recipe_screen.dart'; // Az új hozzáadási képernyő importálása
+import 'add_recipe_screen.dart';
 
 class RecipesScreen extends StatelessWidget {
   const RecipesScreen({super.key});
 
-  // Ellenőrzi, hogy a felhasználó admin-e
   Future<bool> _isAdmin() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -43,14 +42,12 @@ class RecipesScreen extends StatelessWidget {
                 return const Center(child: Text("No recipes available"));
               }
 
-              // Recept lista csoportosítva nehézségi szint szerint
               Map<String, List<DocumentSnapshot>> categorizedRecipes = {
                 "Easy": [],
                 "Intermediate": [],
                 "Advanced": [],
               };
 
-              // A Firestore adatainak feldolgozása
               snapshot.data!.docs.forEach((doc) {
                 var data = doc.data() as Map<String, dynamic>;
                 String difficulty = data['difficulty'] ?? "Easy";
@@ -68,7 +65,6 @@ class RecipesScreen extends StatelessWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Kategória címsor "Add" gombbal
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8.0, vertical: 16.0),
@@ -97,9 +93,8 @@ class RecipesScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // Recept kártyák
                       SizedBox(
-                        height: 180, // Fixált magasság a vízszintes görgetéshez
+                        height: 180,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: recipes.length,
@@ -122,40 +117,46 @@ class RecipesScreen extends StatelessWidget {
                                     ),
                                   );
                                 },
-                                child: Card(
-                                  elevation: 4.0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: Container(
-                                    width: 200,
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // Kép megjelenítése, ha van
-                                        if (imageUrl != null)
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                            child: Image.network(
-                                              imageUrl,
-                                              height: 100,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
+                                child: SizedBox(
+                                  width: 200,
+                                  child: Card(
+                                    elevation: 4.0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          if (imageUrl != null)
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                              child: Image.network(
+                                                imageUrl,
+                                                height:
+                                                    90, // Adjusted height for balance
+                                                width: double.infinity,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          const SizedBox(height: 8),
+                                          Flexible(
+                                            child: Text(
+                                              recipeName,
+                                              style: const TextStyle(
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          recipeName,
-                                          style: const TextStyle(
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
