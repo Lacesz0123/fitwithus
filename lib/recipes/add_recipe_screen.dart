@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -75,8 +74,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           .where((text) => text.isNotEmpty)
           .toList();
 
+      // Hozzáadjuk a `name_lower` mezőt, amely a `name` kisbetűs változata
       await FirebaseFirestore.instance.collection('recipes').add({
         'name': nameController.text,
+        'name_lower': nameController.text.toLowerCase(),
         'description': descriptionController.text,
         'prepTime': int.parse(prepTimeController.text),
         'difficulty': widget.category,
