@@ -99,7 +99,7 @@ class RecipesScreen extends StatelessWidget {
                       ),
                       // Recept kártyák
                       SizedBox(
-                        height: 150, // Fixált magasság a vízszintes görgetéshez
+                        height: 180, // Fixált magasság a vízszintes görgetéshez
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: recipes.length,
@@ -108,6 +108,7 @@ class RecipesScreen extends StatelessWidget {
                                 recipes[index].data() as Map<String, dynamic>;
                             String recipeName =
                                 recipeData['name'] ?? "Unknown Recipe";
+                            String? imageUrl = recipeData['imageUrl'];
 
                             return Padding(
                               padding:
@@ -129,15 +130,32 @@ class RecipesScreen extends StatelessWidget {
                                   child: Container(
                                     width: 200,
                                     padding: const EdgeInsets.all(10.0),
-                                    child: Center(
-                                      child: Text(
-                                        recipeName,
-                                        style: const TextStyle(
-                                          fontSize: 18.0,
-                                          fontWeight: FontWeight.bold,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Kép megjelenítése, ha van
+                                        if (imageUrl != null)
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                            child: Image.network(
+                                              imageUrl,
+                                              height: 100,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          recipeName,
+                                          style: const TextStyle(
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.center,
                                         ),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                      ],
                                     ),
                                   ),
                                 ),
