@@ -220,7 +220,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
 
               Map<String, dynamic> userData = snapshot.data!;
-              int completedWorkouts = userData['completedWorkouts'] ?? 0;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
