@@ -100,6 +100,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
                 await FirebaseFirestore.instance.collection('categories').add({
                   'title': titleController.text,
+                  'title_lower': titleController.text
+                      .toLowerCase(), // Kisbetűs verzió hozzáadása
                   'image': imageUrl,
                 });
 
@@ -202,6 +204,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     .doc(docId)
                     .update({
                   'title': titleController.text,
+                  'title_lower': titleController.text
+                      .toLowerCase(), // Kisbetűs verzió frissítése
                   'image': imageUrl,
                 });
 
@@ -436,11 +440,13 @@ class CategorySearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
+    String lowerCaseQuery = query.toLowerCase();
+
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('categories')
-          .where('title', isGreaterThanOrEqualTo: query)
-          .where('title', isLessThanOrEqualTo: query + '\uf8ff')
+          .where('title_lower', isGreaterThanOrEqualTo: lowerCaseQuery)
+          .where('title_lower', isLessThanOrEqualTo: lowerCaseQuery + '\uf8ff')
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

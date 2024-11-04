@@ -87,7 +87,7 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
     }
 
     // Továbblépés a következő oldalra
-    Navigator.of(context).push(
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => RegisterStep2Screen(
           email: _emailController.text,

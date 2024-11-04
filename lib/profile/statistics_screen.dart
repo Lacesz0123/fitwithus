@@ -12,7 +12,7 @@ class StatisticsScreen extends StatefulWidget {
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
   final TextEditingController _weightController = TextEditingController();
-  String? _selectedActivityLevel = 'No Activity';
+  String? _selectedActivityLevel;
   double _rmr = 0.0;
   double _maintenanceCalories = 0.0;
   Map<String, dynamic>? _userData;
@@ -55,7 +55,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           .get();
       setState(() {
         _userData = userDoc.data() as Map<String, dynamic>?;
-        _calculateCalories();
+        _rmr = 0.0;
+        _maintenanceCalories = 0.0;
       });
     }
   }
@@ -215,6 +216,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
               DropdownButton<String>(
                 value: _selectedActivityLevel,
+                hint: const Text('Select Activity Level'),
                 items: [
                   'No Activity',
                   'Light Activity',
