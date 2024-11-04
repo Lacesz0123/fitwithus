@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'recipe_detail_screen.dart';
 import 'add_recipe_screen.dart';
+import 'edit_recipe_screen.dart';
 
 class RecipesScreen extends StatefulWidget {
   const RecipesScreen({Key? key}) : super(key: key);
@@ -125,57 +126,89 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => RecipeDetailScreen(
-                                      recipeId: recipes[index].id),
-                                ),
-                              );
-                            },
-                            child: SizedBox(
-                              width: 200,
-                              child: Card(
-                                elevation: 4.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15.0),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      if (imageUrl != null)
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                          child: Image.network(
-                                            imageUrl,
-                                            height: 90,
-                                            width: double.infinity,
-                                            fit: BoxFit.cover,
+                          child: Stack(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => RecipeDetailScreen(
+                                          recipeId: recipes[index].id),
+                                    ),
+                                  );
+                                },
+                                child: SizedBox(
+                                  width: 200,
+                                  child: Card(
+                                    elevation: 4.0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          if (imageUrl != null)
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                              child: Image.network(
+                                                imageUrl,
+                                                height: 90,
+                                                width: double.infinity,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          const SizedBox(height: 8),
+                                          Flexible(
+                                            child: Text(
+                                              recipeName,
+                                              style: const TextStyle(
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
-                                        ),
-                                      const SizedBox(height: 8),
-                                      Flexible(
-                                        child: Text(
-                                          recipeName,
-                                          style: const TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                              if (userRole == 'admin')
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              EditRecipeScreen(
+                                                  recipeId: recipes[index].id),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: const EdgeInsets.all(6.0),
+                                      child: const Icon(
+                                        Icons.edit,
+                                        color: Colors.white,
+                                        size: 24.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         );
                       },
@@ -223,7 +256,7 @@ class RecipeSearchDelegate extends SearchDelegate {
       stream: FirebaseFirestore.instance
           .collection('recipes')
           .where('name_lower', isGreaterThanOrEqualTo: lowerCaseQuery)
-          .where('name_lower', isLessThanOrEqualTo: lowerCaseQuery + '\uf8ff')
+          .where('name_lower', isLessThanOrEqualTo: lowerCaseQuery + '')
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

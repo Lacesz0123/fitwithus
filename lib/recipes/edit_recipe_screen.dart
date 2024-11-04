@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditRecipeScreen extends StatefulWidget {
   final String recipeId;
@@ -26,7 +27,27 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   @override
   void initState() {
     super.initState();
+    _checkAdminRole();
     _loadRecipeData();
+  }
+
+  void _checkAdminRole() {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser?.uid)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        var data = documentSnapshot.data() as Map<String, dynamic>;
+        if (data['role'] != 'admin') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Only admins can edit recipes.')),
+          );
+          Navigator.of(context).pop();
+        }
+      }
+    });
   }
 
   Future<void> _loadRecipeData() async {
@@ -54,14 +75,33 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      final bytes = await file.length();
+      // Maximum méret 5MB
+      if (bytes > 5 * 1024 * 1024) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Image size cannot exceed 5MB.")),
+        );
+        return;
+      }
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImage = file;
       });
     }
   }
 
   Future<String?> _uploadImage() async {
     if (_selectedImage == null) return _imageUrl;
+
+    // Töröljük a régi képet, ha új képet választottak
+    if (_imageUrl != null) {
+      try {
+        final oldImageRef = FirebaseStorage.instance.refFromURL(_imageUrl!);
+        await oldImageRef.delete();
+      } catch (e) {
+        print('Error deleting previous image from Storage: $e');
+      }
+    }
 
     final storageRef = FirebaseStorage.instance
         .ref()
@@ -76,15 +116,42 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     });
 
     try {
-      final imageUrl = await _uploadImage();
+      // Ellenőrzés, hogy minden mező ki legyen töltve
+      if (nameController.text.isEmpty) {
+        _showError('Recipe name cannot be empty.');
+        return;
+      }
+
+      if (descriptionController.text.isEmpty) {
+        _showError('Description cannot be empty.');
+        return;
+      }
+
+      int? prepTime = int.tryParse(prepTimeController.text);
+      if (prepTime == null) {
+        _showError('Preparation time must be a valid number.');
+        return;
+      }
+
       List<String> ingredients = ingredientControllers
           .map((controller) => controller.text)
           .where((text) => text.isNotEmpty)
           .toList();
+      if (ingredients.isEmpty) {
+        _showError('Please add at least one ingredient.');
+        return;
+      }
+
       List<String> steps = stepControllers
           .map((controller) => controller.text)
           .where((text) => text.isNotEmpty)
           .toList();
+      if (steps.isEmpty) {
+        _showError('Please add at least one step.');
+        return;
+      }
+
+      final imageUrl = await _uploadImage();
 
       await FirebaseFirestore.instance
           .collection('recipes')
@@ -92,7 +159,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
           .update({
         'name': nameController.text,
         'description': descriptionController.text,
-        'prepTime': int.parse(prepTimeController.text),
+        'prepTime': prepTime,
         'ingredients': ingredients,
         'steps': steps,
         'imageUrl': imageUrl ?? _imageUrl,
@@ -100,9 +167,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
 
       Navigator.of(context).pop();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to save changes: $e")),
-      );
+      _showError('Failed to save changes: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -110,10 +175,84 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     }
   }
 
+  Future<void> _confirmDeleteRecipe() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Recipe'),
+          content: const Text('Are you sure you want to delete this recipe?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteRecipe();
+              },
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteRecipe() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Töröljük a recept képét a Storage-ból
+      if (_imageUrl != null) {
+        try {
+          final oldImageRef = FirebaseStorage.instance.refFromURL(_imageUrl!);
+          await oldImageRef.delete();
+        } catch (e) {
+          print('Error deleting image from Storage: $e');
+        }
+      }
+
+      // Töröljük a receptet a Firestore-ból
+      await FirebaseFirestore.instance
+          .collection('recipes')
+          .doc(widget.recipeId)
+          .delete();
+
+      Navigator.of(context).pop();
+    } catch (e) {
+      _showError('Failed to delete recipe: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Recipe")),
+      appBar: AppBar(
+        title: const Text("Edit Recipe"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _isLoading ? null : _confirmDeleteRecipe,
+          ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -235,7 +374,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: _saveChanges,
+                    onPressed: _isLoading ? null : _saveChanges,
                     child: const Text("Save Changes"),
                   ),
                 ],
