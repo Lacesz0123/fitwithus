@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Felhasználó ellenőrzéséhez
+import 'package:firebase_auth/firebase_auth.dart';
 import 'workout_detail_screen.dart';
-import 'add_workout_screen.dart'; // Az új edzés hozzáadásának képernyője
-import 'edit_workout_screen.dart'; // Importálás az edzés módosítási képernyőhöz
+import 'add_workout_screen.dart';
+import 'edit_workout_screen.dart';
 
 class CategoryWorkoutsScreen extends StatefulWidget {
   final String category;
@@ -23,7 +23,6 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
     _getCurrentUserRole();
   }
 
-  // Felhasználó szerepkörének lekérdezése Firestore-ból
   Future<void> _getCurrentUserRole() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -45,23 +44,19 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
         .map((snapshot) => snapshot.docs.map((doc) {
               Map<String, dynamic> workoutData =
                   doc.data() as Map<String, dynamic>;
-              workoutData['id'] =
-                  doc.id; // Hozzáadjuk a dokumentum ID-ját az edzés adataihoz
+              workoutData['id'] = doc.id;
               return workoutData;
             }).toList());
   }
 
-  // Edzés módosítása
   void editWorkout(BuildContext context, Map<String, dynamic> workout) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => EditWorkoutScreen(
-          workoutId: workout['id'], // Az edzés azonosítója
-          initialTitle: workout['title'] ?? 'No title', // Eredeti cím
-          initialDescription:
-              workout['description'] ?? 'No description', // Eredeti leírás
-          initialSteps:
-              List<String>.from(workout['steps'] ?? []), // Eredeti lépések
+          workoutId: workout['id'],
+          initialTitle: workout['title'] ?? 'No title',
+          initialDescription: workout['description'] ?? 'No description',
+          initialSteps: List<String>.from(workout['steps'] ?? []),
         ),
       ),
     );
@@ -71,7 +66,16 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.category} Workouts'),
+        title: Text('${widget.category} Edzések'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: getWorkoutsByCategory(),
@@ -80,11 +84,12 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return const Center(child: Text('Error loading workouts'));
+            return const Center(
+                child: Text('Hiba az edzések betöltése közben'));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
-                child: Text('No workouts found for this category'));
+                child: Text('Nincs ilyen kategóriába tartozó edzés'));
           }
 
           List<Map<String, dynamic>> workouts = snapshot.data!;
@@ -93,35 +98,33 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
             itemCount: workouts.length,
             itemBuilder: (context, index) {
               Map<String, dynamic> workout = workouts[index];
-              String workoutTitle = workout['title'] ?? 'No title';
+              String workoutTitle = workout['title'] ?? 'Nincs cím';
               String workoutDescription =
-                  workout['description'] ?? 'No description';
+                  workout['description'] ?? 'Nincs leírás';
 
               return GestureDetector(
                 onTap: () {
-                  // Navigálás az edzés részletező oldalra
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => WorkoutDetailScreen(
-                        workoutId: workout['id'], // Az edzés azonosítója
+                        workoutId: workout['id'],
                       ),
                     ),
                   );
                 },
                 child: Container(
                   margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: Colors.grey.withOpacity(0.3),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: const Offset(0, 3), // Árnyék pozíciója
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
@@ -134,21 +137,28 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                             Text(
                               workoutTitle,
                               style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.teal,
                               ),
                             ),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 4),
                             Text(
                               workoutDescription,
-                              style: const TextStyle(fontSize: 14),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
                             ),
                           ],
                         ),
                       ),
                       if (userRole == 'admin')
                         IconButton(
-                          icon: const Icon(Icons.settings),
+                          icon: const Icon(
+                            Icons.settings,
+                            color: Colors.blueAccent,
+                          ),
                           onPressed: () => editWorkout(context, workout),
                         ),
                     ],
@@ -169,11 +179,12 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                   ),
                 );
               },
+              backgroundColor: Colors.teal,
               label: Row(
                 children: const [
-                  Text('Add New'), // A szöveg
-                  SizedBox(width: 5), // Kis távolság a szöveg és az ikon között
-                  Icon(Icons.add), // Az ikon a szöveg után
+                  Text('Új hozzáadása'),
+                  SizedBox(width: 5),
+                  Icon(Icons.add),
                 ],
               ),
             )

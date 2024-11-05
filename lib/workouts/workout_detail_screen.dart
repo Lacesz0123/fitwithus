@@ -80,6 +80,15 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Details'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<Map<String, dynamic>?>(
         future: getWorkoutData(),
@@ -88,16 +97,16 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return const Center(child: Text('Error loading workout details'));
+            return const Center(child: Text('Hiba az edzés betöltése közben'));
           }
           if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text('Workout not found'));
+            return const Center(child: Text('Nincs ilyen edzés'));
           }
 
           // Lekért adatok
           Map<String, dynamic> workoutData = snapshot.data!;
-          String title = workoutData['title'] ?? 'No title';
-          String description = workoutData['description'] ?? 'No description';
+          String title = workoutData['title'] ?? 'Cím nélkül';
+          String description = workoutData['description'] ?? 'Nincs leírás';
           List<dynamic> steps = workoutData['steps'] ?? [];
 
           return Padding(
@@ -112,22 +121,34 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                       child: Text(
                         title,
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 26,
                           fontWeight: FontWeight.bold,
+                          color: Colors.teal,
                         ),
                       ),
                     ),
                     GestureDetector(
                       onTap: _toggleFavorite,
-                      child: Container(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
                         decoration: BoxDecoration(
-                          color: Colors.black54, // Halvány fekete háttér
-                          borderRadius: BorderRadius.circular(12),
+                          color: isFavorite
+                              ? Colors.yellow.shade100
+                              : Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            if (isFavorite)
+                              BoxShadow(
+                                color: Colors.yellow.shade400,
+                                blurRadius: 10,
+                                spreadRadius: 1,
+                              )
+                          ],
                         ),
                         padding: const EdgeInsets.all(8),
                         child: Icon(
                           isFavorite ? Icons.star : Icons.star_border,
-                          color: isFavorite ? Colors.yellow : Colors.grey,
+                          color: isFavorite ? Colors.orange : Colors.grey,
                           size: 30,
                         ),
                       ),
@@ -137,43 +158,56 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                 const SizedBox(height: 10),
                 Text(
                   description,
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18, color: Colors.black87),
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Steps:',
+                  'Lépések:',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: Colors.teal,
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Lépések számozott listázása
-                ...steps.asMap().entries.map((entry) {
-                  int index = entry.key + 1; // Számozás 1-től kezdődően
-                  String step = entry.value;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '$index. ',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                // Lépések kártya-stílusú megjelenítése
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: steps.length,
+                    itemBuilder: (context, index) {
+                      String step = steps[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6.0),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${index + 1}. ',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueAccent,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  step,
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Expanded(
-                          child: Text(
-                            step,
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           );

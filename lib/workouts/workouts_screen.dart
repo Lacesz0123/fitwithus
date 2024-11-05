@@ -285,8 +285,16 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Categories'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
-          // Keresés ikon hozzáadása
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -343,6 +351,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15.0),
                           image: DecorationImage(
                             image: categoryImage.isNotEmpty
                                 ? NetworkImage(categoryImage)
@@ -350,13 +359,26 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                                     'https://firebasestorage.googleapis.com/v0/b/fitwithus-c4ae9.appspot.com/o/category_images%2FplaceholderImage%2Fplaceholder.jpg?alt=media&token=bd57247b-4a73-ac18-3d5d93b15960'),
                             fit: BoxFit.cover,
                           ),
-                          borderRadius: BorderRadius.circular(15.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
                         child: Align(
                           alignment: Alignment.bottomCenter,
                           child: Container(
                             padding: const EdgeInsets.all(8.0),
-                            color: Colors.black54,
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(15.0),
+                                topRight: Radius.circular(15.0),
+                              ),
+                            ),
                             child: Text(
                               categoryTitle,
                               style: const TextStyle(
@@ -364,6 +386,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                                 fontSize: 16.0,
                                 fontWeight: FontWeight.bold,
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ),
@@ -400,11 +423,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       floatingActionButton: userRole == 'admin'
           ? FloatingActionButton.extended(
               onPressed: () => addCategory(context),
+              backgroundColor: Colors.teal,
               label: Row(
                 children: const [
-                  Text('Add New'), // A szöveg
-                  SizedBox(width: 5), // Kis távolság a szöveg és az ikon között
-                  Icon(Icons.add), // Az ikon a szöveg után
+                  Text('Add new'),
+                  SizedBox(width: 5),
+                  Icon(Icons.add),
                 ],
               ),
             )
@@ -469,8 +493,12 @@ class CategorySearchDelegate extends SearchDelegate {
 
             return ListTile(
               leading: categoryImage.isNotEmpty
-                  ? Image.network(categoryImage, width: 50, height: 50)
-                  : const Icon(Icons.category),
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(categoryImage,
+                          width: 50, height: 50, fit: BoxFit.cover),
+                    )
+                  : const Icon(Icons.category, size: 40),
               title: Text(categoryTitle),
               onTap: () {
                 Navigator.push(
