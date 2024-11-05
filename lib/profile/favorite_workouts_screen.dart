@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '/workouts/workout_detail_screen.dart'; // Importáljuk az edzés részletező képernyőt
+import '/workouts/workout_detail_screen.dart';
 
 class FavoriteWorkoutsScreen extends StatelessWidget {
   const FavoriteWorkoutsScreen({super.key});
@@ -40,6 +40,15 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorite Workouts'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: getFavoriteWorkouts(),
@@ -60,6 +69,8 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
               String workoutTitle = workout['title'] ?? 'No title';
               String workoutCategory =
                   workout['category'] ?? 'Unknown category';
+              String workoutDescription =
+                  workout['description'] ?? 'No description';
               String workoutId = workout['id'];
 
               return GestureDetector(
@@ -74,36 +85,52 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
                 },
                 child: Container(
                   margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: Colors.grey.withOpacity(0.3),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: const Offset(0, 3), // Árnyék pozíciója
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        workoutTitle,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              workoutTitle,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.teal,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              workoutDescription,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Category: $workoutCategory',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        'Category: $workoutCategory',
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     ],
                   ),

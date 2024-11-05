@@ -39,6 +39,15 @@ class FavoriteRecipesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Favorite Recipes"),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<List<DocumentSnapshot>>(
         future: _getFavoriteRecipes(),
@@ -61,20 +70,65 @@ class FavoriteRecipesScreen extends StatelessWidget {
               String recipeName = recipeData['name'] ?? "Unknown Recipe";
               String? imageUrl = recipeData['imageUrl'];
 
-              return ListTile(
-                leading: imageUrl != null
-                    ? Image.network(imageUrl,
-                        width: 50, height: 50, fit: BoxFit.cover)
-                    : const Icon(Icons.fastfood),
-                title: Text(recipeName),
+              return GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) =>
-                          RecipeDetailScreen(recipeId: recipes[index].id),
+                      builder: (context) => RecipeDetailScreen(
+                        recipeId: recipes[index].id,
+                      ),
                     ),
                   );
                 },
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: imageUrl != null
+                            ? Image.network(
+                                imageUrl,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(
+                                Icons.fastfood,
+                                size: 60,
+                                color: Colors.grey,
+                              ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          recipeName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           );
