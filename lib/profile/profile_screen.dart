@@ -166,36 +166,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildMenuButton(String title, VoidCallback onPressed,
       {Color? color, Color textColor = Colors.black}) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          color: color, // Beállítjuk a háttérszínt, ha meg van adva
-          child: TextButton(
-            onPressed: onPressed,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              foregroundColor: textColor,
-              backgroundColor: Colors.transparent, // Átlátszó háttér a gombon
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          vertical: 8.0, horizontal: 16.0), // Szélekhez közeli margó
+      child: Container(
+        width: double.infinity, // Teljes szélesség kitöltése
+        decoration: BoxDecoration(
+          color: color ?? Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
-            child: Align(
-              alignment: Alignment.center,
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+          ],
+        ),
+        child: TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            foregroundColor: textColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18, // Modern, jól látható betűméret
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ),
-        const Divider(
-          color: Colors.black,
-          thickness: 0.5,
-          height: 0,
-        ),
-      ],
+      ),
     );
   }
 
@@ -204,6 +210,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -225,23 +240,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const SizedBox(
+                      height: 20), // Térköz az AppBar és a profilkép között
                   GestureDetector(
                     onTap: _uploadProfileImage,
                     child: CircleAvatar(
-                      radius: 60,
+                      radius: 70, // Növeljük a méretet modernebb kinézetért
                       backgroundImage: _profileImageUrl != null
                           ? NetworkImage(_profileImageUrl!)
                           : (_defaultProfileImageUrl != null
                               ? NetworkImage(_defaultProfileImageUrl!)
                               : null),
                       backgroundColor: Colors.grey[300],
+                      child: _profileImageUrl == null &&
+                              _defaultProfileImageUrl == null
+                          ? const Icon(Icons.person,
+                              size: 70,
+                              color: Colors
+                                  .white70) // Alapértelmezett ikon, ha nincs kép
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     userData['username'] ?? 'N/A',
                     style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                      fontSize: 22, // Nagyobb betűméret
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   _buildMenuButton("Favorite Workouts", () {
@@ -282,8 +309,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildMenuButton(
                     "Delete Account",
                     _deleteAccount,
-                    color: Colors.red, // Piros háttér teljes szélességben
-                    textColor: Colors.white,
+                    color: Colors
+                        .redAccent, // Piros háttér, ami illeszkedik a modern kinézethez
+                    textColor: Colors.white, // Fehér szöveg a piros háttérrel
                   ),
                 ],
               );

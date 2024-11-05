@@ -39,6 +39,15 @@ class _RecipesScreenState extends State<RecipesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Healthy Recipes"),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -277,8 +286,16 @@ class RecipeSearchDelegate extends SearchDelegate {
 
             return ListTile(
               leading: imageUrl != null
-                  ? Image.network(imageUrl, width: 50, height: 50)
-                  : const Icon(Icons.fastfood),
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        imageUrl,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : const Icon(Icons.fastfood, size: 40),
               title: Text(recipeName),
               onTap: () {
                 Navigator.of(context).push(
