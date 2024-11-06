@@ -54,7 +54,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit $field'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Text('Edit $field', style: TextStyle(color: Colors.teal)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -70,7 +73,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (value) {
                     newGender = value;
                   },
-                  decoration: const InputDecoration(labelText: 'Select Gender'),
+                  decoration: const InputDecoration(
+                    labelText: 'Select Gender',
+                    border: OutlineInputBorder(),
+                  ),
                 )
               else if (field == 'Birth Date')
                 ElevatedButton(
@@ -90,10 +96,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _updateUserData();
                     }
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   child: Text(
                     newBirthdate != null
                         ? DateFormat('yyyy. MM. dd.').format(newBirthdate!)
                         : 'Select Date',
+                    style: const TextStyle(fontSize: 16),
                   ),
                 )
               else
@@ -102,6 +116,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   decoration: InputDecoration(
                     labelText: 'Enter $field',
                     errorText: errorMessage.isNotEmpty ? errorMessage : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
             ],
@@ -109,9 +126,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () async {
                 if (field == 'Email') {
                   if (!_isValidEmail(controller.text)) {
@@ -185,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'gender': _gender,
       });
 
-      await _loadUserData(); // Adatok újratöltése a frissítés után
+      await _loadUserData();
       _showMessage('Profile updated successfully');
     }
   }
@@ -195,6 +212,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -204,19 +230,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               const Text(
                 'Profile Information',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
               ),
               const SizedBox(height: 20),
               _buildProfileItem('Email', _email ?? ''),
-              const Divider(),
+              const Divider(thickness: 1.5),
               _buildProfileItem('Username', _username ?? ''),
-              const Divider(),
+              const Divider(thickness: 1.5),
               _buildProfileItem(
                   'Birth Date',
                   _birthdate != null
                       ? DateFormat('yyyy. MM. dd.').format(_birthdate!)
                       : 'Not set'),
-              const Divider(),
+              const Divider(thickness: 1.5),
               _buildProfileItem('Gender', _gender ?? ''),
             ],
           ),
@@ -227,13 +257,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildProfileItem(String field, String value) {
     return ListTile(
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
       title: Text(
         field,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
       ),
-      subtitle: Text(value),
+      subtitle: Text(
+        value,
+        style: const TextStyle(fontSize: 16, color: Colors.black87),
+      ),
       trailing: IconButton(
-        icon: const Icon(Icons.edit),
+        icon: const Icon(Icons.edit, color: Colors.blueAccent),
         onPressed: () => _showEditDialog(field, value),
       ),
     );
