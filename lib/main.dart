@@ -4,6 +4,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'home_screen.dart';
 import 'register/register_step1_screen.dart';
 
+final appBarTitleStyle = const TextStyle(
+  fontSize: 22,
+  fontWeight: FontWeight.bold,
+  color: Colors.white,
+  fontFamily: 'Roboto', // Választhatsz modern betűtípust
+  letterSpacing: 1.2,
+);
+
 void main() {
   runApp(const MainApp());
 }
@@ -13,8 +21,18 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LoadingScreen(),
+    return MaterialApp(
+      title: 'Your App Title',
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(
+          titleTextStyle: appBarTitleStyle,
+          backgroundColor: Colors.blueAccent, // Az AppBar háttérszíne
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        primarySwatch: Colors.blue,
+      ),
+      home: const LoadingScreen(),
     );
   }
 }

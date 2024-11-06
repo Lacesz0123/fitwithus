@@ -77,7 +77,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     if (pickedFile != null) {
       final file = File(pickedFile.path);
       final bytes = await file.length();
-      // Maximum méret 5MB
       if (bytes > 5 * 1024 * 1024) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Image size cannot exceed 5MB.")),
@@ -93,7 +92,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   Future<String?> _uploadImage() async {
     if (_selectedImage == null) return _imageUrl;
 
-    // Töröljük a régi képet, ha új képet választottak
     if (_imageUrl != null) {
       try {
         final oldImageRef = FirebaseStorage.instance.refFromURL(_imageUrl!);
@@ -116,7 +114,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     });
 
     try {
-      // Ellenőrzés, hogy minden mező ki legyen töltve
       if (nameController.text.isEmpty) {
         _showError('Recipe name cannot be empty.');
         return;
@@ -175,11 +172,211 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     }
   }
 
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Edit Recipe"),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.redAccent),
+            onPressed: _isLoading ? null : _confirmDeleteRecipe,
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: "Recipe Name",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: descriptionController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: "Description",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: prepTimeController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: "Preparation Time (minutes)",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      _selectedImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                _selectedImage!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : (_imageUrl != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    _imageUrl!,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : const Text("No image selected")),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: _pickImage,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text("Select Image"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text("Ingredients",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ...ingredientControllers.map((controller) {
+                    int index = ingredientControllers.indexOf(controller);
+                    return Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: controller,
+                                decoration: const InputDecoration(
+                                    labelText: "Ingredient"),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle),
+                              color: Colors.red,
+                              onPressed: () {
+                                setState(() {
+                                  ingredientControllers.removeAt(index);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10), // Extra távolság
+                      ],
+                    );
+                  }).toList(),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle, color: Colors.teal),
+                    onPressed: () {
+                      setState(() {
+                        ingredientControllers.add(TextEditingController());
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  const Text("Steps",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ...stepControllers.map((controller) {
+                    int index = stepControllers.indexOf(controller);
+                    return Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: controller,
+                                decoration:
+                                    const InputDecoration(labelText: "Step"),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle),
+                              color: Colors.red,
+                              onPressed: () {
+                                setState(() {
+                                  stepControllers.removeAt(index);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10), // Extra távolság
+                      ],
+                    );
+                  }).toList(),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle, color: Colors.teal),
+                    onPressed: () {
+                      setState(() {
+                        stepControllers.add(TextEditingController());
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _saveChanges,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Text("Save Changes"),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
   Future<void> _confirmDeleteRecipe() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: const Text('Delete Recipe'),
           content: const Text('Are you sure you want to delete this recipe?'),
           actions: [
@@ -206,7 +403,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     });
 
     try {
-      // Töröljük a recept képét a Storage-ból
       if (_imageUrl != null) {
         try {
           final oldImageRef = FirebaseStorage.instance.refFromURL(_imageUrl!);
@@ -216,7 +412,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         }
       }
 
-      // Töröljük a receptet a Firestore-ból
       await FirebaseFirestore.instance
           .collection('recipes')
           .doc(widget.recipeId)
@@ -230,157 +425,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         _isLoading = false;
       });
     }
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Recipe"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: _isLoading ? null : _confirmDeleteRecipe,
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: "Recipe Name"),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: const InputDecoration(labelText: "Description"),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: prepTimeController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                        labelText: "Preparation Time (minutes)"),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      _selectedImage != null
-                          ? Image.file(
-                              _selectedImage!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            )
-                          : (_imageUrl != null
-                              ? Image.network(
-                                  _imageUrl!,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                )
-                              : const Text("No image selected")),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: _pickImage,
-                        child: const Text("Select Image"),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  const Text("Ingredients",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ...ingredientControllers.map((controller) {
-                    int index = ingredientControllers.indexOf(controller);
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: controller,
-                            decoration:
-                                const InputDecoration(labelText: "Ingredient"),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle),
-                          color: Colors.red,
-                          onPressed: () {
-                            setState(() {
-                              ingredientControllers.removeAt(index);
-                            });
-                          },
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle),
-                    color: Colors.green,
-                    onPressed: () {
-                      setState(() {
-                        ingredientControllers.add(TextEditingController());
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  const Text("Steps",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ...stepControllers.map((controller) {
-                    int index = stepControllers.indexOf(controller);
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: controller,
-                            decoration:
-                                const InputDecoration(labelText: "Step"),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle),
-                          color: Colors.red,
-                          onPressed: () {
-                            setState(() {
-                              stepControllers.removeAt(index);
-                            });
-                          },
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle),
-                    color: Colors.green,
-                    onPressed: () {
-                      setState(() {
-                        stepControllers.add(TextEditingController());
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _saveChanges,
-                    child: const Text("Save Changes"),
-                  ),
-                ],
-              ),
-            ),
-    );
   }
 
   @override
