@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:email_validator/email_validator.dart'; // Email validátor csomag
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore importálása
-import 'register_step2_screen.dart'; // Importáljuk a második regisztrációs oldalt
+import 'package:email_validator/email_validator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'register_step2_screen.dart';
 
 class RegisterStep1Screen extends StatefulWidget {
   const RegisterStep1Screen({super.key});
@@ -12,14 +12,12 @@ class RegisterStep1Screen extends StatefulWidget {
 
 class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
   TextEditingController _emailController = TextEditingController();
-  TextEditingController _usernameController =
-      TextEditingController(); // Felhasználónév mező
+  TextEditingController _usernameController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _confirmPasswordController = TextEditingController();
   String _errorMessage = '';
-  bool _passwordVisible = false; // Jelszó láthatóságának állapota
-  bool _confirmPasswordVisible =
-      false; // Jelszó megerősítés láthatóságának állapota
+  bool _passwordVisible = false;
+  bool _confirmPasswordVisible = false;
 
   bool _isUsernameValid(String username) {
     final validCharacters = RegExp(r'^[a-zA-Z0-9]+$');
@@ -30,10 +28,9 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
 
   Future<void> _continueRegistration() async {
     setState(() {
-      _errorMessage = ''; // Üzenet resetelése minden ellenőrzés előtt
+      _errorMessage = '';
     });
 
-    // Email validáció
     if (!EmailValidator.validate(_emailController.text)) {
       setState(() {
         _errorMessage = 'Please enter a valid email address.';
@@ -41,7 +38,6 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
       return;
     }
 
-    // Felhasználónév ellenőrzés
     if (!_isUsernameValid(_usernameController.text)) {
       setState(() {
         _errorMessage =
@@ -50,7 +46,6 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
       return;
     }
 
-    // Jelszó hosszúság ellenőrzés
     if (_passwordController.text.length < 5) {
       setState(() {
         _errorMessage = 'Password must be at least 5 characters long.';
@@ -58,7 +53,6 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
       return;
     }
 
-    // Jelszó és megerősítés ellenőrzés
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _errorMessage = 'Passwords do not match.';
@@ -66,7 +60,6 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
       return;
     }
 
-    // Ellenőrizzük, hogy az e-mail cím már létezik-e
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -86,8 +79,7 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
       return;
     }
 
-    // Továbblépés a következő oldalra
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => RegisterStep2Screen(
           email: _emailController.text,
@@ -101,84 +93,144 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Step 1: Basic Information')),
-      resizeToAvoidBottomInset:
-          true, // Engedélyezi az átrendezést a billentyűzet megjelenésekor
+      appBar: AppBar(
+        title: const Text('Basic Information'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
-        // Görgethető tartalom
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
+              const Text(
+                "Let's get started!",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Please enter your basic information to create an account.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildTextField(
                 controller: _emailController,
+                hintText: "Email",
+                icon: Icons.mail,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "Email",
-                  prefixIcon: Icon(Icons.mail),
-                ),
               ),
-              const SizedBox(height: 16.0),
-              TextField(
-                controller: _usernameController, // Felhasználónév mező
-                decoration: const InputDecoration(
-                  hintText: "Username",
-                  prefixIcon: Icon(Icons.person),
-                ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _usernameController,
+                hintText: "Username",
+                icon: Icons.person,
               ),
-              const SizedBox(height: 16.0),
-              TextField(
+              const SizedBox(height: 16),
+              _buildTextField(
                 controller: _passwordController,
+                hintText: "Password",
+                icon: Icons.lock,
                 obscureText: !_passwordVisible,
-                decoration: InputDecoration(
-                  hintText: "Password",
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _passwordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _passwordVisible = !_passwordVisible;
-                      });
-                    },
-                  ),
-                ),
+                toggleVisibility: () {
+                  setState(() {
+                    _passwordVisible = !_passwordVisible;
+                  });
+                },
+                isPasswordField: true,
+                isVisible: _passwordVisible,
               ),
-              const SizedBox(height: 16.0),
-              TextField(
+              const SizedBox(height: 16),
+              _buildTextField(
                 controller: _confirmPasswordController,
+                hintText: "Confirm Password",
+                icon: Icons.lock,
                 obscureText: !_confirmPasswordVisible,
-                decoration: InputDecoration(
-                  hintText: "Confirm Password",
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _confirmPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                toggleVisibility: () {
+                  setState(() {
+                    _confirmPasswordVisible = !_confirmPasswordVisible;
+                  });
+                },
+                isPasswordField: true,
+                isVisible: _confirmPasswordVisible,
+              ),
+              const SizedBox(height: 16),
+              if (_errorMessage.isNotEmpty)
+                Text(
+                  _errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _continueRegistration,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _confirmPasswordVisible = !_confirmPasswordVisible;
-                      });
-                    },
+                  ),
+                  child: const Text(
+                    "Continue",
+                    style: TextStyle(fontSize: 18),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16.0),
-              if (_errorMessage.isNotEmpty)
-                Text(_errorMessage, style: const TextStyle(color: Colors.red)),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _continueRegistration, // Továbblépés gomb
-                child: const Text("Continue"),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    bool isPasswordField = false,
+    VoidCallback? toggleVisibility,
+    bool isVisible = false,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: Icon(icon, color: Colors.teal),
+        suffixIcon: isPasswordField
+            ? IconButton(
+                icon: Icon(
+                  isVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: toggleVisibility,
+              )
+            : null,
+        filled: true,
+        fillColor: Colors.grey[100],
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
       ),
     );

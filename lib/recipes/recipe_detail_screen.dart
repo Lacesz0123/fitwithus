@@ -13,12 +13,13 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
-  late Map<String, bool> ingredientsStatus = {}; // Hozzávalók állapotai
+  late Map<String, bool> ingredientsStatus = {};
   String name = '';
   String description = '';
   int prepTime = 0;
   List<String> steps = [];
-  bool isFavorite = false; // Kedvenc állapot
+  bool isFavorite = false;
+  String? imageUrl; // Kép URL hozzáadása
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       description = data['description'] ?? '';
       prepTime = data['prepTime'];
       steps = List<String>.from(data['steps']);
+      imageUrl = data['imageUrl']; // Kép URL lekérése
       ingredientsStatus = {
         for (var ingredient in ingredients) ingredient: false
       };
@@ -95,15 +97,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Recipe Details"),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isFavorite ? Icons.star : Icons.star_border,
-              color: isFavorite ? Colors.yellow : Colors.grey,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            onPressed: _toggleFavorite,
           ),
-        ],
+        ),
       ),
       body: name.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -112,50 +114,146 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name,
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text("Preparation Time: $prepTime minutes",
-                      style: const TextStyle(fontSize: 16)),
-                  const SizedBox(height: 8),
-                  Text(description, style: const TextStyle(fontSize: 16)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _toggleFavorite,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          decoration: BoxDecoration(
+                            color: isFavorite
+                                ? Colors.yellow.shade100
+                                : Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              if (isFavorite)
+                                BoxShadow(
+                                  color: Colors.yellow.shade400,
+                                  blurRadius: 10,
+                                  spreadRadius: 1,
+                                ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(
+                            isFavorite ? Icons.star : Icons.star_border,
+                            color: isFavorite ? Colors.orange : Colors.grey,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Preparation Time: $prepTime minutes",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    description,
+                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
                   const SizedBox(height: 16),
-
-                  // Hozzávalók lista jelölőnégyzetekkel
-                  const Text("Ingredients:",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Ingredients:",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   ...ingredientsStatus.keys.map((ingredient) {
                     bool isChecked = ingredientsStatus[ingredient] ?? false;
                     return CheckboxListTile(
-                      title: Text(ingredient),
+                      title: Text(
+                        ingredient,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isChecked ? Colors.grey : Colors.black,
+                          decoration: isChecked
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                        ),
+                      ),
                       value: isChecked,
                       onChanged: (_) => _toggleIngredientStatus(ingredient),
                       controlAffinity: ListTileControlAffinity.leading,
-                      activeColor: Colors.green,
+                      activeColor: Colors.teal,
                       checkColor: Colors.white,
                     );
                   }).toList(),
-
                   const SizedBox(height: 16),
-
-                  // Lépések megjelenítése
-                  const Text("Steps:",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: steps.map((step) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text("- $step",
-                            style: const TextStyle(fontSize: 16)),
-                      );
-                    }).toList(),
+                  const Text(
+                    "Steps:",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal,
+                    ),
                   ),
+                  const SizedBox(height: 8),
+                  ...steps.asMap().entries.map((entry) {
+                    int index = entry.key + 1;
+                    String step = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "$index. ",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueAccent,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              step,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  const SizedBox(height: 20),
+                  if (imageUrl != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: Image.network(
+                        imageUrl!,
+                        height: 250,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                 ],
               ),
             ),

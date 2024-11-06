@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../home_screen.dart'; // A főoldalra való navigálás
+import '../home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -22,21 +22,19 @@ class RegisterStep2Screen extends StatefulWidget {
 class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
   TextEditingController _weightController = TextEditingController();
   TextEditingController _heightController = TextEditingController();
-  String _selectedGender = "Male"; // Nem választása
-  DateTime? _birthDate; // Születési dátum
+  String _selectedGender = "Male";
+  DateTime? _birthDate;
   String _errorMessage = '';
 
   Future<void> _registerUser() async {
     if (_validateInputs()) {
       try {
-        // Felhasználó regisztrálása Firebase-ben
         UserCredential userCredential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: widget.email,
           password: widget.password,
         );
 
-        // Felhasználói adatok mentése a Firestore-ba
         User? user = userCredential.user;
         if (user != null) {
           await FirebaseFirestore.instance
@@ -47,17 +45,18 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
             'username': widget.username,
             'weight': int.parse(_weightController.text),
             'height': int.parse(_heightController.text),
-            'favorites': [], // Üres kedvenc lista létrehozása
-            'favoriteRecipes': [], // Üres kedvenc recept lista létrehozása
+            'favorites': [],
+            'favoriteRecipes': [],
             'gender': _selectedGender,
             'birthDate': _birthDate?.toIso8601String(),
             'completedWorkouts': 0,
-            'role': 'user', // Alapértelmezett szerepkör hozzáadása
+            'role': 'user',
           });
 
-          // Sikeres regisztráció után átirányítás a HomeScreen-re
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (Route<dynamic> route) =>
+                false, // Eltávolítja az összes előző oldalt
           );
         }
       } catch (e) {
@@ -79,7 +78,6 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
       return false;
     }
 
-    // Ellenőrizni a súly és magasság helyességét
     int? weight = int.tryParse(_weightController.text);
     int? height = int.tryParse(_heightController.text);
 
@@ -117,19 +115,52 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Step 2: Additional Information')),
-      resizeToAvoidBottomInset:
-          true, // Engedélyezi az átrendezést a billentyűzet megjelenésekor
+      appBar: AppBar(
+        title: const Text('Additional Information'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
-        // Görgethető tartalom
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text(
+                "Complete Your Profile",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Please enter additional information to finish setting up your account.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 20),
               const Text("Gender"),
-              DropdownButton<String>(
+              DropdownButtonFormField<String>(
                 value: _selectedGender,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
                 items: const [
                   DropdownMenuItem(value: "Male", child: Text("Male")),
                   DropdownMenuItem(value: "Female", child: Text("Female")),
@@ -140,45 +171,91 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
                   });
                 },
               ),
-              const SizedBox(height: 16.0),
-              TextField(
+              const SizedBox(height: 16),
+              _buildTextField(
                 controller: _weightController,
+                hintText: "Your Weight (kg)",
+                icon: Icons.fitness_center,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: "Your Weight (kg)",
-                  prefixIcon: Icon(Icons.fitness_center),
-                ),
               ),
-              const SizedBox(height: 16.0),
-              TextField(
+              const SizedBox(height: 16),
+              _buildTextField(
                 controller: _heightController,
+                hintText: "Your Height (cm)",
+                icon: Icons.height,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: "Your Height (cm)",
-                  prefixIcon: Icon(Icons.height),
-                ),
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 16),
               const Text("Date of Birth"),
+              const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () => _selectBirthDate(context),
-                child: Text(_birthDate == null
-                    ? "Select Date of Birth"
-                    : _birthDate!.toLocal().toString().split(' ')[0]),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[100],
+                  foregroundColor: Colors.teal,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.teal),
+                  ),
+                ),
+                child: Text(
+                  _birthDate == null
+                      ? "Select Date of Birth"
+                      : _birthDate!.toLocal().toString().split(' ')[0],
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 16),
               if (_errorMessage.isNotEmpty)
                 Text(
                   _errorMessage,
                   style: const TextStyle(color: Colors.red),
                 ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _registerUser,
-                child: const Text("Register"),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _registerUser,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Register",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: Icon(icon, color: Colors.teal),
+        filled: true,
+        fillColor: Colors.grey[100],
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
       ),
     );
