@@ -12,14 +12,6 @@ class WorkoutDetailScreen extends StatefulWidget {
 }
 
 class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
-  bool isFavorite = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkIfFavorite(); // Ellenőrizzük, hogy kedvenc-e az edzés
-  }
-
   Future<Map<String, dynamic>?> getWorkoutData() async {
     DocumentSnapshot doc = await FirebaseFirestore.instance
         .collection('workouts')
@@ -28,51 +20,45 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     return doc.data() as Map<String, dynamic>?;
   }
 
-  // Ellenőrizzük, hogy az edzés már kedvenc-e a Firestore-ban
-  Future<void> _checkIfFavorite() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      List<dynamic> favoriteWorkouts =
-          (doc.data() as Map<String, dynamic>)['favorites'] ?? [];
-
-      setState(() {
-        isFavorite = favoriteWorkouts.contains(widget.workoutId);
-      });
-    }
-  }
-
-  // Kedvencekhez adás vagy eltávolítás
-  Future<void> _toggleFavorite() async {
+  Future<void> _markWorkoutCompleted() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       DocumentReference userRef =
           FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-      DocumentSnapshot doc = await userRef.get();
-      List<dynamic> favoriteWorkouts = doc['favorites'] ?? [];
-
-      if (favoriteWorkouts.contains(widget.workoutId)) {
-        // Eltávolítjuk a kedvencek közül
-        await userRef.update({
-          'favorites': FieldValue.arrayRemove([widget.workoutId])
-        });
-        setState(() {
-          isFavorite = false;
-        });
-      } else {
-        // Hozzáadjuk a kedvencekhez
-        await userRef.update({
-          'favorites': FieldValue.arrayUnion([widget.workoutId])
-        });
-        setState(() {
-          isFavorite = true;
-        });
-      }
+      // Increment completedWorkouts
+      await userRef.update({
+        'completedWorkouts': FieldValue.increment(1),
+      });
     }
+  }
+
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Completion'),
+          content: const Text(
+              'Are you sure you want to mark this workout as completed?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                _markWorkoutCompleted();
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -97,16 +83,16 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return const Center(child: Text('Hiba az edzés betöltése közben'));
+            return const Center(child: Text('Error loading workout data'));
           }
           if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text('Nincs ilyen edzés'));
+            return const Center(child: Text('No workout found'));
           }
 
-          // Lekért adatok
+          // Retrieved workout data
           Map<String, dynamic> workoutData = snapshot.data!;
-          String title = workoutData['title'] ?? 'Cím nélkül';
-          String description = workoutData['description'] ?? 'Nincs leírás';
+          String title = workoutData['title'] ?? 'No Title';
+          String description = workoutData['description'] ?? 'No Description';
           List<dynamic> steps = workoutData['steps'] ?? [];
 
           return Padding(
@@ -114,46 +100,13 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.teal,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: _toggleFavorite,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        decoration: BoxDecoration(
-                          color: isFavorite
-                              ? Colors.yellow.shade100
-                              : Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            if (isFavorite)
-                              BoxShadow(
-                                color: Colors.yellow.shade400,
-                                blurRadius: 10,
-                                spreadRadius: 1,
-                              )
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          isFavorite ? Icons.star : Icons.star_border,
-                          color: isFavorite ? Colors.orange : Colors.grey,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                  ],
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.teal,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -162,7 +115,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Lépések:',
+                  'Steps:',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -170,7 +123,6 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Lépések kártya-stílusú megjelenítése
                 Expanded(
                   child: ListView.builder(
                     itemCount: steps.length,
@@ -206,6 +158,17 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                         ),
                       );
                     },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _showConfirmationDialog,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Mark as Completed'),
                   ),
                 ),
               ],
