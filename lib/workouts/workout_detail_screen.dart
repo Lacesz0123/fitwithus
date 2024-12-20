@@ -13,11 +13,14 @@ class WorkoutDetailScreen extends StatefulWidget {
 
 class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
   bool isFavorite = false;
+  double? userRating;
+  double averageRating = 0.0;
 
   @override
   void initState() {
     super.initState();
     _checkIfFavorite();
+    _fetchRatings();
   }
 
   Future<Map<String, dynamic>?> getWorkoutData() async {
@@ -43,6 +46,64 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
         isFavorite = favoriteWorkouts.contains(widget.workoutId);
       });
     }
+  }
+
+  Future<void> _fetchRatings() async {
+    DocumentSnapshot workoutDoc = await FirebaseFirestore.instance
+        .collection('workouts')
+        .doc(widget.workoutId)
+        .get();
+
+    Map<String, dynamic> ratings =
+        (workoutDoc.data() as Map<String, dynamic>?)?['ratings'] ?? {};
+
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null && ratings.containsKey(user.uid)) {
+      setState(() {
+        userRating = (ratings[user.uid] as num).toDouble();
+      });
+    }
+
+    if (ratings.isNotEmpty) {
+      double totalRating =
+          ratings.values.fold(0.0, (sum, value) => sum + (value as num));
+      setState(() {
+        averageRating = totalRating / ratings.length;
+      });
+    } else {
+      setState(() {
+        averageRating = 0.0;
+      });
+    }
+  }
+
+  Future<void> _updateRating(double rating) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    DocumentReference workoutRef =
+        FirebaseFirestore.instance.collection('workouts').doc(widget.workoutId);
+
+    DocumentSnapshot workoutDoc = await workoutRef.get();
+    Map<String, dynamic> ratings =
+        (workoutDoc.data() as Map<String, dynamic>?)?['ratings'] ?? {};
+
+    ratings[user.uid] = rating;
+
+    double totalRating =
+        ratings.values.fold(0.0, (sum, value) => sum + (value as num));
+    double newAverageRating = totalRating / ratings.length;
+
+    await workoutRef.update({
+      'ratings': ratings,
+      'averageRating': newAverageRating,
+    });
+
+    setState(() {
+      userRating = rating;
+      averageRating = newAverageRating;
+    });
   }
 
   Future<void> _toggleFavorite() async {
@@ -242,6 +303,35 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                         ),
                       );
                     },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      Slider(
+                        value: userRating ?? 1.0,
+                        onChanged: (value) {
+                          setState(() {
+                            userRating = value;
+                          });
+                        },
+                        onChangeEnd: (value) => _updateRating(value),
+                        min: 1.0,
+                        max: 5.0,
+                        divisions: 4,
+                        label: userRating?.toStringAsFixed(1),
+                      ),
+                      Text(
+                        'Average Rating: ${averageRating.toStringAsFixed(1)}',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
