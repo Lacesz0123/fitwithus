@@ -74,7 +74,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           .where((text) => text.isNotEmpty)
           .toList();
 
-      // Hozzáadjuk a `name_lower` mezőt, amely a `name` kisbetűs változata
       await FirebaseFirestore.instance.collection('recipes').add({
         'name': nameController.text,
         'name_lower': nameController.text.toLowerCase(),
@@ -101,76 +100,126 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add New Recipe")),
+      appBar: AppBar(
+        title: const Text("Add New Recipe"),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: "Recipe Name"),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: const InputDecoration(labelText: "Description"),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: prepTimeController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                        labelText: "Preparation Time (minutes)"),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Képfeltöltés mező
-                  Row(
-                    children: [
-                      _selectedImage != null
-                          ? Image.file(
-                              _selectedImage!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            )
-                          : const Text("No image selected"),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: _pickImage,
-                        child: const Text("Select Image"),
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: nameController,
+                            decoration: const InputDecoration(
+                              labelText: "Recipe Name",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: descriptionController,
+                            maxLines: 3,
+                            decoration: const InputDecoration(
+                              labelText: "Description",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: prepTimeController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: "Preparation Time (minutes)",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Hozzávalók beviteli mezők
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          _selectedImage != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: Image.file(
+                                    _selectedImage!,
+                                    height: 200,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : const Text("No image selected"),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: _pickImage,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                            ),
+                            child: const Text("Select Image"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   const Text("Ingredients",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ...ingredientControllers.map((controller) {
                     int index = ingredientControllers.indexOf(controller);
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: controller,
-                            decoration:
-                                const InputDecoration(labelText: "Ingredient"),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: controller,
+                              decoration: const InputDecoration(
+                                labelText: "Ingredient",
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle),
-                          color: Colors.red,
-                          onPressed: () {
-                            setState(() {
-                              ingredientControllers.removeAt(index);
-                            });
-                          },
-                        ),
-                      ],
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle),
+                            color: Colors.red,
+                            onPressed: () {
+                              setState(() {
+                                ingredientControllers.removeAt(index);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     );
                   }).toList(),
                   IconButton(
@@ -182,34 +231,36 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       });
                     },
                   ),
-
                   const SizedBox(height: 20),
-
-                  // Lépések beviteli mezők
                   const Text("Steps",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ...stepControllers.map((controller) {
                     int index = stepControllers.indexOf(controller);
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: controller,
-                            decoration:
-                                const InputDecoration(labelText: "Step"),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: controller,
+                              decoration: const InputDecoration(
+                                labelText: "Step",
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle),
-                          color: Colors.red,
-                          onPressed: () {
-                            setState(() {
-                              stepControllers.removeAt(index);
-                            });
-                          },
-                        ),
-                      ],
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle),
+                            color: Colors.red,
+                            onPressed: () {
+                              setState(() {
+                                stepControllers.removeAt(index);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     );
                   }).toList(),
                   IconButton(
@@ -221,11 +272,18 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       });
                     },
                   ),
-
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _addRecipe,
-                    child: const Text("Add Recipe"),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _addRecipe,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 24),
+                        textStyle: const TextStyle(fontSize: 16),
+                      ),
+                      child: const Text("Add Recipe"),
+                    ),
                   ),
                 ],
               ),

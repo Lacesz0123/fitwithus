@@ -22,7 +22,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Your App Title',
+      title: 'FitWithUs',
       theme: ThemeData(
         appBarTheme: AppBarTheme(
           titleTextStyle: appBarTitleStyle,
@@ -164,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const Text(
-                  "Login to Your App",
+                  "Login",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 26.0,

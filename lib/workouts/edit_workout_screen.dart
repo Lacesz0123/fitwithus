@@ -31,7 +31,6 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     _descriptionController =
         TextEditingController(text: widget.initialDescription);
 
-    // Lépésekhez külön TextEditingController-ek létrehozása
     for (String step in widget.initialSteps) {
       _stepsControllers.add(TextEditingController(text: step));
     }
@@ -47,7 +46,6 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     super.dispose();
   }
 
-  // Edzés adatainak mentése Firestore-ba
   Future<void> _saveWorkout() async {
     String newTitle = _titleController.text.trim();
     String newDescription = _descriptionController.text.trim();
@@ -84,7 +82,6 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     }
   }
 
-  // Edzés törlése Firestore-ból
   Future<void> _deleteWorkout() async {
     bool confirmDelete = await showDialog(
       context: context,
@@ -115,7 +112,7 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Workout deleted successfully')),
         );
-        Navigator.of(context).pop(); // Visszatérés az előző képernyőre
+        Navigator.of(context).pop();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error deleting workout')),
@@ -124,14 +121,12 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     }
   }
 
-  // Új lépés hozzáadása
   void _addStep() {
     setState(() {
       _stepsControllers.add(TextEditingController());
     });
   }
 
-  // Lépés eltávolítása
   void _removeStep(int index) {
     setState(() {
       _stepsControllers.removeAt(index);
@@ -143,6 +138,21 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Workout'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.white),
+            onPressed: _deleteWorkout,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -150,65 +160,104 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Workout Title',
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Workout Description',
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Steps',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 5),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _stepsControllers.length,
-                itemBuilder: (context, index) {
-                  return Row(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _stepsControllers[index],
-                          decoration: InputDecoration(
-                            labelText: 'Step ${index + 1}',
-                          ),
+                      TextField(
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                          labelText: 'Workout Title',
+                          border: OutlineInputBorder(),
                         ),
                       ),
-                      IconButton(
-                        icon:
-                            const Icon(Icons.remove_circle, color: Colors.red),
-                        onPressed: () => _removeStep(index),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _descriptionController,
+                        maxLines: 5,
+                        decoration: const InputDecoration(
+                          labelText: 'Workout Description',
+                          border: OutlineInputBorder(),
+                        ),
                       ),
                     ],
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              TextButton.icon(
-                onPressed: _addStep,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Step'),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _saveWorkout,
-                child: const Text('Save Changes'),
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Steps',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _stepsControllers.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _stepsControllers[index],
+                                    decoration: InputDecoration(
+                                      labelText: 'Step ${index + 1}',
+                                      border: const OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle,
+                                      color: Colors.red),
+                                  onPressed: () => _removeStep(index),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      TextButton.icon(
+                        onPressed: _addStep,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Step'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _deleteWorkout,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('Delete Workout'),
+              const SizedBox(height: 20),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _saveWorkout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  child: const Text('Save Changes'),
+                ),
               ),
             ],
           ),

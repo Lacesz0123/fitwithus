@@ -12,6 +12,14 @@ class WorkoutDetailScreen extends StatefulWidget {
 }
 
 class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
+  bool isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfFavorite();
+  }
+
   Future<Map<String, dynamic>?> getWorkoutData() async {
     DocumentSnapshot doc = await FirebaseFirestore.instance
         .collection('workouts')
@@ -20,13 +28,57 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     return doc.data() as Map<String, dynamic>?;
   }
 
+  Future<void> _checkIfFavorite() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      List<dynamic> favoriteWorkouts =
+          (userDoc.data() as Map<String, dynamic>?)?['favorites'] ?? [];
+
+      setState(() {
+        isFavorite = favoriteWorkouts.contains(widget.workoutId);
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentReference userRef =
+          FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+      DocumentSnapshot userDoc = await userRef.get();
+      List<dynamic> favoriteWorkouts =
+          (userDoc.data() as Map<String, dynamic>?)?['favorites'] ?? [];
+
+      if (favoriteWorkouts.contains(widget.workoutId)) {
+        await userRef.update({
+          'favorites': FieldValue.arrayRemove([widget.workoutId])
+        });
+        setState(() {
+          isFavorite = false;
+        });
+      } else {
+        await userRef.update({
+          'favorites': FieldValue.arrayUnion([widget.workoutId])
+        });
+        setState(() {
+          isFavorite = true;
+        });
+      }
+    }
+  }
+
   Future<void> _markWorkoutCompleted() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       DocumentReference userRef =
           FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-      // Increment completedWorkouts
       await userRef.update({
         'completedWorkouts': FieldValue.increment(1),
       });
@@ -44,13 +96,13 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
                 _markWorkoutCompleted();
               },
               child: const Text('Yes'),
@@ -89,7 +141,6 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
             return const Center(child: Text('No workout found'));
           }
 
-          // Retrieved workout data
           Map<String, dynamic> workoutData = snapshot.data!;
           String title = workoutData['title'] ?? 'No Title';
           String description = workoutData['description'] ?? 'No Description';
@@ -100,13 +151,46 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _toggleFavorite,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        decoration: BoxDecoration(
+                          color: isFavorite
+                              ? Colors.yellow.shade100
+                              : Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            if (isFavorite)
+                              BoxShadow(
+                                color: Colors.yellow.shade400,
+                                blurRadius: 10,
+                                spreadRadius: 1,
+                              ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          isFavorite ? Icons.star : Icons.star_border,
+                          color: isFavorite ? Colors.orange : Colors.grey,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 Text(
