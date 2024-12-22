@@ -77,119 +77,133 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
           ),
         ),
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: getWorkoutsByCategory(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(
-                child: Text('Hiba az edzések betöltése közben'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-                child: Text('Nincs ilyen kategóriába tartozó edzés'));
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: getWorkoutsByCategory(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(
+                      child: Text('Hiba az edzések betöltése közben'));
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                      child: Text('Nincs ilyen kategóriába tartozó edzés'));
+                }
 
-          List<Map<String, dynamic>> workouts = snapshot.data!;
+                List<Map<String, dynamic>> workouts = snapshot.data!;
 
-          return ListView.builder(
-            itemCount: workouts.length,
-            itemBuilder: (context, index) {
-              Map<String, dynamic> workout = workouts[index];
-              String workoutTitle = workout['title'] ?? 'Nincs cím';
-              String workoutDescription =
-                  workout['description'] ?? 'Nincs leírás';
+                return ListView.builder(
+                  itemCount: workouts.length,
+                  itemBuilder: (context, index) {
+                    Map<String, dynamic> workout = workouts[index];
+                    String workoutTitle = workout['title'] ?? 'Nincs cím';
+                    String workoutDescription =
+                        workout['description'] ?? 'Nincs leírás';
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => WorkoutDetailScreen(
-                        workoutId: workout['id'],
-                      ),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              workoutTitle,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.teal,
-                              ),
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => WorkoutDetailScreen(
+                              workoutId: workout['id'],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              workoutDescription,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
-                              ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
-                      ),
-                      if (userRole == 'admin')
-                        IconButton(
-                          icon: const Icon(
-                            Icons.settings,
-                            color: Colors.blueAccent,
-                          ),
-                          onPressed: () => editWorkout(context, workout),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    workoutTitle,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.teal,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    workoutDescription,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (userRole == 'admin')
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.settings,
+                                  color: Colors.blueAccent,
+                                ),
+                                onPressed: () => editWorkout(context, workout),
+                              ),
+                          ],
                         ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: userRole == 'admin'
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        AddWorkoutScreen(category: widget.category),
-                  ),
+                      ),
+                    );
+                  },
                 );
               },
-              backgroundColor: Colors.teal,
-              label: Row(
-                children: const [
-                  Text('Új hozzáadása'),
-                  SizedBox(width: 5),
-                  Icon(Icons.add),
-                ],
+            ),
+          ),
+          if (userRole == 'admin')
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AddWorkoutScreen(category: widget.category),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  label: const Text(
+                    'Add New',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
               ),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            ),
+        ],
+      ),
     );
   }
 }

@@ -79,6 +79,15 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add New Workout'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.tealAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -88,15 +97,25 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
             children: [
               TextField(
                 controller: _titleController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Workout Title',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
               const SizedBox(height: 10),
               TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
+                controller: _titleController,
+                decoration: InputDecoration(
                   labelText: 'Workout Description',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
               ),
               const SizedBox(height: 10),
@@ -117,6 +136,11 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                           controller: _stepsControllers[index],
                           decoration: InputDecoration(
                             labelText: 'Step ${index + 1}',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
                           ),
                         ),
                       ),
@@ -130,15 +154,43 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                 },
               ),
               const SizedBox(height: 10),
-              TextButton.icon(
+              ElevatedButton.icon(
                 onPressed: _addStep,
-                icon: const Icon(Icons.add),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.add, color: Colors.white),
                 label: const Text('Add Step'),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _addWorkout,
-                child: const Text('Add Workout'),
+              const SizedBox(
+                  height: 30), // Extra távolság biztosítása a gomb fölött
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width *
+                      0.8, // A gomb szélessége a képernyő 80%-a
+                  child: ElevatedButton(
+                    onPressed: _addWorkout,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Add Workout',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
