@@ -51,20 +51,40 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add New Category'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0), // Kerekített sarkok
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.add, color: Colors.teal), // Ikon hozzáadása
+            const SizedBox(width: 10),
+            const Text(
+              'Add New Category',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              maxLength: 18, // Maximális karakterhossz beállítása
-              decoration: const InputDecoration(
-                hintText: 'Category Title',
-                counterText: '', // Karakter számláló elrejtése
+              maxLength: 18,
+              decoration: InputDecoration(
+                labelText: 'Category Title',
+                counterText: '',
+                labelStyle: const TextStyle(color: Colors.teal),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.teal, width: 2),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () async {
                 final picker = ImagePicker();
                 pickedImage =
@@ -75,20 +95,26 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   );
                 }
               },
-              child: const Text('Select Image'),
+              icon: const Icon(Icons.image, color: Colors.white),
+              label: const Text('Select Image'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.red)),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
               if (titleController.text.isNotEmpty &&
-                  titleController.text.length <=
-                      18 && // Karakterhossz ellenőrzés
+                  titleController.text.length <= 18 &&
                   pickedImage != null) {
                 final storageRef = FirebaseStorage.instance
                     .ref()
@@ -100,8 +126,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
                 await FirebaseFirestore.instance.collection('categories').add({
                   'title': titleController.text,
-                  'title_lower': titleController.text
-                      .toLowerCase(), // Kisbetűs verzió hozzáadása
+                  'title_lower': titleController.text.toLowerCase(),
                   'image': imageUrl,
                 });
 
@@ -112,11 +137,19 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text(
-                          'Please enter a title (max 18 characters) and select an image')),
+                    content: Text(
+                      'Please enter a title (max 18 characters) and select an image',
+                    ),
+                  ),
                 );
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             child: const Text('Add'),
           ),
         ],
@@ -141,20 +174,41 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Category'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.edit, color: Colors.blueAccent),
+            const SizedBox(width: 10),
+            const Text(
+              'Edit Category',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              maxLength: 18, // Maximális karakterhossz beállítása
-              decoration: const InputDecoration(
-                hintText: 'Category Title',
-                counterText: '', // Karakter számláló elrejtése
+              maxLength: 18,
+              decoration: InputDecoration(
+                labelText: 'Category Title',
+                counterText: '',
+                labelStyle: const TextStyle(color: Colors.blueAccent),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide:
+                      const BorderSide(color: Colors.blueAccent, width: 2),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () async {
                 final picker = ImagePicker();
                 pickedImage =
@@ -165,115 +219,145 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   );
                 }
               },
-              child: const Text('Select New Image'),
+              icon: const Icon(Icons.image, color: Colors.white),
+              label: const Text('Select New Image'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (titleController.text.isNotEmpty &&
-                  titleController.text.length <= 18) {
-                // Karakterhossz ellenőrzés
-                String imageUrl = currentImage;
-                // Ha új kép van kiválasztva, töröljük a régit
-                if (pickedImage != null) {
-                  try {
-                    final oldImageRef =
-                        FirebaseStorage.instance.refFromURL(currentImage);
-                    await oldImageRef.delete();
-                  } catch (e) {
-                    print('Error deleting previous image from Storage: $e');
-                  }
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    if (titleController.text.isNotEmpty &&
+                        titleController.text.length <= 18) {
+                      // Frissítési logika
+                      String imageUrl = currentImage;
+                      if (pickedImage != null) {
+                        try {
+                          final oldImageRef =
+                              FirebaseStorage.instance.refFromURL(currentImage);
+                          await oldImageRef.delete();
+                        } catch (e) {
+                          print(
+                              'Error deleting previous image from Storage: $e');
+                        }
 
-                  final storageRef = FirebaseStorage.instance
-                      .ref()
-                      .child('category_images/categoryImages')
-                      .child('${titleController.text}.jpg');
+                        final storageRef = FirebaseStorage.instance
+                            .ref()
+                            .child('category_images/categoryImages')
+                            .child('${titleController.text}.jpg');
 
-                  await storageRef.putFile(File(pickedImage!.path));
-                  imageUrl = await storageRef.getDownloadURL();
-                }
+                        await storageRef.putFile(File(pickedImage!.path));
+                        imageUrl = await storageRef.getDownloadURL();
+                      }
 
-                await FirebaseFirestore.instance
-                    .collection('categories')
-                    .doc(docId)
-                    .update({
-                  'title': titleController.text,
-                  'title_lower': titleController.text
-                      .toLowerCase(), // Kisbetűs verzió frissítése
-                  'image': imageUrl,
-                });
+                      await FirebaseFirestore.instance
+                          .collection('categories')
+                          .doc(docId)
+                          .update({
+                        'title': titleController.text,
+                        'title_lower': titleController.text.toLowerCase(),
+                        'image': imageUrl,
+                      });
 
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Category updated successfully')),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content:
-                          Text('Please enter a title (max 18 characters)')),
-                );
-              }
-            },
-            child: const Text('Update'),
-          ),
-          TextButton(
-            onPressed: () async {
-              // Kategória és kapcsolódó gyakorlatok törlése
-              try {
-                // Először töröljük a kategóriához tartozó összes gyakorlatot
-                QuerySnapshot workoutsSnapshot = await FirebaseFirestore
-                    .instance
-                    .collection('workouts')
-                    .where('category', isEqualTo: currentTitle)
-                    .get();
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Category updated successfully')),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'Please enter a title (max 18 characters)')),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Update'),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    // Törlés logikája
+                    try {
+                      QuerySnapshot workoutsSnapshot = await FirebaseFirestore
+                          .instance
+                          .collection('workouts')
+                          .where('category', isEqualTo: currentTitle)
+                          .get();
 
-                for (DocumentSnapshot workoutDoc in workoutsSnapshot.docs) {
-                  await FirebaseFirestore.instance
-                      .collection('workouts')
-                      .doc(workoutDoc.id)
-                      .delete();
-                }
+                      for (DocumentSnapshot workoutDoc
+                          in workoutsSnapshot.docs) {
+                        await FirebaseFirestore.instance
+                            .collection('workouts')
+                            .doc(workoutDoc.id)
+                            .delete();
+                      }
 
-                // Ezután töröljük a kategóriát
-                await FirebaseFirestore.instance
-                    .collection('categories')
-                    .doc(docId)
-                    .delete();
+                      await FirebaseFirestore.instance
+                          .collection('categories')
+                          .doc(docId)
+                          .delete();
 
-                // Ha van kép a kategóriához, töröljük azt is
-                if (currentImage.isNotEmpty) {
-                  try {
-                    final storageRef =
-                        FirebaseStorage.instance.refFromURL(currentImage);
-                    await storageRef.delete();
-                  } catch (e) {
-                    print('Error deleting image from Storage: $e');
-                  }
-                }
+                      if (currentImage.isNotEmpty) {
+                        try {
+                          final storageRef =
+                              FirebaseStorage.instance.refFromURL(currentImage);
+                          await storageRef.delete();
+                        } catch (e) {
+                          print('Error deleting image from Storage: $e');
+                        }
+                      }
 
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content:
-                          Text('Category and workouts deleted successfully')),
-                );
-              } catch (e) {
-                print('Error deleting category and workouts: $e');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Error deleting category and workouts')),
-                );
-              }
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'Category and workouts deleted successfully')),
+                      );
+                    } catch (e) {
+                      print('Error deleting category and workouts: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text('Error deleting category and workouts')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.delete, color: Colors.white),
+                  label: const Text('Delete'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -321,119 +405,139 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
           List<QueryDocumentSnapshot> categories = snapshot.data!.docs;
 
-          return Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
-                childAspectRatio: 1.0,
-              ),
-              itemCount: categories.length,
-              itemBuilder: (BuildContext context, int index) {
-                String categoryTitle = categories[index]['title'] ?? 'No title';
-                String categoryImage = categories[index]['image'] ?? '';
-                String docId = categories[index].id;
+          return Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10.0,
+                      mainAxisSpacing: 10.0,
+                      childAspectRatio: 1.0,
+                    ),
+                    itemCount: categories.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      String categoryTitle =
+                          categories[index]['title'] ?? 'No title';
+                      String categoryImage = categories[index]['image'] ?? '';
+                      String docId = categories[index].id;
 
-                return Stack(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CategoryWorkoutsScreen(
-                              category: categoryTitle,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15.0),
-                          image: DecorationImage(
-                            image: categoryImage.isNotEmpty
-                                ? NetworkImage(categoryImage)
-                                : NetworkImage(
-                                    'https://firebasestorage.googleapis.com/v0/b/fitwithus-c4ae9.appspot.com/o/category_images%2FplaceholderImage%2Fplaceholder.jpg?alt=media&token=bd57247b-4a73-ac18-3d5d93b15960'),
-                            fit: BoxFit.cover,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(15.0),
-                                topRight: Radius.circular(15.0),
+                      return Stack(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CategoryWorkoutsScreen(
+                                    category: categoryTitle,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15.0),
+                                image: DecorationImage(
+                                  image: categoryImage.isNotEmpty
+                                      ? NetworkImage(categoryImage)
+                                      : NetworkImage(
+                                          'https://firebasestorage.googleapis.com/v0/b/fitwithus-c4ae9.appspot.com/o/category_images%2FplaceholderImage%2Fplaceholder.jpg?alt=media&token=bd57247b-4a73-ac18-3d5d93b15960'),
+                                  fit: BoxFit.cover,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(15.0),
+                                      topRight: Radius.circular(15.0),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    categoryTitle,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               ),
                             ),
-                            child: Text(
-                              categoryTitle,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
                           ),
-                        ),
+                          if (userRole == 'admin')
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: GestureDetector(
+                                onTap: () => editCategory(context, docId,
+                                    categoryTitle, categoryImage),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: const Icon(
+                                    Icons.settings,
+                                    color: Colors.white,
+                                    size: 24.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+              if (userRole == 'admin')
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 16.0), // Kevesebb függőleges margó
+                  child: SizedBox(
+                    height: 40, // Gomb magasságának csökkentése
+                    child: ElevatedButton.icon(
+                      onPressed: () => addCategory(context),
+                      icon: const Icon(Icons.add,
+                          size: 20), // Ikon kisebb méretben
+                      label: const Text(
+                        'Add New Category',
+                        style: TextStyle(
+                            fontSize: 14), // Szöveg kisebb betűmérettel
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal:
+                                12.0), // Gombon belüli padding csökkentése
                       ),
                     ),
-                    if (userRole == 'admin')
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: GestureDetector(
-                          onTap: () => editCategory(
-                              context, docId, categoryTitle, categoryImage),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            padding: const EdgeInsets.all(6.0),
-                            child: const Icon(
-                              Icons.settings,
-                              color: Colors.white,
-                              size: 24.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ),
+            ],
           );
         },
       ),
-      floatingActionButton: userRole == 'admin'
-          ? FloatingActionButton.extended(
-              onPressed: () => addCategory(context),
-              backgroundColor: Colors.teal,
-              label: Row(
-                children: const [
-                  Text('Add new'),
-                  SizedBox(width: 5),
-                  Icon(Icons.add),
-                ],
-              ),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
