@@ -165,20 +165,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildMenuButton(String title, VoidCallback onPressed,
-      {Color? color, Color textColor = Colors.black}) {
+      {Color? color, Color textColor = Colors.white}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: 8.0, horizontal: 16.0), // Szélekhez közeli margó
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Container(
-        width: double.infinity, // Teljes szélesség kitöltése
+        width: double.infinity,
         decoration: BoxDecoration(
-          color: color ?? Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: color ??
+              const Color.fromARGB(
+                  255, 68, 138, 255), // Lágy kék árnyalatú gomb
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 6,
               offset: const Offset(0, 3),
             ),
           ],
@@ -189,14 +190,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.symmetric(vertical: 15),
             foregroundColor: textColor,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(20),
             ),
           ),
           child: Text(
             title,
             style: const TextStyle(
-              fontSize: 18, // Modern, jól látható betűméret
-              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,
           ),
@@ -208,6 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F9FC), // Lágy világos szürke háttér
       appBar: AppBar(
         title: const Text('Profile'),
         flexibleSpace: Container(
@@ -241,26 +243,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(
-                      height: 20), // Térköz az AppBar és a profilkép között
+                      height: 30), // Térköz az AppBar és a profilkép között
                   GestureDetector(
                     onTap: _uploadProfileImage,
-                    child: CircleAvatar(
-                      radius: 70, // Növeljük a méretet modernebb kinézetért
-                      backgroundImage: _profileImageUrl != null
-                          ? NetworkImage(_profileImageUrl!)
-                          : (_defaultProfileImageUrl != null
-                              ? NetworkImage(_defaultProfileImageUrl!)
-                              : null),
-                      backgroundColor: Colors.grey[300],
-                      child: _profileImageUrl == null &&
-                              _defaultProfileImageUrl == null
-                          ? const Icon(Icons.person,
-                              size: 70,
-                              color: Colors
-                                  .white70) // Alapértelmezett ikon, ha nincs kép
-                          : null,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [
+                            Colors.tealAccent,
+                            Colors.blueAccent
+                          ], // Színátmenet a kerethez
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(5), // Keret vastagsága
+                      child: CircleAvatar(
+                        radius: 65, // A kép mérete kisebb a kerethez képest
+                        backgroundImage: _profileImageUrl != null
+                            ? NetworkImage(_profileImageUrl!)
+                            : (_defaultProfileImageUrl != null
+                                ? NetworkImage(_defaultProfileImageUrl!)
+                                : null),
+                        backgroundColor: Colors.white,
+                        child: _profileImageUrl == null &&
+                                _defaultProfileImageUrl == null
+                            ? const Icon(
+                                Icons.person,
+                                size: 70,
+                                color: Colors.grey,
+                              )
+                            : null,
+                      ),
                     ),
                   ),
+
                   const SizedBox(height: 10),
                   Text(
                     userData['username'] ?? 'N/A',
@@ -311,7 +336,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _deleteAccount,
                     color: Colors
                         .redAccent, // Piros háttér, ami illeszkedik a modern kinézethez
-                    textColor: Colors.white, // Fehér szöveg a piros háttérrel
                   ),
                 ],
               );

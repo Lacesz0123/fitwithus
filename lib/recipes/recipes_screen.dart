@@ -37,6 +37,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F9FC), // Világos szürke háttér
       appBar: AppBar(
         title: const Text("Healthy Recipes"),
         flexibleSpace: Container(
@@ -99,16 +100,26 @@ class _RecipesScreenState extends State<RecipesScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          difficulty,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent, // Színes háttér
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Text(
+                            difficulty,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white, // Fehér szöveg
+                            ),
                           ),
                         ),
                         if (userRole == 'admin')
                           IconButton(
-                            icon: const Icon(Icons.add),
+                            icon:
+                                const Icon(Icons.add, color: Colors.blueAccent),
                             onPressed: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -149,9 +160,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                 child: SizedBox(
                                   width: 200,
                                   child: Card(
-                                    elevation: 4.0,
+                                    color: Colors.white, // Világos színű kártya
+                                    elevation: 2.0, // Csökkentett árnyék
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15.0),
+                                      borderRadius: BorderRadius.circular(
+                                          20.0), // Nagyobb lekerekítés
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.all(10.0),
@@ -162,7 +175,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                           if (imageUrl != null)
                                             ClipRRect(
                                               borderRadius:
-                                                  BorderRadius.circular(10.0),
+                                                  BorderRadius.circular(15.0),
                                               child: Image.network(
                                                 imageUrl,
                                                 height: 90,
@@ -177,6 +190,8 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                               style: const TextStyle(
                                                 fontSize: 16.0,
                                                 fontWeight: FontWeight.bold,
+                                                color: Colors
+                                                    .black87, // Fekete szöveg
                                               ),
                                               textAlign: TextAlign.center,
                                               maxLines: 2,
