@@ -182,6 +182,33 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               height: 200,
                               child: LineChart(
                                 LineChartData(
+                                  gridData: FlGridData(
+                                    show: true,
+                                    drawHorizontalLine: true,
+                                    drawVerticalLine: false,
+                                    horizontalInterval:
+                                        50, // Csak a bal oldali értékekhez
+                                    getDrawingHorizontalLine: (value) {
+                                      return FlLine(
+                                        color: Colors.grey.withOpacity(
+                                            0.2), // Lágy szürke vonalak
+                                        strokeWidth: 1,
+                                      );
+                                    },
+                                  ),
+                                  borderData: FlBorderData(
+                                    show: true,
+                                    border: const Border(
+                                      left: BorderSide(color: Colors.grey),
+                                      bottom: BorderSide(
+                                          color: Colors
+                                              .transparent), // Alsó vonal eltávolítása
+                                      right:
+                                          BorderSide(color: Colors.transparent),
+                                      top:
+                                          BorderSide(color: Colors.transparent),
+                                    ),
+                                  ),
                                   lineBarsData: [
                                     LineChartBarData(
                                       spots: weightEntries.map((entry) {
@@ -189,33 +216,53 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                             (entry['date'] as Timestamp)
                                                 .toDate();
                                         return FlSpot(
-                                            date.millisecondsSinceEpoch
-                                                .toDouble(),
-                                            (entry['weight'] as num)
-                                                .toDouble());
+                                          date.millisecondsSinceEpoch
+                                              .toDouble(),
+                                          (entry['weight'] as num).toDouble(),
+                                        );
                                       }).toList(),
                                       isCurved: true,
-                                      color: Colors.blue,
-                                      barWidth: 2,
-                                      belowBarData: BarAreaData(show: false),
+                                      color: Colors.teal,
+                                      barWidth: 4,
+                                      dotData: FlDotData(show: false),
+                                      belowBarData: BarAreaData(
+                                        show: true,
+                                        color: Colors.teal.withOpacity(0.1),
+                                      ),
                                     ),
                                   ],
                                   titlesData: FlTitlesData(
                                     bottomTitles: AxisTitles(
                                       sideTitles: SideTitles(
+                                          showTitles:
+                                              false), // Dátumok eltávolítása
+                                    ),
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
                                         showTitles: true,
-                                        interval: 604800000,
+                                        reservedSize: 40,
+                                        interval: 50, // 50 kg lépésköz
                                         getTitlesWidget: (value, meta) {
-                                          DateTime date = DateTime
-                                              .fromMillisecondsSinceEpoch(
-                                                  value.toInt());
                                           return Text(
-                                              '${date.month}/${date.day}');
+                                            '${value.toInt()} kg',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          );
                                         },
                                       ),
                                     ),
-                                    leftTitles: AxisTitles(
-                                      sideTitles: SideTitles(showTitles: true),
+                                    rightTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                          showTitles:
+                                              false), // Jobb oldali tengely eltávolítása
+                                    ),
+                                    topTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                          showTitles:
+                                              false), // Felső tengely eltávolítása
                                     ),
                                   ),
                                 ),
