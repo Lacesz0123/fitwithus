@@ -20,6 +20,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   List<String> steps = [];
   bool isFavorite = false;
   String? imageUrl; // Kép URL hozzáadása
+  int? calories; // Kalóriaérték tárolása
 
   @override
   void initState() {
@@ -46,6 +47,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ingredientsStatus = {
         for (var ingredient in ingredients) ingredient: false
       };
+      calories = data['calories']; // Kalóriaérték lekérése
     });
   }
 
@@ -174,6 +176,25 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     description,
                     style: const TextStyle(fontSize: 16, color: Colors.black87),
                   ),
+                  // Kalóriaérték hozzáadása a build metódushoz
+                  const SizedBox(height: 12),
+                  if (calories != null) ...[
+                    Row(
+                      children: [
+                        const Icon(Icons.local_fire_department,
+                            color: Colors.red),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Calories: $calories kcal",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
                   const SizedBox(height: 16),
                   const Text(
                     "Ingredients:",

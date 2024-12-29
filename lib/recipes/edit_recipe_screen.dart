@@ -17,6 +17,7 @@ class EditRecipeScreen extends StatefulWidget {
 class _EditRecipeScreenState extends State<EditRecipeScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController caloriesController = TextEditingController();
   final TextEditingController prepTimeController = TextEditingController();
   List<TextEditingController> ingredientControllers = [];
   List<TextEditingController> stepControllers = [];
@@ -68,6 +69,9 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
       stepControllers = (data['steps'] as List<dynamic>)
           .map((step) => TextEditingController(text: step))
           .toList();
+      if (data['calories'] != null) {
+        caloriesController.text = data['calories'].toString();
+      }
     });
   }
 
@@ -130,6 +134,12 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         return;
       }
 
+      int? calories = int.tryParse(caloriesController.text);
+      if (calories == null || calories <= 0) {
+        _showError('Calories must be a valid positive number.');
+        return;
+      }
+
       List<String> ingredients = ingredientControllers
           .map((controller) => controller.text)
           .where((text) => text.isNotEmpty)
@@ -160,6 +170,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         'ingredients': ingredients,
         'steps': steps,
         'imageUrl': imageUrl ?? _imageUrl,
+        'calories': calories, // Kalóriaérték mentése
       });
 
       Navigator.of(context).pop();
@@ -222,6 +233,15 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     maxLines: 3,
                     decoration: const InputDecoration(
                       labelText: "Description",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: caloriesController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: "Calories (kcal)",
                       border: OutlineInputBorder(),
                     ),
                   ),

@@ -66,7 +66,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.category} Edzések'),
+        title: Text('${widget.category} Workouts'),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(

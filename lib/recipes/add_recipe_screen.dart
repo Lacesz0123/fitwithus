@@ -17,6 +17,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController prepTimeController = TextEditingController();
+  final TextEditingController caloriesController = TextEditingController();
 
   List<TextEditingController> ingredientControllers = [TextEditingController()];
   List<TextEditingController> stepControllers = [TextEditingController()];
@@ -46,25 +47,43 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   Future<void> _addRecipe() async {
+    // Ellenőrzés, hogy minden mező ki van-e töltve
     if (nameController.text.isEmpty ||
         descriptionController.text.isEmpty ||
         prepTimeController.text.isEmpty ||
+        caloriesController.text.isEmpty ||
         ingredientControllers.any((c) => c.text.isEmpty) ||
         stepControllers.any((c) => c.text.isEmpty) ||
         _selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Please fill all fields and upload an image.")),
+          content: Text("Please fill all fields and upload an image."),
+        ),
       );
       return;
     }
 
+    // Kalória érték ellenőrzése
+    int? calories = int.tryParse(caloriesController.text);
+    if (calories == null || calories <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Calories must be a valid positive number."),
+        ),
+      );
+      return;
+    }
+
+    // Betöltés indítása
     setState(() {
       _isLoading = true;
     });
 
     try {
+      // Kép feltöltése a Firestore-ba
       final imageUrl = await _uploadImage();
+
+      // Összetevők és lépések begyűjtése
       List<String> ingredients = ingredientControllers
           .map((controller) => controller.text)
           .where((text) => text.isNotEmpty)
@@ -74,6 +93,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           .where((text) => text.isNotEmpty)
           .toList();
 
+      // Recept hozzáadása a Firestore-hoz
       await FirebaseFirestore.instance.collection('recipes').add({
         'name': nameController.text,
         'name_lower': nameController.text.toLowerCase(),
@@ -83,14 +103,21 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         'ingredients': ingredients,
         'steps': steps,
         'imageUrl': imageUrl,
+        'calories': calories, // Kalória érték mentése
       });
 
+      // Visszalépés és értesítés
       Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Recipe added successfully!")),
+      );
     } catch (e) {
+      // Hibaüzenet megjelenítése
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to add recipe: $e")),
       );
     } finally {
+      // Betöltés befejezése
       setState(() {
         _isLoading = false;
       });
@@ -150,6 +177,15 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: "Preparation Time (minutes)",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: caloriesController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: "Calories (kcal)",
                               border: OutlineInputBorder(),
                             ),
                           ),
@@ -296,6 +332,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     nameController.dispose();
     descriptionController.dispose();
     prepTimeController.dispose();
+    caloriesController.dispose();
     ingredientControllers.forEach((controller) => controller.dispose());
     stepControllers.forEach((controller) => controller.dispose());
     super.dispose();
