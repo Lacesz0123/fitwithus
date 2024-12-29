@@ -474,8 +474,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         .collection('entries')
         .orderBy('date', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList());
+        .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
   }
 }

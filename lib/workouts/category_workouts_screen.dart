@@ -42,8 +42,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
         .where('category', isEqualTo: widget.category)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
-              Map<String, dynamic> workoutData =
-                  doc.data() as Map<String, dynamic>;
+              Map<String, dynamic> workoutData = doc.data();
               workoutData['id'] = doc.id;
               return workoutData;
             }).toList());
