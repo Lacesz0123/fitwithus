@@ -108,7 +108,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
               ),
               const SizedBox(height: 10),
               TextField(
-                controller: _titleController,
+                controller: _descriptionController,
                 decoration: InputDecoration(
                   labelText: 'Workout Description',
                   border: OutlineInputBorder(
