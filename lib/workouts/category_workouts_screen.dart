@@ -86,12 +86,11 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  return const Center(
-                      child: Text('Hiba az edzések betöltése közben'));
+                  return const Center(child: Text('Error loading workouts'));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(
-                      child: Text('Nincs ilyen kategóriába tartozó edzés'));
+                      child: Text('No workouts found in this category'));
                 }
 
                 List<Map<String, dynamic>> workouts = snapshot.data!;
@@ -100,9 +99,9 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                   itemCount: workouts.length,
                   itemBuilder: (context, index) {
                     Map<String, dynamic> workout = workouts[index];
-                    String workoutTitle = workout['title'] ?? 'Nincs cím';
+                    String workoutTitle = workout['title'] ?? 'No title';
                     String workoutDescription =
-                        workout['description'] ?? 'Nincs leírás';
+                        workout['description'] ?? 'No description';
 
                     return GestureDetector(
                       onTap: () {
