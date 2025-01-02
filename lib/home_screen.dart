@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.fitness_center),
           ),
           BottomNavigationBarItem(
-            label: 'AI Chat',
+            label: 'FitBot',
             icon: Icon(Icons.chat),
           ),
           BottomNavigationBarItem(
