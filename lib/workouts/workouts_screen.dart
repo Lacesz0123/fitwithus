@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Kép kiválasztásához
-import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage
-import 'dart:io'; // Fájl kezelése
-import 'category_workouts_screen.dart'; // Az általános edzések listázó képernyő importálása
-import 'package:firebase_auth/firebase_auth.dart'; // Felhasználó ellenőrzéséhez
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import 'category_workouts_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WorkoutsScreen extends StatefulWidget {
   WorkoutsScreen({super.key});
@@ -22,7 +22,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     _getCurrentUserRole();
   }
 
-  // Felhasználó szerepkörének lekérdezése Firestore-ból
   Future<void> _getCurrentUserRole() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -36,7 +35,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     }
   }
 
-  // Új kategória hozzáadása a Firestore-hoz
   Future<void> addCategory(BuildContext context) async {
     if (userRole != 'admin') {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -52,11 +50,11 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0), // Kerekített sarkok
+          borderRadius: BorderRadius.circular(15.0),
         ),
         title: Row(
           children: [
-            const Icon(Icons.add, color: Colors.teal), // Ikon hozzáadása
+            const Icon(Icons.add, color: Colors.teal),
             const SizedBox(width: 10),
             const Text(
               'Add New Category',
@@ -157,7 +155,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     );
   }
 
-  // Kategória módosítása és törlése
   Future<void> editCategory(BuildContext context, String docId,
       String currentTitle, String currentImage) async {
     if (userRole != 'admin') {
@@ -239,7 +236,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   onPressed: () async {
                     if (titleController.text.isNotEmpty &&
                         titleController.text.length <= 18) {
-                      // Frissítési logika
                       String imageUrl = currentImage;
                       if (pickedImage != null) {
                         try {
@@ -293,7 +289,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 const SizedBox(height: 8),
                 ElevatedButton.icon(
                   onPressed: () async {
-                    // Törlés logikája
                     try {
                       QuerySnapshot workoutsSnapshot = await FirebaseFirestore
                           .instance
@@ -511,25 +506,20 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               if (userRole == 'admin')
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 16.0), // Kevesebb függőleges margó
+                      vertical: 8.0, horizontal: 16.0),
                   child: SizedBox(
-                    height: 40, // Gomb magasságának csökkentése
+                    height: 40,
                     child: ElevatedButton.icon(
                       onPressed: () => addCategory(context),
-                      icon: const Icon(Icons.add,
-                          size: 20), // Ikon kisebb méretben
+                      icon: const Icon(Icons.add, size: 20),
                       label: const Text(
                         'Add New Category',
-                        style: TextStyle(
-                            fontSize: 14), // Szöveg kisebb betűmérettel
+                        style: TextStyle(fontSize: 14),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal:
-                                12.0), // Gombon belüli padding csökkentése
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       ),
                     ),
                   ),
@@ -542,7 +532,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 }
 
-// Keresési funkció implementációja
 class CategorySearchDelegate extends SearchDelegate {
   @override
   List<Widget>? buildActions(BuildContext context) {
@@ -550,7 +539,7 @@ class CategorySearchDelegate extends SearchDelegate {
       IconButton(
         icon: const Icon(Icons.clear),
         onPressed: () {
-          query = ''; // Keresési lekérdezés törlése
+          query = '';
         },
       ),
     ];
@@ -561,7 +550,7 @@ class CategorySearchDelegate extends SearchDelegate {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
-        close(context, null); // Keresés bezárása
+        close(context, null);
       },
     );
   }

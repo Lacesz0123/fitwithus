@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -10,16 +12,66 @@ class AIChatScreen extends StatefulWidget {
 class _AIChatScreenState extends State<AIChatScreen> {
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
+  final String _apiKey =
+      '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';
+  bool _isLoading = false;
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     if (_controller.text.isEmpty) return;
 
     setState(() {
       _messages.add({"sender": "user", "message": _controller.text});
-      _messages.add({"sender": "AI", "message": "AI's response..."});
+      _isLoading = true;
     });
 
+    final userMessage = _controller.text;
     _controller.clear();
+
+    try {
+      final response = await _getAIResponse(userMessage);
+
+      setState(() {
+        _messages.add({"sender": "AI", "message": response});
+      });
+    } catch (e) {
+      setState(() {
+        _messages.add({"sender": "AI", "message": "Failed to fetch response."});
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<String> _getAIResponse(String prompt) async {
+    const url = 'https://api.openai.com/v1/chat/completions';
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $_apiKey',
+    };
+    final body = jsonEncode({
+      "model": "gpt-3.5-turbo",
+      "messages": [
+        {
+          "role": "system",
+          "content":
+              "You are an AI assistant that specializes in providing advice and answering questions about healthy living and fitness training. Avoid discussing topics outside of these domains."
+        },
+        {"role": "user", "content": prompt},
+      ],
+    });
+
+    final response =
+        await http.post(Uri.parse(url), headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final decodedResponse = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(decodedResponse);
+      return data['choices'][0]['message']['content'].trim();
+    } else {
+      throw Exception('Failed to fetch AI response');
+    }
   }
 
   @override
@@ -76,6 +128,11 @@ class _AIChatScreenState extends State<AIChatScreen> {
               },
             ),
           ),
+          if (_isLoading)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(),
+            ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
@@ -118,7 +175,6 @@ class _AIChatScreenState extends State<AIChatScreen> {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.send, color: Colors.black),
-                    // Sötétebb árnyalat
                     onPressed: _sendMessage,
                   ),
                 ),
