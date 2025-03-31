@@ -56,25 +56,15 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
   }
 
   bool _validateInputs() {
-    if (_weightController.text.isEmpty ||
-        _heightController.text.isEmpty ||
-        _birthDate == null) {
-      setState(() {
-        _errorMessage = 'All fields are required.';
-      });
-      return false;
-    }
+    final validationMessage = Validators.validateWeightHeightAndBirthDate(
+      weightText: _weightController.text,
+      heightText: _heightController.text,
+      birthDate: _birthDate,
+    );
 
-    if (!Validators.isWeightValid(_weightController.text)) {
+    if (validationMessage != null) {
       setState(() {
-        _errorMessage = 'Weight must be a positive number and max 3 digits.';
-      });
-      return false;
-    }
-
-    if (!Validators.isHeightValid(_heightController.text)) {
-      setState(() {
-        _errorMessage = 'Height must be between 60 and 250 cm.';
+        _errorMessage = validationMessage;
       });
       return false;
     }

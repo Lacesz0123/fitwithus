@@ -1,7 +1,6 @@
 // lib/screens/register/register_step1_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:email_validator/email_validator.dart';
 import 'register_step2_screen.dart';
 import '../../services/firebase_user_service.dart';
 import '../../utils/validators.dart';
@@ -29,31 +28,16 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
       _errorMessage = '';
     });
 
-    if (!EmailValidator.validate(_emailController.text)) {
-      setState(() {
-        _errorMessage = 'Please enter a valid email address.';
-      });
-      return;
-    }
+    final validationMessage = Validators.validateRegisterStep1(
+      email: _emailController.text,
+      username: _usernameController.text,
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
+    );
 
-    if (!Validators.isUsernameValid(_usernameController.text)) {
+    if (validationMessage != null) {
       setState(() {
-        _errorMessage =
-            'Username must be 5-15 characters long and contain only letters and numbers.';
-      });
-      return;
-    }
-
-    if (_passwordController.text.length < 5) {
-      setState(() {
-        _errorMessage = 'Password must be at least 5 characters long.';
-      });
-      return;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() {
-        _errorMessage = 'Passwords do not match.';
+        _errorMessage = validationMessage;
       });
       return;
     }
