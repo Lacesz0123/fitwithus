@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../home_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/firebase_register_service.dart';
+import '../../utils/validators.dart';
 
 class RegisterStep2Screen extends StatefulWidget {
   final String email;
@@ -29,34 +29,21 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
   Future<void> _registerUser() async {
     if (_validateInputs()) {
       try {
-        UserCredential userCredential =
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final registerService = FirebaseRegisterService();
+        final user = await registerService.registerUser(
           email: widget.email,
           password: widget.password,
+          username: widget.username,
+          weight: int.parse(_weightController.text),
+          height: int.parse(_heightController.text),
+          gender: _selectedGender,
+          birthDate: _birthDate!,
         );
 
-        User? user = userCredential.user;
         if (user != null) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set({
-            'email': widget.email,
-            'username': widget.username,
-            'weight': int.parse(_weightController.text),
-            'height': int.parse(_heightController.text),
-            'favorites': [],
-            'favoriteRecipes': [],
-            'gender': _selectedGender,
-            'birthDate': _birthDate?.toIso8601String(),
-            'completedWorkouts': 0,
-            'role': 'user',
-          });
-
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (Route<dynamic> route) =>
-                false, // Eltávolítja az összes előző oldalt
+            (Route<dynamic> route) => false,
           );
         }
       } catch (e) {
@@ -78,17 +65,14 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
       return false;
     }
 
-    int? weight = int.tryParse(_weightController.text);
-    int? height = int.tryParse(_heightController.text);
-
-    if (weight == null || weight <= 0 || weight > 999) {
+    if (!Validators.isWeightValid(_weightController.text)) {
       setState(() {
         _errorMessage = 'Weight must be a positive number and max 3 digits.';
       });
       return false;
     }
 
-    if (height == null || height < 60 || height > 250) {
+    if (!Validators.isHeightValid(_heightController.text)) {
       setState(() {
         _errorMessage = 'Height must be between 60 and 250 cm.';
       });

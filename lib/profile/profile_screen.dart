@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitwithus/main.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'favorite_workouts_screen.dart';
+import '../screens/login_screen.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
 import 'favorite_recipes_screen.dart'; // Importáljuk a kedvenc receptek képernyőt
