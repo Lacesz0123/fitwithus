@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -12,8 +13,7 @@ class AIChatScreen extends StatefulWidget {
 class _AIChatScreenState extends State<AIChatScreen> {
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
-  final String _apiKey =
-      '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';
+  final apiKey = dotenv.env['OPENAI_API_KEY'];
   bool _isLoading = false;
 
   Future<void> _sendMessage() async {
@@ -47,8 +47,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
   Future<String> _getAIResponse(String prompt) async {
     const url = 'https://api.openai.com/v1/chat/completions';
     final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $_apiKey',
+      'Content-Type': 'application/json', // Jelzi, hogy JSON-t küldesz
+      'Authorization': 'Bearer $apiKey', // API kulcs azonosítás
     };
     final body = jsonEncode({
       "model": "gpt-3.5-turbo",

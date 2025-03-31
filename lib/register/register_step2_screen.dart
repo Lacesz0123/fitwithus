@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../home_screen.dart';
+import '../screens/home_screen.dart';
 import '../../services/firebase_register_service.dart';
 import '../../utils/validators.dart';
 

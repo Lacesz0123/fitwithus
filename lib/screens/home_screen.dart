@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'profile/profile_screen.dart'; // Már megvan
-import 'workouts/workouts_screen.dart'; // Az edzések képernyője
+import '../profile/profile_screen.dart'; // Már megvan
+import '../workouts/workouts_screen.dart'; // Az edzések képernyője
 import 'ai_chat_screen.dart'; // AI Chat képernyője
-import 'recipes/recipes_screen.dart'; // Receptek képernyője
+import '../recipes/recipes_screen.dart'; // Receptek képernyője
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
