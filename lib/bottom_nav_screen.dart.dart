@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import '../profile/profile_screen.dart'; // Már megvan
-import '../workouts/workouts_screen.dart'; // Az edzések képernyője
-import 'ai_chat_screen.dart'; // AI Chat képernyője
-import '../recipes/recipes_screen.dart'; // Receptek képernyője
+import 'profile/profile_screen.dart'; // Már megvan
+import 'workouts/workouts_screen.dart'; // Az edzések képernyője
+import 'ai_chat/ai_chat_screen.dart'; // AI Chat képernyője
+import 'recipes/recipes_screen.dart'; // Receptek képernyője
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class BottomNavScreen extends StatefulWidget {
+  const BottomNavScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _BottomNavScreenState createState() => _BottomNavScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _BottomNavScreenState extends State<BottomNavScreen> {
   int _currentIndex = 0;
 
   // Négy képernyő: Edzések, AI Chat, Receptek, Profil

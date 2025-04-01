@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'widgets/recipe_header.dart';
-import 'widgets/ingredient_checklist.dart';
-import 'widgets/recipe_steps.dart';
+import 'widgets/detail_recipe_header.dart';
+import 'widgets/detail_recipe_ingredients_checklist.dart';
+import 'widgets/detail_recipe_steps.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final String recipeId;

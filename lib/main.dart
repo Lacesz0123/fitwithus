@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'screens/login_screen.dart'; // <- LoginScreen import
+import 'login/login_screen.dart'; // <- LoginScreen import
 import 'services/firebase_init.dart'; // <- FirebaseInitializer import
 
 Future<void> main() async {

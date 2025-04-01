@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/edit_recipe_header.dart';
-import 'widgets/edit_recipe_ingredients.dart';
+import 'widgets/edit_recipe_ingredients_checklist.dart';
 import 'widgets/edit_recipe_steps.dart';
 import '../../utils/validators.dart';
 

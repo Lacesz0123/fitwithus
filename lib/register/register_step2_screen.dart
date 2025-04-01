@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/home_screen.dart';
+import '../bottom_nav_screen.dart.dart';
 import '../../services/firebase_register_service.dart';
 import '../../utils/validators.dart';
 
@@ -42,7 +42,7 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
 
         if (user != null) {
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) => const BottomNavScreen()),
             (Route<dynamic> route) => false,
           );
         }
