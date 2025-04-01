@@ -1,7 +1,7 @@
 // lib/widgets/recipe_search_delegate.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../recipes/recipe_detail_screen.dart';
+import '../recipe_detail_screen.dart';
 
 class RecipeSearchDelegate extends SearchDelegate {
   @override

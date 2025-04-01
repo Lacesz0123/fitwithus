@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'add_recipe_screen.dart';
-import '../widgets/recipe_card.dart';
-import '../widgets/recipe_search_delegate.dart';
+import 'widgets/recipe_card.dart';
+import 'widgets/recipe_search_delegate.dart';
 
 class RecipesScreen extends StatefulWidget {
   const RecipesScreen({Key? key}) : super(key: key);

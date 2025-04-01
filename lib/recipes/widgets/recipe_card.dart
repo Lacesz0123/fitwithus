@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../recipes/recipe_detail_screen.dart';
-import '../recipes/edit_recipe_screen.dart';
+import '../recipe_detail_screen.dart';
+import '../edit_recipe_screen.dart';
 
 class RecipeCard extends StatelessWidget {
   final DocumentSnapshot recipe;
