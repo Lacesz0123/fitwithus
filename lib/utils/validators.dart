@@ -1,5 +1,6 @@
 // lib/utils/validators.dart
 import 'package:email_validator/email_validator.dart';
+import 'package:flutter/material.dart';
 
 class Validators {
   static bool isUsernameValid(String username) {
@@ -68,5 +69,44 @@ class Validators {
     }
 
     return null;
+  }
+
+  /// 🍲 Recept szerkesztés validálása
+  static String? validateEditedRecipe({
+    required String name,
+    required String description,
+    required String prepTime,
+    required String calories,
+    required List<TextEditingController> ingredients,
+    required List<TextEditingController> steps,
+  }) {
+    if (name.trim().isEmpty) return 'Recipe name cannot be empty.';
+    if (description.trim().isEmpty) return 'Description cannot be empty.';
+
+    final parsedPrepTime = int.tryParse(prepTime);
+    if (parsedPrepTime == null || parsedPrepTime <= 0) {
+      return 'Preparation time must be a valid number.';
+    }
+
+    final parsedCalories = int.tryParse(calories);
+    if (parsedCalories == null || parsedCalories <= 0) {
+      return 'Calories must be a valid positive number.';
+    }
+
+    final ingredientList = ingredients
+        .map((c) => c.text.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    if (ingredientList.isEmpty) {
+      return 'Please add at least one ingredient.';
+    }
+
+    final stepList =
+        steps.map((c) => c.text.trim()).where((e) => e.isNotEmpty).toList();
+    if (stepList.isEmpty) {
+      return 'Please add at least one step.';
+    }
+
+    return null; // Minden valid!
   }
 }
