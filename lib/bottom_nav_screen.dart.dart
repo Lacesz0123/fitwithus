@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'profile/profile_screen.dart'; // Már megvan
-import 'workouts/in_a_category_workouts/in_a_category_workouts_screen.dart'; // Az edzések képernyője
+import 'workouts/categories/categories_for_workouts_screen.dart'; // Az edzések képernyője
 import 'ai_chat/ai_chat_screen.dart'; // AI Chat képernyője
 import 'recipes/recipes_screen.dart'; // Receptek képernyője
 

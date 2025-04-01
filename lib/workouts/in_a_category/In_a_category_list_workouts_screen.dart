@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../workout_details/workout_detail_screen.dart';
-import '../workout_details/add_workout_screen.dart';
-import '../workout_details/edit_workout_screen.dart';
+import 'workout_detail_screen.dart';
+import 'add_workout_screen.dart';
+import 'edit_workout_screen.dart';
 
 class CategoryWorkoutsScreen extends StatefulWidget {
   final String category;

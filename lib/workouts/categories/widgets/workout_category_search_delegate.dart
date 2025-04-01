@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../category_workouts_screen.dart';
+import '../../in_a_category/In_a_category_list_workouts_screen.dart';
 
 class CategorySearchDelegate extends SearchDelegate {
   @override
