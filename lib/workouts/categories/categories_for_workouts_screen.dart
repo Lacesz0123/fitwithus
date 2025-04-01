@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'widgets/edit_workout_category_dialog.dart';
+import '../category/category_widgets/edit_workout_category_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'widgets/workout_category_card.dart';
-import 'widgets/add_workout_category_dialog.dart';
-import 'widgets/workout_category_search_delegate.dart';
+import '../category/category_widgets/workout_category_card.dart';
+import '../category/category_widgets/add_workout_category_dialog.dart';
+import '../category/category_widgets/workout_category_search_delegate.dart';
 
 class WorkoutsScreen extends StatefulWidget {
   WorkoutsScreen({super.key});

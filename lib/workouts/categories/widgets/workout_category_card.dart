@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fitwithus/workouts/category_workouts_screen.dart';
+import 'package:fitwithus/workouts/category/category_workouts_screen.dart';
 
 class WorkoutCategoryCard extends StatelessWidget {
   final String title;
