@@ -1,14 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:io';
-import 'favorite_workouts_screen.dart';
+import 'favorite_workouts/favorite_workouts_screen.dart';
 import '../login/login_screen.dart';
-import 'settings_screen.dart';
-import 'statistics_screen.dart';
-import 'favorite_recipes_screen.dart'; // Importáljuk a kedvenc receptek képernyőt
+import 'settings/settings_screen.dart';
+import 'statistics/statistics_screen.dart';
+import 'favorite_recipes/favorite_recipes_screen.dart';
+import 'profile_header.dart';
+import 'profile_menu_button.dart';
+import '../../services/profile_image_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -56,47 +57,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _uploadProfileImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (user == null) return;
 
-    if (pickedFile != null) {
-      try {
-        if (_profileImageUrl != null) {
-          try {
-            final oldImageRef =
-                FirebaseStorage.instance.refFromURL(_profileImageUrl!);
-            await oldImageRef.delete();
-          } catch (e) {
-            print('Error deleting previous profile image: $e');
-          }
-        }
+    final downloadUrl = await ProfileImageService.uploadProfileImage(
+      user!,
+      currentImageUrl: _profileImageUrl,
+    );
 
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('profile_images/userImages')
-            .child('${user!.uid}.jpg');
+    if (downloadUrl != null) {
+      setState(() {
+        _profileImageUrl = downloadUrl;
+      });
 
-        await storageRef.putFile(File(pickedFile.path));
-        final downloadUrl = await storageRef.getDownloadURL();
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .update({'profileImageUrl': downloadUrl});
-
-        setState(() {
-          _profileImageUrl = downloadUrl;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile image updated successfully')),
-        );
-      } catch (e) {
-        print('Error uploading profile image: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error uploading profile image')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile image updated successfully')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error uploading profile image')),
+      );
     }
   }
 
@@ -164,52 +143,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Widget _buildMenuButton(String title, VoidCallback onPressed,
-      {Color? color, Color textColor = Colors.white}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: color ??
-              const Color.fromARGB(
-                  255, 68, 138, 255), // Lágy kék árnyalatú gomb
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: TextButton(
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            foregroundColor: textColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC), // Lágy világos szürke háttér
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
         title: const Text('Profile'),
         flexibleSpace: Container(
@@ -237,105 +174,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 return const Text('No user data found');
               }
 
-              Map<String, dynamic> userData = snapshot.data!;
+              final userData = snapshot.data!;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(
-                      height: 30), // Térköz az AppBar és a profilkép között
-                  GestureDetector(
-                    onTap: _uploadProfileImage,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [
-                            Colors.tealAccent,
-                            Colors.blueAccent
-                          ], // Színátmenet a kerethez
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                  ProfileHeader(
+                    profileImageUrl: _profileImageUrl,
+                    defaultProfileImageUrl: _defaultProfileImageUrl,
+                    onImageTap: _uploadProfileImage,
+                    username: userData['username'] ?? 'N/A',
+                  ),
+                  ProfileMenuButton(
+                    title: "Favorite Workouts",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FavoriteWorkoutsScreen(),
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(5), // Keret vastagsága
-                      child: CircleAvatar(
-                        radius: 65, // A kép mérete kisebb a kerethez képest
-                        backgroundImage: _profileImageUrl != null
-                            ? NetworkImage(_profileImageUrl!)
-                            : (_defaultProfileImageUrl != null
-                                ? NetworkImage(_defaultProfileImageUrl!)
-                                : null),
-                        backgroundColor: Colors.white,
-                        child: _profileImageUrl == null &&
-                                _defaultProfileImageUrl == null
-                            ? const Icon(
-                                Icons.person,
-                                size: 70,
-                                color: Colors.grey,
-                              )
-                            : null,
-                      ),
-                    ),
+                      );
+                    },
                   ),
-
-                  const SizedBox(height: 10),
-                  Text(
-                    userData['username'] ?? 'N/A',
-                    style: const TextStyle(
-                      fontSize: 22, // Nagyobb betűméret
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
+                  ProfileMenuButton(
+                    title: "Favorite Recipes",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FavoriteRecipesScreen(),
+                        ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 20),
-                  _buildMenuButton("Favorite Workouts", () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const FavoriteWorkoutsScreen(),
-                      ),
-                    );
-                  }),
-                  _buildMenuButton("Favorite Recipes", () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const FavoriteRecipesScreen(),
-                      ),
-                    );
-                  }),
-                  _buildMenuButton("Statistics", () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const StatisticsScreen(),
-                      ),
-                    );
-                  }),
-                  _buildMenuButton("Settings", () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsScreen(),
-                      ),
-                    );
-                  }),
-                  _buildMenuButton("Logout", () async {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) => const LoginScreen()),
-                    );
-                  }),
-                  _buildMenuButton(
-                    "Delete Account",
-                    _deleteAccount,
-                    color: Colors
-                        .redAccent, // Piros háttér, ami illeszkedik a modern kinézethez
+                  ProfileMenuButton(
+                    title: "Statistics",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const StatisticsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  ProfileMenuButton(
+                    title: "Settings",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  ProfileMenuButton(
+                    title: "Logout",
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  ProfileMenuButton(
+                    title: "Delete Account",
+                    color: Colors.redAccent,
+                    onPressed: _deleteAccount,
                   ),
                 ],
               );
