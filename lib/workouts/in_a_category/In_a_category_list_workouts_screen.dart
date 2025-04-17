@@ -140,7 +140,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.teal,
+                                      color: Colors.blueAccent,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -186,7 +186,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: Colors.blueAccent,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
