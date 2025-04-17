@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -15,6 +17,12 @@ class _AIChatScreenState extends State<AIChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final apiKey = dotenv.env['OPENAI_API_KEY'];
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessagesFromLocal();
+  }
 
   Future<void> _sendMessage() async {
     if (_controller.text.isEmpty) return;
@@ -38,17 +46,16 @@ class _AIChatScreenState extends State<AIChatScreen> {
         _messages.add({"sender": "AI", "message": "Failed to fetch response."});
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      _isLoading = false;
+      await _saveMessagesToLocal(); // mentés minden válasz után
     }
   }
 
   Future<String> _getAIResponse(String prompt) async {
     const url = 'https://api.openai.com/v1/chat/completions';
     final headers = {
-      'Content-Type': 'application/json', // Jelzi, hogy JSON-t küldesz
-      'Authorization': 'Bearer $apiKey', // API kulcs azonosítás
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $apiKey',
     };
     final body = jsonEncode({
       "model": "gpt-3.5-turbo",
@@ -74,6 +81,40 @@ class _AIChatScreenState extends State<AIChatScreen> {
     }
   }
 
+  Future<void> _saveMessagesToLocal() async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final key = 'chat_messages_${user.uid}';
+    final jsonList = _messages.map((msg) => jsonEncode(msg)).toList();
+    await prefs.setStringList(key, jsonList);
+  }
+
+  Future<void> _loadMessagesFromLocal() async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final key = 'chat_messages_${user.uid}';
+    final jsonList = prefs.getStringList(key);
+    if (jsonList != null) {
+      setState(() {
+        _messages.clear();
+        _messages.addAll(
+            jsonList.map((e) => Map<String, String>.from(jsonDecode(e))));
+      });
+    }
+  }
+
+  Future<void> _clearChatHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await prefs.remove('chat_messages_${user.uid}');
+    setState(() {
+      _messages.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +129,13 @@ class _AIChatScreenState extends State<AIChatScreen> {
             ),
           ),
         ),
+        actions: [
+          // Törlés ikon (ha szeretnéd aktiválni)
+          IconButton(
+            icon: Icon(Icons.delete_outline),
+            onPressed: _clearChatHistory,
+          )
+        ],
       ),
       body: Column(
         children: [
@@ -129,8 +177,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
             ),
           ),
           if (_isLoading)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
               child: CircularProgressIndicator(),
             ),
           Container(
@@ -162,14 +210,14 @@ class _AIChatScreenState extends State<AIChatScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(color: Colors.blueAccent),
+                        borderSide: const BorderSide(color: Colors.blueAccent),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Ink(
-                  decoration: ShapeDecoration(
+                  decoration: const ShapeDecoration(
                     color: Colors.blueAccent,
                     shape: CircleBorder(),
                   ),
