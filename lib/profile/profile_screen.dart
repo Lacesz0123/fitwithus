@@ -10,6 +10,7 @@ import 'favorite_recipes/favorite_recipes_screen.dart';
 import 'profile_header.dart';
 import 'profile_menu_button.dart';
 import '../../services/profile_image_service.dart';
+import 'community/community_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -139,6 +140,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const FavoriteRecipesScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  ProfileMenuButton(
+                    title: "Community",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CommunityScreen(),
                         ),
                       );
                     },
