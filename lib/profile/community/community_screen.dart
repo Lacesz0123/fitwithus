@@ -15,13 +15,14 @@ class _CommunityScreenState extends State<CommunityScreen> {
   final ScrollController _scrollController = ScrollController();
   final User? currentUser = FirebaseAuth.instance.currentUser;
   String? _username;
-  List<Map<String, dynamic>> _messages = [];
+  String? _userRole;
+  List<QueryDocumentSnapshot> _messages = [];
   String? _defaultProfileImageUrl;
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    _loadUserData();
     _loadMessages();
     _loadDefaultProfileImageUrl();
   }
@@ -40,14 +41,16 @@ class _CommunityScreenState extends State<CommunityScreen> {
     }
   }
 
-  Future<void> _loadUsername() async {
+  Future<void> _loadUserData() async {
     if (currentUser != null) {
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser!.uid)
           .get();
+      final data = userDoc.data();
       setState(() {
-        _username = userDoc.data()?['username'] ?? 'Unknown';
+        _username = data?['username'] ?? 'Unknown';
+        _userRole = data?['role'] ?? 'user';
       });
     }
   }
@@ -59,13 +62,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         .get();
 
     setState(() {
-      _messages = snapshot.docs
-          .map((doc) => {
-                'username': doc['username'],
-                'message': doc['message'],
-                'senderId': doc['senderId']
-              })
-          .toList();
+      _messages = snapshot.docs;
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -92,6 +89,23 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     _controller.clear();
     await _loadMessages();
+  }
+
+  Future<void> _deleteMessage(String docId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('community_messages')
+          .doc(docId)
+          .delete();
+      await _loadMessages();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Message deleted')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting message: $e')),
+      );
+    }
   }
 
   Future<Widget> _buildAvatar(String senderId, String username) async {
@@ -129,80 +143,112 @@ class _CommunityScreenState extends State<CommunityScreen> {
     }
   }
 
-  Widget _buildMessageBubble(Map<String, dynamic> msg) {
+  Widget _buildMessageBubble(QueryDocumentSnapshot doc) {
+    final Map<String, dynamic> msg = doc.data() as Map<String, dynamic>;
     final bool isMe = msg['senderId'] == currentUser?.uid;
     final String message = msg['message'];
+    final String senderId = msg['senderId'];
+    final String username = msg['username'];
+    final String docId = doc.id;
 
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        padding: const EdgeInsets.all(12),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.8,
-        ),
-        decoration: BoxDecoration(
-          color: isMe ? Colors.blueAccent : Colors.grey[200],
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isMe ? 16 : 4),
-            bottomRight: Radius.circular(isMe ? 4 : 16),
+    return GestureDetector(
+      onLongPress: () {
+        if (!isMe && _userRole == 'admin') {
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text('Delete Message'),
+              content:
+                  const Text('Are you sure you want to delete this message?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _deleteMessage(docId);
+                  },
+                  child:
+                      const Text('Delete', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+      child: Align(
+        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          padding: const EdgeInsets.all(12),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.8,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            )
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            if (!isMe)
-              FutureBuilder<Widget>(
-                future: _buildAvatar(msg['senderId'], msg['username']),
-                builder: (context, snapshot) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      snapshot.data ?? const SizedBox.shrink(),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          msg['username'],
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Colors.teal[700],
+          decoration: BoxDecoration(
+            color: isMe ? Colors.blueAccent : Colors.grey[200],
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(16),
+              topRight: const Radius.circular(16),
+              bottomLeft: Radius.circular(isMe ? 16 : 4),
+              bottomRight: Radius.circular(isMe ? 4 : 16),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              )
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment:
+                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              if (!isMe)
+                FutureBuilder<Widget>(
+                  future: _buildAvatar(senderId, username),
+                  builder: (context, snapshot) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        snapshot.data ?? const SizedBox.shrink(),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            username,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: Colors.teal[700],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              )
-            else
-              const Text(
-                'Me',
+                      ],
+                    );
+                  },
+                )
+              else
+                const Text(
+                  'Me',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Colors.white70,
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Text(
+                message,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                  color: Colors.white70,
+                  fontSize: 16,
+                  color: isMe ? Colors.white : Colors.black87,
                 ),
               ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: TextStyle(
-                fontSize: 16,
-                color: isMe ? Colors.white : Colors.black87,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
