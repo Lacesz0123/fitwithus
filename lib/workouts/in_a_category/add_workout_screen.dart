@@ -25,7 +25,6 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
     super.dispose();
   }
 
-  // Új edzés hozzáadása
   Future<void> _addWorkout() async {
     String title = _titleController.text.trim();
     String description = _descriptionController.text.trim();
@@ -44,7 +43,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
           'category': widget.category,
         });
 
-        Navigator.of(context).pop(); // Visszatérés az előző képernyőre
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Workout added successfully')),
         );
@@ -60,14 +59,12 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
     }
   }
 
-  // Új lépés hozzáadása
   void _addStep() {
     setState(() {
       _stepsControllers.add(TextEditingController());
     });
   }
 
-  // Lépés eltávolítása
   void _removeStep(int index) {
     setState(() {
       _stepsControllers.removeAt(index);
@@ -90,46 +87,58 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: 'Workout Title',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Workout Title',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                hintText: 'Enter workout title',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Workout Description',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Description',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _descriptionController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Enter workout description',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
-              const SizedBox(height: 10),
-              const Text(
-                'Steps',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 5),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _stepsControllers.length,
-                itemBuilder: (context, index) {
-                  return Row(
+            ),
+            const SizedBox(height: 28),
+            const Text(
+              'Steps',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _stepsControllers.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
                     children: [
                       Expanded(
                         child: TextField(
@@ -137,63 +146,54 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                           decoration: InputDecoration(
                             labelText: 'Step ${index + 1}',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            filled: true,
-                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       IconButton(
-                        icon:
-                            const Icon(Icons.remove_circle, color: Colors.red),
+                        icon: const Icon(Icons.remove_circle,
+                            color: Colors.redAccent),
                         onPressed: () => _removeStep(index),
                       ),
                     ],
-                  );
-                },
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: _addStep,
+              icon: const Icon(Icons.add),
+              label: const Text('Add Step'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.blueAccent,
+                side: const BorderSide(color: Colors.blueAccent),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
               ),
-              const SizedBox(height: 10),
-              ElevatedButton.icon(
-                onPressed: _addStep,
+            ),
+            const SizedBox(height: 30),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: _addWorkout,
+                icon: const Icon(Icons.check),
+                label: const Text('Add Workout'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: Colors.blueAccent,
                   foregroundColor: Colors.white,
                   padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                icon: const Icon(Icons.add, color: Colors.white),
-                label: const Text('Add Step'),
               ),
-              const SizedBox(
-                  height: 30), // Extra távolság biztosítása a gomb fölött
-              Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width *
-                      0.8, // A gomb szélessége a képernyő 80%-a
-                  child: ElevatedButton(
-                    onPressed: _addWorkout,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Add Workout',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
