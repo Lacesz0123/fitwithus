@@ -54,6 +54,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _signInAsGuest() async {
+    try {
+      UserCredential userCredential = await _authService.signInAnonymously();
+      if (userCredential.user != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const BottomNavScreen()),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to sign in as guest.';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,6 +210,34 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 16.0,
                       ),
                     ),
+                  ),
+                ),
+                Center(
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Or",
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: _signInAsGuest,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.blueAccent,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.person_outline),
+                        label: const Text(
+                          "Continue as Guest",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 40.0),

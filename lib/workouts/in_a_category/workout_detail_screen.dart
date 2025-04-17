@@ -15,12 +15,23 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
   bool isFavorite = false;
   double? userRating;
   double averageRating = 0.0;
+  bool isGuest = false;
 
   @override
   void initState() {
     super.initState();
+    _checkIfGuest();
     _checkIfFavorite();
     _fetchRatings();
+  }
+
+  void _checkIfGuest() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.isAnonymous) {
+      setState(() {
+        isGuest = true;
+      });
+    }
   }
 
   Future<Map<String, dynamic>?> getWorkoutData() async {
@@ -33,7 +44,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
 
   Future<void> _checkIfFavorite() async {
     User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    if (user != null && !user.isAnonymous) {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -80,7 +91,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
 
   Future<void> _updateRating(double rating) async {
     User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null || user.isAnonymous) return;
 
     DocumentReference workoutRef =
         FirebaseFirestore.instance.collection('workouts').doc(widget.workoutId);
@@ -108,7 +119,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
 
   Future<void> _toggleFavorite() async {
     User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    if (user != null && !user.isAnonymous) {
       DocumentReference userRef =
           FirebaseFirestore.instance.collection('users').doc(user.uid);
 
@@ -136,7 +147,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
 
   Future<void> _markWorkoutCompleted() async {
     User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    if (user != null && !user.isAnonymous) {
       DocumentReference userRef =
           FirebaseFirestore.instance.collection('users').doc(user.uid);
 
@@ -210,7 +221,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// Title + favorite
+                /// Title + (optional) favorite
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -224,26 +235,25 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                         ),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: _toggleFavorite,
-                      child: Icon(
-                        isFavorite ? Icons.star : Icons.star_border,
-                        color: isFavorite ? Colors.orange : Colors.grey,
-                        size: 32,
+                    if (!isGuest)
+                      GestureDetector(
+                        onTap: _toggleFavorite,
+                        child: Icon(
+                          isFavorite ? Icons.star : Icons.star_border,
+                          color: isFavorite ? Colors.orange : Colors.grey,
+                          size: 32,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
 
-                /// Description
                 Text(
                   description,
                   style: const TextStyle(fontSize: 16, color: Colors.black87),
                 ),
                 const SizedBox(height: 24),
 
-                /// Steps
                 const Text(
                   'Steps:',
                   style: TextStyle(
@@ -291,51 +301,55 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
 
                 const SizedBox(height: 20),
 
-                /// Rating
-                Column(
-                  children: [
-                    Text(
-                      'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
-                      style: const TextStyle(fontSize: 15),
-                    ),
-                    Slider(
-                      value: userRating ?? 1.0,
-                      onChanged: (value) => setState(() => userRating = value),
-                      onChangeEnd: _updateRating,
-                      min: 1,
-                      max: 5,
-                      divisions: 4,
-                      label: userRating?.toStringAsFixed(1),
-                      activeColor: Colors.blueAccent,
-                    ),
-                    Text(
-                      'Average Rating: ${averageRating.toStringAsFixed(1)}',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                if (!isGuest) ...[
+                  Column(
+                    children: [
+                      Text(
+                        'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
+                        style: const TextStyle(fontSize: 15),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                /// Mark as completed button
+                      Slider(
+                        value: userRating ?? 1.0,
+                        onChanged: (value) =>
+                            setState(() => userRating = value),
+                        onChangeEnd: _updateRating,
+                        min: 1,
+                        max: 5,
+                        divisions: 4,
+                        label: userRating?.toStringAsFixed(1),
+                        activeColor: Colors.blueAccent,
+                      ),
+                    ],
+                  ),
+                ],
                 Center(
-                  child: ElevatedButton.icon(
-                    onPressed: _showConfirmationDialog,
-                    icon: const Icon(Icons.check),
-                    label: const Text('Mark as Completed'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 28, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                  child: Text(
+                    'Average Rating: ${averageRating.toStringAsFixed(1)}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
+
+                if (!isGuest)
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: _showConfirmationDialog,
+                      icon: const Icon(Icons.check),
+                      label: const Text('Mark as Completed'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           );
