@@ -82,6 +82,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isGuest = user?.isAnonymous ?? false;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
@@ -96,104 +98,147 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: FutureBuilder<Map<String, dynamic>?>(
-            future: getUserData(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              }
-              if (snapshot.hasError) {
-                return const Text('Error loading user data');
-              }
-              if (!snapshot.hasData || snapshot.data == null) {
-                return const Text('No user data found');
-              }
-
-              final userData = snapshot.data!;
-
-              return Column(
+      body: isGuest
+          ? Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40),
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ProfileHeader(
-                    profileImageUrl: _profileImageUrl,
-                    defaultProfileImageUrl: _defaultProfileImageUrl,
-                    onImageTap: _uploadProfileImage,
-                    username: userData['username'] ?? 'N/A',
+                  const Icon(Icons.person_outline,
+                      size: 100, color: Colors.blueAccent),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "You are currently using the app as a Guest.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  ProfileMenuButton(
-                    title: "Favorite Workouts",
+                  const SizedBox(height: 30),
+                  ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FavoriteWorkoutsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  ProfileMenuButton(
-                    title: "Favorite Recipes",
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FavoriteRecipesScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  ProfileMenuButton(
-                    title: "Community",
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CommunityScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  ProfileMenuButton(
-                    title: "Statistics",
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const StatisticsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  ProfileMenuButton(
-                    title: "Settings",
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SettingsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  ProfileMenuButton(
-                    title: "Logout",
-                    onPressed: () async {
-                      await FirebaseAuth.instance.signOut();
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
                       );
                     },
+                    icon: const Icon(Icons.login, color: Colors.white),
+                    label: const Text("Create account here",
+                        style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                 ],
-              );
-            },
-          ),
-        ),
-      ),
+              ),
+            )
+          : SingleChildScrollView(
+              child: Center(
+                child: FutureBuilder<Map<String, dynamic>?>(
+                  future: getUserData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    if (snapshot.hasError) {
+                      return const Text('Error loading user data');
+                    }
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const Text('No user data found');
+                    }
+
+                    final userData = snapshot.data!;
+
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ProfileHeader(
+                          profileImageUrl: _profileImageUrl,
+                          defaultProfileImageUrl: _defaultProfileImageUrl,
+                          onImageTap: _uploadProfileImage,
+                          username: userData['username'] ?? 'N/A',
+                        ),
+                        ProfileMenuButton(
+                          title: "Favorite Workouts",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const FavoriteWorkoutsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        ProfileMenuButton(
+                          title: "Favorite Recipes",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const FavoriteRecipesScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        ProfileMenuButton(
+                          title: "Community",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CommunityScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        ProfileMenuButton(
+                          title: "Statistics",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const StatisticsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        ProfileMenuButton(
+                          title: "Settings",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SettingsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        ProfileMenuButton(
+                          title: "Logout",
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
     );
   }
 }
