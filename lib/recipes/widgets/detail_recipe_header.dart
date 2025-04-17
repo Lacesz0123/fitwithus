@@ -9,6 +9,7 @@ class RecipeHeader extends StatelessWidget {
   final int? calories;
   final bool isFavorite;
   final VoidCallback onToggleFavorite;
+  final bool showFavoriteButton;
 
   const RecipeHeader({
     super.key,
@@ -18,6 +19,7 @@ class RecipeHeader extends StatelessWidget {
     required this.calories,
     required this.isFavorite,
     required this.onToggleFavorite,
+    required this.showFavoriteButton,
   });
 
   @override
@@ -38,33 +40,36 @@ class RecipeHeader extends StatelessWidget {
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: onToggleFavorite,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                decoration: BoxDecoration(
-                  color: isFavorite
-                      ? Colors.yellow.shade100
-                      : Colors.grey.shade200,
-                  shape: BoxShape.circle,
-                  boxShadow: isFavorite
-                      ? [
-                          BoxShadow(
-                            color: Colors.yellow.shade400,
-                            blurRadius: 10,
-                            spreadRadius: 1,
-                          ),
-                        ]
-                      : [],
+            if (showFavoriteButton)
+              GestureDetector(
+                onTap: onToggleFavorite,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  decoration: BoxDecoration(
+                    color: isFavorite
+                        ? Colors.yellow.shade100
+                        : Colors.grey.shade200,
+                    shape: BoxShape.circle,
+                    boxShadow: isFavorite
+                        ? [
+                            BoxShadow(
+                              color: Colors.yellow.shade400,
+                              blurRadius: 10,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : [],
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    isFavorite ? Icons.star : Icons.star_border,
+                    color: isFavorite ? Colors.orange : Colors.grey,
+                    size: 30,
+                  ),
                 ),
-                padding: const EdgeInsets.all(8),
-                child: Icon(
-                  isFavorite ? Icons.star : Icons.star_border,
-                  color: isFavorite ? Colors.orange : Colors.grey,
-                  size: 30,
-                ),
-              ),
-            ),
+              )
+            else
+              const SizedBox.shrink(),
           ],
         ),
         const SizedBox(height: 12),

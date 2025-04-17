@@ -25,12 +25,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   bool isFavorite = false;
   String? imageUrl;
   int? calories;
+  bool isGuest = false;
 
   @override
   void initState() {
     super.initState();
     _fetchRecipeDetails();
     _checkIfFavorite();
+    _checkIfGuest();
+  }
+
+  Future<void> _checkIfGuest() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    setState(() {
+      isGuest = user?.isAnonymous ?? false;
+    });
   }
 
   Future<void> _fetchRecipeDetails() async {
@@ -127,6 +136,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     calories: calories,
                     description: description,
                     onToggleFavorite: _toggleFavorite,
+                    showFavoriteButton: !isGuest,
                   ),
                   const SizedBox(height: 20),
                   IngredientChecklist(
