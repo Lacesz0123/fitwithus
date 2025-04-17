@@ -112,7 +112,7 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.teal,
+                  color: Colors.blueAccent,
                 ),
               ),
               const SizedBox(height: 10),
@@ -125,16 +125,29 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
               ),
               const SizedBox(height: 20),
               const Text("Gender"),
+              const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: _selectedGender,
                 decoration: InputDecoration(
+                  labelText: "Select Gender",
+                  labelStyle: const TextStyle(color: Colors.blueAccent),
+                  prefixIcon:
+                      const Icon(Icons.person_2, color: Colors.blueAccent),
                   filled: true,
                   fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.blueAccent),
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.teal, width: 2),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+                icon: const Icon(Icons.arrow_drop_down_rounded,
+                    color: Colors.blueAccent),
                 items: const [
                   DropdownMenuItem(value: "Male", child: Text("Male")),
                   DropdownMenuItem(value: "Female", child: Text("Female")),
@@ -162,23 +175,30 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
               const SizedBox(height: 16),
               const Text("Date of Birth"),
               const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () => _selectBirthDate(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
-                  foregroundColor: Colors.teal,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(color: Colors.teal),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _selectBirthDate(context),
+                  icon: const Icon(Icons.calendar_today,
+                      color: Colors.blueAccent),
+                  label: Text(
+                    _birthDate == null
+                        ? "Select Date of Birth"
+                        : _birthDate!.toLocal().toString().split(' ')[0],
+                    style:
+                        const TextStyle(fontSize: 16, color: Colors.blueAccent),
                   ),
-                ),
-                child: Text(
-                  _birthDate == null
-                      ? "Select Date of Birth"
-                      : _birthDate!.toLocal().toString().split(' ')[0],
-                  style: const TextStyle(fontSize: 16),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[100],
+                    elevation: 0,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Colors.blueAccent),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -200,7 +220,7 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
                   ),
                   child: const Text(
                     "Register",
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, color: Colors.blueAccent),
                   ),
                 ),
               ),
@@ -220,16 +240,22 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      style: const TextStyle(fontSize: 16),
       decoration: InputDecoration(
-        hintText: hintText,
-        prefixIcon: Icon(icon, color: Colors.teal),
+        labelText: hintText,
+        labelStyle: const TextStyle(color: Colors.blueAccent),
+        prefixIcon: Icon(icon, color: Colors.blueAccent),
         filled: true,
         fillColor: Colors.grey[100],
         contentPadding:
-            const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-        border: OutlineInputBorder(
+            const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.blueAccent),
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.teal, width: 2),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );

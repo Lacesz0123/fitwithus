@@ -94,7 +94,7 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: Colors.blueAccent,
               ),
             ),
             const SizedBox(height: 10),
@@ -162,7 +162,7 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
                 ),
                 child: const Text(
                   "Continue",
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: 18, color: Colors.blueAccent),
                 ),
               ),
             ),
@@ -188,7 +188,7 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
       obscureText: obscureText,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: Icon(icon, color: Colors.teal),
+        prefixIcon: Icon(icon, color: Colors.blueAccent),
         suffixIcon: isPasswordField
             ? IconButton(
                 icon: Icon(
