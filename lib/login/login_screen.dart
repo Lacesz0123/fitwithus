@@ -203,41 +203,70 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       );
                     },
-                    child: const Text(
-                      "Don't have an account? Register here.",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
+                    child: Text.rich(
+                      TextSpan(
+                        text: "Don't have an account? ",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.0,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: "Register here.",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors
+                                  .white, // vagy Colors.tealAccent ha jobban ki akarod emelni
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
+                const SizedBox(height: 30),
+                Row(
+                  children: const [
+                    Expanded(
+                      child: Divider(
+                        color: Colors.white,
+                        thickness: 1,
+                        indent: 10,
+                        endIndent: 10,
+                      ),
+                    ),
+                    Text(
+                      "Or",
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Colors.white,
+                        thickness: 1,
+                        indent: 10,
+                        endIndent: 10,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
                 Center(
-                  child: Column(
-                    children: [
-                      const Text(
-                        "Or",
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                  child: ElevatedButton.icon(
+                    onPressed: _signInAsGuest,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: _signInAsGuest,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.blueAccent,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        icon: const Icon(Icons.person_outline),
-                        label: const Text(
-                          "Continue as Guest",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
+                    ),
+                    icon: const Icon(Icons.person_outline, color: Colors.white),
+                    label: const Text(
+                      "Continue as Guest",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40.0),
