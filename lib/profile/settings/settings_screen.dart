@@ -44,6 +44,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _updateUsernameInCommunityMessages(String newUsername) async {
+    if (user == null) return;
+
+    final messages = await FirebaseFirestore.instance
+        .collection('community_messages')
+        .where('senderId', isEqualTo: user!.uid)
+        .get();
+
+    for (var doc in messages.docs) {
+      await doc.reference.update({'username': newUsername});
+    }
+  }
+
   Future<void> _showEditDialog(String field, dynamic currentValue) async {
     TextEditingController controller =
         TextEditingController(text: currentValue is String ? currentValue : '');
@@ -152,6 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     return;
                   }
                   _username = controller.text;
+                  await _updateUsernameInCommunityMessages(_username!);
                 } else if (field == 'Gender') {
                   _gender = newGender;
                 }
