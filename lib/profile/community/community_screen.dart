@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -15,12 +16,28 @@ class _CommunityScreenState extends State<CommunityScreen> {
   final User? currentUser = FirebaseAuth.instance.currentUser;
   String? _username;
   List<Map<String, dynamic>> _messages = [];
+  String? _defaultProfileImageUrl;
 
   @override
   void initState() {
     super.initState();
     _loadUsername();
     _loadMessages();
+    _loadDefaultProfileImageUrl();
+  }
+
+  Future<void> _loadDefaultProfileImageUrl() async {
+    try {
+      final defaultRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_images/defaultImage/default.jpg');
+      final url = await defaultRef.getDownloadURL();
+      setState(() {
+        _defaultProfileImageUrl = url;
+      });
+    } catch (e) {
+      print('Error loading default profile image URL: $e');
+    }
   }
 
   Future<void> _loadUsername() async {
@@ -51,7 +68,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
           .toList();
     });
 
-    // Scroll to bottom after loading
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -78,12 +94,44 @@ class _CommunityScreenState extends State<CommunityScreen> {
     await _loadMessages();
   }
 
+  Future<Widget> _buildAvatar(String senderId, String username) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(senderId)
+          .get();
+      final data = userDoc.data();
+      final url = data?['profileImageUrl'];
+
+      if (url != null && url.toString().isNotEmpty) {
+        return CircleAvatar(
+          radius: 16,
+          backgroundImage: NetworkImage(url),
+        );
+      } else {
+        return CircleAvatar(
+          radius: 16,
+          backgroundImage: _defaultProfileImageUrl != null
+              ? NetworkImage(_defaultProfileImageUrl!)
+              : null,
+        );
+      }
+    } catch (e) {
+      return CircleAvatar(
+        radius: 16,
+        backgroundColor: Colors.tealAccent,
+        child: Text(
+          username[0].toUpperCase(),
+          style: const TextStyle(
+              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+      );
+    }
+  }
+
   Widget _buildMessageBubble(Map<String, dynamic> msg) {
     final bool isMe = msg['senderId'] == currentUser?.uid;
-    final String username = msg['username'];
     final String message = msg['message'];
-    final String initial =
-        username.isNotEmpty ? username[0].toUpperCase() : '?';
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -114,35 +162,28 @@ class _CommunityScreenState extends State<CommunityScreen> {
               isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             if (!isMe)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Colors.tealAccent.withOpacity(0.9),
-                    child: Text(
-                      initial,
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+              FutureBuilder<Widget>(
+                future: _buildAvatar(msg['senderId'], msg['username']),
+                builder: (context, snapshot) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      snapshot.data ?? const SizedBox.shrink(),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          msg['username'],
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.teal[700],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      username,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: Colors.teal[700],
-                      ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               )
             else
               const Text(
