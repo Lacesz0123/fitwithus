@@ -58,8 +58,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          title:
-              Text('Edit $field', style: const TextStyle(color: Colors.teal)),
+          title: Text('Edit $field',
+              style: const TextStyle(color: Colors.blueAccent)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -307,7 +307,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.teal,
+                  color: Colors.blueAccent,
                 ),
               ),
               const SizedBox(height: 20),

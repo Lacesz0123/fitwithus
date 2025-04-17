@@ -120,7 +120,7 @@ class FavoriteRecipesScreen extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.teal,
+                            color: Colors.blueAccent,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

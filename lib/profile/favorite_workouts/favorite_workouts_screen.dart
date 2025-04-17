@@ -110,7 +110,7 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.teal,
+                                color: Colors.blueAccent,
                               ),
                             ),
                             const SizedBox(height: 4),
