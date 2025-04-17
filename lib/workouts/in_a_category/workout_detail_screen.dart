@@ -156,9 +156,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
               'Are you sure you want to mark this workout as completed?'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
@@ -208,10 +206,11 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
           List<dynamic> steps = workoutData['steps'] ?? [];
 
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                /// Title + favorite
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -219,130 +218,122 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                       child: Text(
                         title,
                         style: const TextStyle(
-                          fontSize: 26,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.teal,
+                          color: Colors.blueAccent,
                         ),
                       ),
                     ),
                     GestureDetector(
                       onTap: _toggleFavorite,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        decoration: BoxDecoration(
-                          color: isFavorite
-                              ? Colors.yellow.shade100
-                              : Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            if (isFavorite)
-                              BoxShadow(
-                                color: Colors.yellow.shade400,
-                                blurRadius: 10,
-                                spreadRadius: 1,
-                              ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          isFavorite ? Icons.star : Icons.star_border,
-                          color: isFavorite ? Colors.orange : Colors.grey,
-                          size: 30,
-                        ),
+                      child: Icon(
+                        isFavorite ? Icons.star : Icons.star_border,
+                        color: isFavorite ? Colors.orange : Colors.grey,
+                        size: 32,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
+
+                /// Description
                 Text(
                   description,
-                  style: const TextStyle(fontSize: 18, color: Colors.black87),
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
+
+                /// Steps
                 const Text(
                   'Steps:',
                   style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blueAccent,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Expanded(
-                  child: ListView.builder(
+                  child: ListView.separated(
                     itemCount: steps.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
-                      String step = steps[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 6.0),
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${index + 1}. ',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blueAccent,
-                                ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${index + 1}. ',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
                               ),
-                              Expanded(
-                                child: Text(
-                                  step,
-                                  style: const TextStyle(fontSize: 18),
-                                ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                steps[index],
+                                style: const TextStyle(fontSize: 15.5),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },
                   ),
                 ),
+
                 const SizedBox(height: 20),
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
-                        style: const TextStyle(fontSize: 16),
+
+                /// Rating
+                Column(
+                  children: [
+                    Text(
+                      'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    Slider(
+                      value: userRating ?? 1.0,
+                      onChanged: (value) => setState(() => userRating = value),
+                      onChangeEnd: _updateRating,
+                      min: 1,
+                      max: 5,
+                      divisions: 4,
+                      label: userRating?.toStringAsFixed(1),
+                      activeColor: Colors.blueAccent,
+                    ),
+                    Text(
+                      'Average Rating: ${averageRating.toStringAsFixed(1)}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Slider(
-                        value: userRating ?? 1.0,
-                        onChanged: (value) {
-                          setState(() {
-                            userRating = value;
-                          });
-                        },
-                        onChangeEnd: (value) => _updateRating(value),
-                        min: 1.0,
-                        max: 5.0,
-                        divisions: 4,
-                        label: userRating?.toStringAsFixed(1),
-                      ),
-                      Text(
-                        'Average Rating: ${averageRating.toStringAsFixed(1)}',
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
+
+                /// Mark as completed button
                 Center(
-                  child: ElevatedButton(
+                  child: ElevatedButton.icon(
                     onPressed: _showConfirmationDialog,
+                    icon: const Icon(Icons.check),
+                    label: const Text('Mark as Completed'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
+                      backgroundColor: Colors.blueAccent,
                       foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 28, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    child: const Text('Mark as Completed'),
                   ),
                 ),
               ],
