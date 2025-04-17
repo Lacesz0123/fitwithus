@@ -92,6 +92,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
               );
             },
           ),
+          if (userRole == 'admin')
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Add Category',
+              onPressed: () => addCategory(context),
+            ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -141,27 +147,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                   ),
                 ),
               ),
-              if (userRole == 'admin')
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 16.0),
-                  child: SizedBox(
-                    height: 40,
-                    child: ElevatedButton.icon(
-                      onPressed: () => addCategory(context),
-                      icon: const Icon(Icons.add, size: 20),
-                      label: const Text(
-                        'Add New Category',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      ),
-                    ),
-                  ),
-                ),
             ],
           );
         },
