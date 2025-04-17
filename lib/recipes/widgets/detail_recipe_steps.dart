@@ -15,7 +15,7 @@ class RecipeSteps extends StatelessWidget {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.teal,
+            color: Colors.blueAccent,
           ),
         ),
         const SizedBox(height: 8),

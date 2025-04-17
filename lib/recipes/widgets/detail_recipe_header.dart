@@ -34,7 +34,7 @@ class RecipeHeader extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.teal,
+                  color: Colors.blueAccent,
                 ),
               ),
             ),

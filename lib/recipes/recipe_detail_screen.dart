@@ -128,24 +128,25 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     description: description,
                     onToggleFavorite: _toggleFavorite,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   IngredientChecklist(
                     ingredientsStatus: ingredientsStatus,
                     onToggle: _toggleIngredientStatus,
                   ),
-                  const SizedBox(height: 16),
-                  RecipeSteps(steps: steps),
                   const SizedBox(height: 20),
-                  if (imageUrl != null)
+                  if (imageUrl != null) ...[
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(16),
                       child: Image.network(
                         imageUrl!,
-                        height: 250,
+                        height: 230,
                         width: double.infinity,
                         fit: BoxFit.cover,
                       ),
                     ),
+                    const SizedBox(height: 20),
+                  ],
+                  RecipeSteps(steps: steps),
                 ],
               ),
             ),

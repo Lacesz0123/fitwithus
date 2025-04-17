@@ -20,7 +20,7 @@ class IngredientChecklist extends StatelessWidget {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.teal,
+            color: Colors.blueAccent,
           ),
         ),
         const SizedBox(height: 8),
@@ -40,7 +40,7 @@ class IngredientChecklist extends StatelessWidget {
             value: isChecked,
             onChanged: (_) => onToggle(ingredient),
             controlAffinity: ListTileControlAffinity.leading,
-            activeColor: Colors.teal,
+            activeColor: Colors.blueAccent,
             checkColor: Colors.white,
           );
         }).toList(),
