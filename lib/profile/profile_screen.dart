@@ -79,70 +79,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _deleteAccount() async {
-    bool confirmDelete = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-            'Are you sure you want to delete your account? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmDelete) {
-      try {
-        if (_profileImageUrl != null) {
-          try {
-            final imageRef =
-                FirebaseStorage.instance.refFromURL(_profileImageUrl!);
-            await imageRef.delete();
-          } catch (e) {
-            print('Error deleting profile image from Storage: $e');
-          }
-        }
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .delete();
-
-        await user!.delete();
-
-        await FirebaseAuth.instance.signOut();
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Your account has been successfully deleted.')),
-        );
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'requires-recent-login') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content:
-                    Text('Please log in again to confirm account deletion.')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${e.message}')),
-          );
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -239,11 +175,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       );
                     },
-                  ),
-                  ProfileMenuButton(
-                    title: "Delete Account",
-                    color: Colors.redAccent,
-                    onPressed: _deleteAccount,
                   ),
                 ],
               );

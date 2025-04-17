@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -57,7 +58,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          title: Text('Edit $field', style: TextStyle(color: Colors.teal)),
+          title:
+              Text('Edit $field', style: const TextStyle(color: Colors.teal)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -207,6 +209,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _deleteAccount() async {
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+            'Are you sure you want to delete your account? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmDelete) {
+      try {
+        // Profilkép törlés
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .get();
+        final data = doc.data();
+        final profileImageUrl = data?['profileImageUrl'];
+
+        if (profileImageUrl != null && profileImageUrl.toString().isNotEmpty) {
+          try {
+            final imageRef =
+                FirebaseStorage.instance.refFromURL(profileImageUrl);
+            await imageRef.delete();
+          } catch (e) {
+            print('Error deleting profile image: $e');
+          }
+        }
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .delete();
+
+        await user!.delete();
+        await FirebaseAuth.instance.signOut();
+
+        if (mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Your account has been successfully deleted.'),
+            ),
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'requires-recent-login') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please log in again to confirm account deletion.'),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${e.message}')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -242,12 +316,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildProfileItem('Username', _username ?? ''),
               const Divider(thickness: 1.5),
               _buildProfileItem(
-                  'Birth Date',
-                  _birthdate != null
-                      ? DateFormat('yyyy. MM. dd.').format(_birthdate!)
-                      : 'Not set'),
+                'Birth Date',
+                _birthdate != null
+                    ? DateFormat('yyyy. MM. dd.').format(_birthdate!)
+                    : 'Not set',
+              ),
               const Divider(thickness: 1.5),
               _buildProfileItem('Gender', _gender ?? ''),
+              const SizedBox(height: 40),
+              Center(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  icon: const Icon(Icons.delete, color: Colors.white),
+                  label: const Text(
+                    'Delete Account',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  onPressed: _deleteAccount,
+                ),
+              ),
             ],
           ),
         ),
