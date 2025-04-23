@@ -3,51 +3,49 @@ import 'package:flutter/material.dart';
 class ProfileMenuButton extends StatelessWidget {
   final String title;
   final VoidCallback onPressed;
-  final Color? color;
-  final Color textColor;
 
   const ProfileMenuButton({
     super.key,
     required this.title,
     required this.onPressed,
-    this.color,
-    this.textColor = Colors.white,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        splashColor: Colors.white.withOpacity(0.2),
-        highlightColor: Colors.transparent,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 17),
-          width: double.infinity,
+        borderRadius: BorderRadius.circular(15),
+        splashColor: Colors.grey.withOpacity(0.1),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
           decoration: BoxDecoration(
-            color: color ?? const Color(0xFF1E88E5),
-            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Colors.grey.shade200),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.grey.withOpacity(0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: textColor,
-              letterSpacing: 0.3,
-            ),
-            textAlign: TextAlign.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios,
+                  size: 18, color: Colors.black45),
+            ],
           ),
         ),
       ),

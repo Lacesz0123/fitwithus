@@ -1,5 +1,3 @@
-// lib/profile/statistics/widgets/weight_chart_card.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -21,72 +19,82 @@ class WeightChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const Text(
-              'Weight Change Over Time',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Weight Change Over Time',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.blueAccent,
             ),
-            const SizedBox(height: 20),
-            StreamBuilder<List<Map<String, dynamic>>>(
+          ),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade300),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: StreamBuilder<List<Map<String, dynamic>>>(
               stream: _getWeightEntries(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No weight data available');
+                  return const Center(child: Text('No weight data available'));
                 }
 
-                List<Map<String, dynamic>> weightEntries = snapshot.data!;
+                final entries = snapshot.data!;
+                final spots = entries.map((entry) {
+                  final date = (entry['date'] as Timestamp).toDate();
+                  return FlSpot(
+                    date.millisecondsSinceEpoch.toDouble(),
+                    (entry['weight'] as num).toDouble(),
+                  );
+                }).toList();
+
                 return SizedBox(
-                  height: 200,
+                  height: 220,
                   child: LineChart(
                     LineChartData(
                       gridData: FlGridData(
                         show: true,
                         drawHorizontalLine: true,
+                        horizontalInterval: 5,
+                        getDrawingHorizontalLine: (value) => FlLine(
+                          color: Colors.grey.withOpacity(0.1),
+                          strokeWidth: 1,
+                        ),
                         drawVerticalLine: false,
-                        horizontalInterval: 50,
-                        getDrawingHorizontalLine: (value) {
-                          return FlLine(
-                            color: Colors.grey.withOpacity(0.2),
-                            strokeWidth: 1,
-                          );
-                        },
                       ),
                       borderData: FlBorderData(
-                        show: true,
-                        border: const Border(
-                          left: BorderSide(color: Colors.grey),
-                          bottom: BorderSide(color: Colors.transparent),
-                          right: BorderSide(color: Colors.transparent),
-                          top: BorderSide(color: Colors.transparent),
-                        ),
+                        show: false,
                       ),
                       lineBarsData: [
                         LineChartBarData(
-                          spots: weightEntries.map((entry) {
-                            DateTime date =
-                                (entry['date'] as Timestamp).toDate();
-                            return FlSpot(
-                              date.millisecondsSinceEpoch.toDouble(),
-                              (entry['weight'] as num).toDouble(),
-                            );
-                          }).toList(),
+                          spots: spots,
                           isCurved: true,
                           color: Colors.teal,
-                          barWidth: 4,
-                          dotData: FlDotData(show: false),
+                          barWidth: 3,
+                          isStrokeCapRound: true,
                           belowBarData: BarAreaData(
                             show: true,
-                            color: Colors.teal.withOpacity(0.1),
+                            color: Colors.teal.withOpacity(0.12),
                           ),
+                          dotData: FlDotData(show: false),
                         ),
                       ],
                       titlesData: FlTitlesData(
@@ -96,18 +104,15 @@ class WeightChartCard extends StatelessWidget {
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
+                            interval: 5,
+                            getTitlesWidget: (value, meta) => Text(
+                              '${value.toInt()} kg',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
                             reservedSize: 40,
-                            interval: 50,
-                            getTitlesWidget: (value, meta) {
-                              return Text(
-                                '${value.toInt()} kg',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            },
                           ),
                         ),
                         rightTitles: AxisTitles(
@@ -122,8 +127,8 @@ class WeightChartCard extends StatelessWidget {
                 );
               },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
