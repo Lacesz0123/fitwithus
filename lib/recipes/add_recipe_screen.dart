@@ -47,7 +47,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   Future<void> _addRecipe() async {
-    // Ellenőrzés, hogy minden mező ki van-e töltve
     if (nameController.text.isEmpty ||
         descriptionController.text.isEmpty ||
         prepTimeController.text.isEmpty ||
@@ -63,7 +62,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       return;
     }
 
-    // Kalória érték ellenőrzése
     int? calories = int.tryParse(caloriesController.text);
     if (calories == null || calories <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,16 +72,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       return;
     }
 
-    // Betöltés indítása
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      // Kép feltöltése a Firestore-ba
       final imageUrl = await _uploadImage();
 
-      // Összetevők és lépések begyűjtése
       List<String> ingredients = ingredientControllers
           .map((controller) => controller.text)
           .where((text) => text.isNotEmpty)
@@ -93,7 +86,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           .where((text) => text.isNotEmpty)
           .toList();
 
-      // Recept hozzáadása a Firestore-hoz
       await FirebaseFirestore.instance.collection('recipes').add({
         'name': nameController.text,
         'name_lower': nameController.text.toLowerCase(),
@@ -103,25 +95,48 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         'ingredients': ingredients,
         'steps': steps,
         'imageUrl': imageUrl,
-        'calories': calories, // Kalória érték mentése
+        'calories': calories,
       });
 
-      // Visszalépés és értesítés
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Recipe added successfully!")),
       );
     } catch (e) {
-      // Hibaüzenet megjelenítése
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to add recipe: $e")),
       );
     } finally {
-      // Betöltés befejezése
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
+  }
+
+  Widget _buildLabeledField(
+    String label,
+    TextEditingController controller, {
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            hintText: label,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+        ),
+        const SizedBox(height: 18),
+      ],
+    );
   }
 
   @override
@@ -142,112 +157,76 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: nameController,
-                            decoration: const InputDecoration(
-                              labelText: "Recipe Name",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: descriptionController,
-                            maxLines: 3,
-                            decoration: const InputDecoration(
-                              labelText: "Description",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: prepTimeController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: "Preparation Time (minutes)",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: caloriesController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: "Calories (kcal)",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ],
+                  _buildLabeledField("Recipe Name", nameController),
+                  _buildLabeledField("Description", descriptionController,
+                      maxLines: 4),
+                  _buildLabeledField(
+                      "Preparation Time (minutes)", prepTimeController,
+                      keyboardType: TextInputType.number),
+                  _buildLabeledField("Calories (kcal)", caloriesController,
+                      keyboardType: TextInputType.number),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      _selectedImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                _selectedImage!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Text("No image selected"),
+                      const SizedBox(width: 10),
+                      ElevatedButton.icon(
+                        onPressed: _pickImage,
+                        icon: const Icon(Icons.upload, color: Colors.white),
+                        label: const Text('Select Image',
+                            style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          _selectedImage != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: Image.file(
-                                    _selectedImage!,
-                                    height: 200,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : const Text("No image selected"),
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: _pickImage,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.teal,
-                            ),
-                            child: const Text("Select Image"),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
                   const Text("Ingredients",
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ...ingredientControllers.map((controller) {
-                    int index = ingredientControllers.indexOf(controller);
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+                  ...ingredientControllers.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final controller = entry.value;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      padding: const EdgeInsets.only(bottom: 12),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextField(
                               controller: controller,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: "Ingredient",
-                                border: OutlineInputBorder(),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
                               ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           IconButton(
-                            icon: const Icon(Icons.remove_circle),
-                            color: Colors.red,
+                            icon: const Icon(Icons.remove_circle,
+                                color: Colors.redAccent),
                             onPressed: () {
                               setState(() {
                                 ingredientControllers.removeAt(index);
@@ -257,38 +236,53 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         ],
                       ),
                     );
-                  }).toList(),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle),
-                    color: Colors.green,
-                    onPressed: () {
-                      setState(() {
-                        ingredientControllers.add(TextEditingController());
-                      });
-                    },
+                  }),
+                  Center(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          ingredientControllers.add(TextEditingController());
+                        });
+                      },
+                      icon: const Icon(Icons.add, color: Colors.white),
+                      label: const Text('Add Ingredient',
+                          style: TextStyle(color: Colors.white)),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        side: BorderSide.none,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
                   const Text("Steps",
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ...stepControllers.map((controller) {
-                    int index = stepControllers.indexOf(controller);
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+                  ...stepControllers.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final controller = entry.value;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      padding: const EdgeInsets.only(bottom: 12),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextField(
                               controller: controller,
-                              decoration: const InputDecoration(
-                                labelText: "Step",
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: "Step ${index + 1}",
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
                               ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           IconButton(
-                            icon: const Icon(Icons.remove_circle),
-                            color: Colors.red,
+                            icon: const Icon(Icons.remove_circle,
+                                color: Colors.redAccent),
                             onPressed: () {
                               setState(() {
                                 stepControllers.removeAt(index);
@@ -298,27 +292,39 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         ],
                       ),
                     );
-                  }).toList(),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle),
-                    color: Colors.green,
-                    onPressed: () {
-                      setState(() {
-                        stepControllers.add(TextEditingController());
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
+                  }),
                   Center(
-                    child: ElevatedButton(
-                      onPressed: _addRecipe,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 24),
-                        textStyle: const TextStyle(fontSize: 16),
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          stepControllers.add(TextEditingController());
+                        });
+                      },
+                      icon: const Icon(Icons.add, color: Colors.white),
+                      label: const Text('Add Step',
+                          style: TextStyle(color: Colors.white)),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        side: BorderSide.none,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text("Add Recipe"),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: _addRecipe,
+                      icon: const Icon(Icons.save, color: Colors.white),
+                      label: const Text("Add Recipe",
+                          style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                   ),
                 ],
