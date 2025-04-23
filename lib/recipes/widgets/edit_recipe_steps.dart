@@ -21,36 +21,64 @@ class EditRecipeSteps extends StatelessWidget {
       children: [
         const Text(
           "Steps",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.blueAccent,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: controllers.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controllers[index],
+                      decoration: InputDecoration(
+                        labelText: 'Step ${index + 1}',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      onChanged: (_) => onChanged(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle,
+                        color: Colors.redAccent),
+                    onPressed: () => onRemoveStep(index),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
         const SizedBox(height: 10),
-        ...controllers.asMap().entries.map((entry) {
-          final index = entry.key;
-          final controller = entry.value;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    decoration: InputDecoration(labelText: "Step ${index + 1}"),
-                    onChanged: (_) => onChanged(),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.remove_circle, color: Colors.red),
-                  onPressed: () => onRemoveStep(index),
-                ),
-              ],
+        Center(
+          child: OutlinedButton.icon(
+            onPressed: onAddStep,
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: const Text('Add Step'),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Colors.blueAccent),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-          );
-        }),
-        const SizedBox(height: 10),
-        TextButton.icon(
-          onPressed: onAddStep,
-          icon: const Icon(Icons.add_circle, color: Colors.teal),
-          label: const Text("Add Step"),
+          ),
         ),
       ],
     );

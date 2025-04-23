@@ -305,8 +305,13 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _saveChanges,
+                      icon: const Icon(Icons.save, color: Colors.white),
+                      label: const Text(
+                        "Save Changes",
+                        style: TextStyle(color: Colors.white),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -314,7 +319,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text("Save Changes"),
                     ),
                   ),
                 ],

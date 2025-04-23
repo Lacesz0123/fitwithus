@@ -26,75 +26,114 @@ class EditRecipeHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Text(
+          'Recipe Name',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 6),
         TextField(
           controller: nameController,
-          decoration: const InputDecoration(
-            labelText: "Recipe Name",
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: 'Enter recipe name',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
         const SizedBox(height: 20),
+        const Text(
+          'Description',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 6),
         TextField(
           controller: descriptionController,
           maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: "Description",
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: 'Enter description',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
         const SizedBox(height: 20),
+        const Text(
+          'Calories (kcal)',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 6),
         TextField(
           controller: caloriesController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: "Calories (kcal)",
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: 'e.g. 250',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
         const SizedBox(height: 20),
+        const Text(
+          'Preparation Time (minutes)',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 6),
         TextField(
           controller: prepTimeController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: "Preparation Time (minutes)",
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: 'e.g. 15',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
+        const Text(
+          'Image',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
         Row(
           children: [
-            selectedImage != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.file(
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: selectedImage != null
+                  ? Image.file(
                       selectedImage!,
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,
-                    ),
-                  )
-                : (imageUrl != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
+                    )
+                  : (imageUrl != null
+                      ? Image.network(
                           imageUrl!,
                           width: 100,
                           height: 100,
                           fit: BoxFit.cover,
-                        ),
-                      )
-                    : const Text("No image selected")),
-            const SizedBox(width: 10),
-            ElevatedButton(
+                        )
+                      : Container(
+                          width: 100,
+                          height: 100,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.image_not_supported,
+                              color: Colors.grey),
+                        )),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton.icon(
               onPressed: onImagePick,
+              icon: const Icon(Icons.upload, color: Colors.white),
+              label: const Text('Select Image'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
                 padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              child: const Text("Select Image"),
             ),
           ],
         ),
