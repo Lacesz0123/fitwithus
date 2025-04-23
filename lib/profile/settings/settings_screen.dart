@@ -67,138 +67,159 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: Text('Edit $field',
-              style: const TextStyle(color: Colors.blueAccent)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (field == 'Gender')
-                DropdownButtonFormField<String>(
-                  value: newGender,
-                  items: ['Male', 'Female']
-                      .map((gender) => DropdownMenuItem(
-                            value: gender,
-                            child: Text(gender),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    newGender = value;
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Select Gender',
-                    border: OutlineInputBorder(),
-                  ),
-                )
-              else if (field == 'Birth Date')
-                ElevatedButton(
-                  onPressed: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: newBirthdate ?? DateTime.now(),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (pickedDate != null) {
-                      newBirthdate = pickedDate;
-                      setState(() {
-                        _birthdate = newBirthdate;
-                      });
-                      Navigator.of(context).pop();
-                      _updateUserData();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    newBirthdate != null
-                        ? DateFormat('yyyy. MM. dd.').format(newBirthdate!)
-                        : 'Select Date',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                )
-              else
-                TextField(
-                  controller: controller,
-                  decoration: InputDecoration(
-                    labelText: 'Enter $field',
-                    errorText: errorMessage.isNotEmpty ? errorMessage : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: Colors.white,
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Edit $field',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
                   ),
                 ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (field == 'Email') {
-                  if (!_isValidEmail(controller.text)) {
-                    errorMessage = 'Please enter a valid email';
-                    _showMessage(errorMessage);
-                    return;
-                  }
-                  if (await _isEmailInUse(controller.text)) {
-                    errorMessage = 'Email is already in use';
-                    _showMessage(errorMessage);
-                    return;
-                  }
-                  _email = controller.text;
-                } else if (field == 'Username') {
-                  if (!_isValidUsername(controller.text)) {
-                    errorMessage =
-                        'Username must be 5-15 characters long and contain only letters and numbers';
-                    _showMessage(errorMessage);
-                    return;
-                  }
-                  _username = controller.text;
-                  await _updateUsernameInCommunityMessages(_username!);
-                } else if (field == 'Gender') {
-                  _gender = newGender;
-                }
+                const SizedBox(height: 20),
+                if (field == 'Gender')
+                  DropdownButtonFormField<String>(
+                    value: newGender,
+                    items: ['Male', 'Female']
+                        .map((gender) => DropdownMenuItem(
+                              value: gender,
+                              child: Text(gender),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      newGender = value;
+                    },
+                    decoration: const InputDecoration(
+                      labelText: 'Select Gender',
+                      border: OutlineInputBorder(),
+                    ),
+                  )
+                else if (field == 'Birth Date')
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: newBirthdate ?? DateTime.now(),
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                        );
+                        if (pickedDate != null) {
+                          newBirthdate = pickedDate;
+                          setState(() {
+                            _birthdate = newBirthdate;
+                          });
+                          Navigator.of(context).pop();
+                          _updateUserData();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        newBirthdate != null
+                            ? DateFormat('yyyy. MM. dd.').format(newBirthdate!)
+                            : 'Select Date',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  )
+                else
+                  TextField(
+                    controller: controller,
+                    decoration: InputDecoration(
+                      labelText: 'Enter $field',
+                      errorText: errorMessage.isNotEmpty ? errorMessage : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.grey.shade600,
+                      ),
+                      child: const Text("Cancel"),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (field == 'Username') {
+                          if (!_isValidUsername(controller.text)) {
+                            errorMessage =
+                                'Username must be 5–15 characters long and contain only letters and numbers';
+                            _showMessage(errorMessage);
+                            return;
+                          }
+                          _username = controller.text;
+                          await _updateUsernameInCommunityMessages(_username!);
+                        } else if (field == 'Gender') {
+                          _gender = newGender;
+                        }
 
-                await _updateUserData();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
+                        await _updateUserData();
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text("Save"),
+                    ),
+                  ],
+                )
+              ],
             ),
-          ],
+          ),
         );
       },
     );
   }
 
-  Future<bool> _isEmailInUse(String email) async {
-    final result = await FirebaseFirestore.instance
-        .collection('users')
-        .where('email', isEqualTo: email)
-        .get();
-    return result.docs.isNotEmpty && email != _email;
-  }
-
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.blueAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 6,
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        duration: const Duration(seconds: 3),
+      ),
     );
-  }
-
-  bool _isValidEmail(String email) {
-    final emailRegex =
-        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    return emailRegex.hasMatch(email);
   }
 
   bool _isValidUsername(String username) {
@@ -275,7 +296,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Your account has been successfully deleted.'),
+              content: Text(
+                'Your account has been successfully deleted.',
+                style: TextStyle(color: Colors.black),
+              ),
+              backgroundColor: Colors.blueAccent,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              elevation: 6,
+              margin: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              duration: Duration(seconds: 3),
             ),
           );
         }
@@ -283,12 +315,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (e.code == 'requires-recent-login') {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Please log in again to confirm account deletion.'),
+              content: Text(
+                'Please log in again to confirm account deletion.',
+                style: TextStyle(color: Colors.black),
+              ),
+              backgroundColor: Colors.blueAccent,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              elevation: 6,
+              margin: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              duration: Duration(seconds: 3),
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${e.message}')),
+            SnackBar(
+              content: Text(
+                'Error: ${e.message}',
+                style: const TextStyle(color: Colors.black),
+              ),
+              backgroundColor: Colors.blueAccent,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              elevation: 6,
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              duration: const Duration(seconds: 3),
+            ),
           );
         }
       }
@@ -325,7 +381,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              _buildProfileItem('Email', _email ?? ''),
+              _buildProfileItem('Email', _email ?? '', editable: false),
               const Divider(thickness: 1.5),
               _buildProfileItem('Username', _username ?? ''),
               const Divider(thickness: 1.5),
@@ -362,7 +418,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildProfileItem(String field, String value) {
+  Widget _buildProfileItem(String field, String value, {bool editable = true}) {
     return ListTile(
       contentPadding:
           const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
@@ -374,10 +430,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value,
         style: const TextStyle(fontSize: 16, color: Colors.black87),
       ),
-      trailing: IconButton(
-        icon: const Icon(Icons.edit, color: Colors.blueAccent),
-        onPressed: () => _showEditDialog(field, value),
-      ),
+      trailing: editable
+          ? IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blueAccent),
+              onPressed: () => _showEditDialog(field, value),
+            )
+          : null,
     );
   }
 }
