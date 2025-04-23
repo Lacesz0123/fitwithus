@@ -14,6 +14,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   List<TextEditingController> _stepsControllers = [];
+  bool _sendNotification = false; // UI kapcsolóhoz
 
   @override
   void dispose() {
@@ -176,7 +177,21 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                     borderRadius: BorderRadius.circular(10)),
               ),
             ),
-            const SizedBox(height: 30),
+            SwitchListTile(
+              title: const Text(
+                'Send push notification to users',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              value: _sendNotification,
+              onChanged: (value) {
+                setState(() {
+                  _sendNotification = value;
+                });
+              },
+              activeColor: Colors.blueAccent,
+              contentPadding: EdgeInsets.zero,
+            ),
+            const SizedBox(height: 16),
             Center(
               child: ElevatedButton.icon(
                 onPressed: _addWorkout,
