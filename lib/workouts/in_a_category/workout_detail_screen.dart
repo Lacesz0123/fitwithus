@@ -238,10 +238,29 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                     if (!isGuest)
                       GestureDetector(
                         onTap: _toggleFavorite,
-                        child: Icon(
-                          isFavorite ? Icons.star : Icons.star_border,
-                          color: isFavorite ? Colors.orange : Colors.grey,
-                          size: 32,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          decoration: BoxDecoration(
+                            color: isFavorite
+                                ? Colors.yellow.shade100
+                                : Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                            boxShadow: isFavorite
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.yellow.shade400,
+                                      blurRadius: 10,
+                                      spreadRadius: 1,
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(
+                            isFavorite ? Icons.star : Icons.star_border,
+                            color: isFavorite ? Colors.orange : Colors.grey,
+                            size: 30,
+                          ),
                         ),
                       ),
                   ],
