@@ -107,6 +107,39 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     });
   }
 
+  Future<void> _addRecipeCaloriesToDaily() async {
+    if (calories == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final userRef =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final userDoc = await userRef.get();
+    final data = userDoc.data();
+
+    final currentCalories = data?['dailyCalories'] ?? 0;
+    await userRef.set({'dailyCalories': currentCalories + calories!},
+        SetOptions(merge: true));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Calories updated!',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.blueAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,6 +193,27 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ],
               ),
             ),
+      bottomNavigationBar: !isGuest && calories != null
+          ? Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton.icon(
+                onPressed: _addRecipeCaloriesToDaily,
+                icon: const Icon(Icons.restaurant, color: Colors.white),
+                label: const Text(
+                  "I ate this",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
