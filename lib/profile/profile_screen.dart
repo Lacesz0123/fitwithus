@@ -545,7 +545,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              '$label: ${current.toStringAsFixed(0)} / ${goal.toStringAsFixed(0)} kcal',
+                                              '$label: ${current > goal ? goal.toStringAsFixed(0) : current.toStringAsFixed(0)} / ${goal.toStringAsFixed(0)} kcal',
                                               style:
                                                   const TextStyle(fontSize: 15),
                                             ),
