@@ -10,8 +10,8 @@ import 'profile_header.dart';
 import 'profile_menu_button.dart';
 import '../../services/profile_image_service.dart';
 import 'community/community_screen.dart';
-import 'statistics/widgets/weight_chart_card.dart';
-import 'statistics/widgets/workout_progress_card.dart';
+import 'weight_chart_card.dart';
+import 'workout_progress_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -30,6 +30,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, double> _calorieLevels = {};
   Map<String, dynamic>? _userData;
   int _completedWorkouts = 0;
+  int _dailyCalories = 0;
+  final TextEditingController _calorieInputController = TextEditingController();
 
   @override
   void initState() {
@@ -96,6 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .get();
       setState(() {
         _userData = userDoc.data() as Map<String, dynamic>?;
+        _dailyCalories = _userData?['dailyCalories'] ?? 0;
         _completedWorkouts = _userData?['completedWorkouts'] ?? 0;
         _calculateCalories();
       });
@@ -160,6 +163,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SnackBar(content: Text('Weight added successfully')),
       );
       _fetchUserData();
+    }
+  }
+
+  Future<void> _addCalories() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && _calorieInputController.text.isNotEmpty) {
+      int added = int.tryParse(_calorieInputController.text) ?? 0;
+      if (added > 0) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
+          {'dailyCalories': _dailyCalories + added},
+          SetOptions(merge: true),
+        );
+        setState(() {
+          _dailyCalories += added;
+        });
+        _calorieInputController.clear();
+      }
+    }
+  }
+
+  Future<void> _resetCalories() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
+        {'dailyCalories': 0},
+        SetOptions(merge: true),
+      );
+      setState(() {
+        _dailyCalories = 0;
+      });
     }
   }
 
@@ -409,7 +442,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         Expanded(
                                           child: ElevatedButton.icon(
                                             onPressed: _addWeight,
-                                            icon: const Icon(Icons.add),
+                                            icon: const Icon(Icons.add,
+                                                color: Colors
+                                                    .white), // <- ez a kulcs
                                             label: const Text("Add Weight"),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
@@ -419,9 +454,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                   const EdgeInsets.symmetric(
                                                       vertical: 14),
                                               shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -430,7 +465,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           child: ElevatedButton.icon(
                                             onPressed: _deleteLastWeight,
                                             icon: const Icon(
-                                                Icons.delete_outline),
+                                                Icons.delete_outline,
+                                                color: Colors.white),
                                             label: const Text("Delete Last"),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors.redAccent,
@@ -453,8 +489,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                         ),
-
-                        const SizedBox(height: 20),
                         const SizedBox(height: 28),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -462,7 +496,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Calorie Levels',
+                                'Daily Calorie Intake',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -487,19 +521,137 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: _calorieLevels.entries.map((entry) {
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 6),
-                                      child: Text(
-                                        '${entry.key}: ${entry.value.toStringAsFixed(0)} kcal',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                        ),
+                                  children: [
+                                    Text(
+                                      'Current: ${_dailyCalories.toStringAsFixed(0)} kcal',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                    );
-                                  }).toList(),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ..._calorieLevels.entries.map((entry) {
+                                      final label = entry.key;
+                                      final goal = entry.value;
+                                      final current = _dailyCalories;
+                                      final progress =
+                                          (current / goal).clamp(0.0, 1.0);
+
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '$label: ${current.toStringAsFixed(0)} / ${goal.toStringAsFixed(0)} kcal',
+                                              style:
+                                                  const TextStyle(fontSize: 15),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: LinearProgressIndicator(
+                                                value: progress,
+                                                minHeight: 14,
+                                                backgroundColor:
+                                                    Colors.grey.shade300,
+                                                color: Colors.teal,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }),
+                                    const SizedBox(height: 20),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            controller: _calorieInputController,
+                                            keyboardType: TextInputType.number,
+                                            decoration: const InputDecoration(
+                                              hintText: 'Enter kcal (e.g. 200)',
+                                              border: OutlineInputBorder(),
+                                              contentPadding:
+                                                  EdgeInsets.symmetric(
+                                                      horizontal: 14,
+                                                      vertical: 10),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 14),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: _addCalories,
+                                          icon: const Icon(Icons.add,
+                                              color: Colors
+                                                  .white), // <- itt a trükk
+                                          label: const Text("Add"),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.blueAccent,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 28, vertical: 12),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (_) => AlertDialog(
+                                                title: const Text(
+                                                    "Reset Calories"),
+                                                content: const Text(
+                                                    "Are you sure you want to reset your daily calories?"),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(context)
+                                                            .pop(),
+                                                    child: const Text("Cancel"),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                      _resetCalories();
+                                                    },
+                                                    child: const Text("Reset"),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                          icon: const Icon(Icons.refresh,
+                                              color: Colors.white),
+                                          label: const Text("Reset"),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 28, vertical: 12),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
