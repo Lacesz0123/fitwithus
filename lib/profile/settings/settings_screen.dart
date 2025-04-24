@@ -393,6 +393,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const Divider(thickness: 1.5),
               _buildProfileItem('Gender', _gender ?? ''),
+              const SizedBox(height: 32),
+              const Text(
+                'Appearance',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile.adaptive(
+                title: const Text(
+                  'Dark Mode',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                ),
+                value: false, // később majd dinamikus lesz
+                onChanged: (bool newValue) {
+                  // majd később: setState(() { isDarkMode = newValue; })
+                },
+                activeColor: Colors.blueAccent,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               const SizedBox(height: 40),
               Center(
                 child: ElevatedButton.icon(
