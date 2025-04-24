@@ -6,7 +6,6 @@ import '../../workouts/in_a_category/workout_detail_screen.dart';
 class FavoriteWorkoutsScreen extends StatelessWidget {
   const FavoriteWorkoutsScreen({super.key});
 
-  // Kedvenc edzések lekérése a Firestore-ból
   Future<List<Map<String, dynamic>>> getFavoriteWorkouts() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -16,7 +15,6 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
           .get();
       List<dynamic> favoriteWorkoutIds = userDoc['favorites'] ?? [];
 
-      // Lekérjük az edzések részleteit az ID alapján
       List<Map<String, dynamic>> favoriteWorkouts = [];
       for (var workoutId in favoriteWorkoutIds) {
         DocumentSnapshot workoutDoc = await FirebaseFirestore.instance
@@ -26,7 +24,7 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
         if (workoutDoc.exists) {
           Map<String, dynamic> workoutData =
               workoutDoc.data() as Map<String, dynamic>;
-          workoutData['id'] = workoutId; // ID hozzáadása
+          workoutData['id'] = workoutId;
           favoriteWorkouts.add(workoutData);
         }
       }
@@ -37,18 +35,29 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBackground = isDark ? const Color(0xFF2C2C2C) : Colors.white;
+    final cardShadow =
+        isDark ? Colors.transparent : Colors.grey.withOpacity(0.3);
+    final titleColor = isDark ? Colors.grey.shade100 : Colors.blueAccent;
+    final textColor = isDark ? Colors.white70 : Colors.black87;
+    final subtitleColor = isDark ? Colors.grey.shade400 : Colors.grey;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorite Workouts'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : null,
+        flexibleSpace: !isDark
+            ? Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              )
+            : null,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: getFavoriteWorkouts(),
@@ -58,7 +67,15 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No favorite workouts'));
+            return Center(
+              child: Text(
+                'No favorite workouts',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+              ),
+            );
           }
 
           List<Map<String, dynamic>> favoriteWorkouts = snapshot.data!;
@@ -75,7 +92,6 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
 
               return GestureDetector(
                 onTap: () {
-                  // Navigálás az edzés részletező oldalra
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) =>
@@ -88,11 +104,11 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBackground,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: cardShadow,
                         spreadRadius: 2,
                         blurRadius: 5,
                         offset: const Offset(0, 3),
@@ -107,26 +123,26 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
                           children: [
                             Text(
                               workoutTitle,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.blueAccent,
+                                color: titleColor,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               workoutDescription,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black87,
+                                color: textColor,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Category: $workoutCategory',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey,
+                                color: subtitleColor,
                               ),
                             ),
                           ],

@@ -7,15 +7,17 @@ class RecipeSteps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Steps:",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.blueAccent,
+            color: isDark ? Colors.grey.shade300 : Colors.blueAccent,
           ),
         ),
         const SizedBox(height: 8),
@@ -29,18 +31,18 @@ class RecipeSteps extends StatelessWidget {
               children: [
                 Text(
                   "$index. ",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent,
+                    color: isDark ? Colors.grey.shade300 : Colors.blueAccent,
                   ),
                 ),
                 Expanded(
                   child: Text(
                     step,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                 ),

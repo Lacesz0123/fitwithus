@@ -30,7 +30,9 @@ class RecipeCard extends StatelessWidget {
             child: SizedBox(
               width: 200,
               child: Card(
-                color: Colors.white,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.blueGrey.shade900
+                    : Colors.white,
                 elevation: 2.0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
@@ -54,10 +56,13 @@ class RecipeCard extends StatelessWidget {
                       Flexible(
                         child: Text(
                           recipeName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black87,
                           ),
                           textAlign: TextAlign.center,
                           maxLines: 2,

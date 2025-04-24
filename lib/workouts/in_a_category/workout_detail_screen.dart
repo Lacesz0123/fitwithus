@@ -185,18 +185,25 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? Colors.white : Colors.blueAccent;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Details'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : null,
+        flexibleSpace: !isDark
+            ? Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              )
+            : null,
       ),
       body: FutureBuilder<Map<String, dynamic>?>(
         future: getWorkoutData(),
@@ -221,17 +228,16 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// Title + (optional) favorite
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
+                          color: primaryColor,
                         ),
                       ),
                     ),
@@ -242,10 +248,14 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                           duration: const Duration(milliseconds: 300),
                           decoration: BoxDecoration(
                             color: isFavorite
-                                ? Colors.yellow.shade100
-                                : Colors.grey.shade200,
+                                ? (isDark
+                                    ? Colors.grey.shade700.withOpacity(0.4)
+                                    : Colors.yellow.shade100)
+                                : (isDark
+                                    ? Colors.grey.shade800
+                                    : Colors.grey.shade200),
                             shape: BoxShape.circle,
-                            boxShadow: isFavorite
+                            boxShadow: !isDark && isFavorite
                                 ? [
                                     BoxShadow(
                                       color: Colors.yellow.shade400,
@@ -258,7 +268,11 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                           padding: const EdgeInsets.all(8),
                           child: Icon(
                             isFavorite ? Icons.star : Icons.star_border,
-                            color: isFavorite ? Colors.orange : Colors.grey,
+                            color: isFavorite
+                                ? (isDark
+                                    ? Colors.orange.shade300
+                                    : Colors.orange)
+                                : (isDark ? Colors.grey.shade400 : Colors.grey),
                             size: 30,
                           ),
                         ),
@@ -266,19 +280,17 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
                 Text(
                   description,
-                  style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  style: TextStyle(fontSize: 16, color: textColor),
                 ),
                 const SizedBox(height: 24),
-
-                const Text(
+                Text(
                   'Steps:',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.blueAccent,
+                    color: primaryColor,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -291,8 +303,14 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          border: Border.all(color: Colors.grey.shade300),
+                          color: isDark
+                              ? Colors.grey.shade900
+                              : Colors.grey.shade100,
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.grey.shade700
+                                : Colors.grey.shade300,
+                          ),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -300,15 +318,16 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                           children: [
                             Text(
                               '${index + 1}. ',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
+                                color: primaryColor,
                               ),
                             ),
                             Expanded(
                               child: Text(
                                 steps[index],
-                                style: const TextStyle(fontSize: 15.5),
+                                style:
+                                    TextStyle(fontSize: 15.5, color: textColor),
                               ),
                             ),
                           ],
@@ -317,15 +336,13 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                     },
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 if (!isGuest) ...[
                   Column(
                     children: [
                       Text(
                         'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
-                        style: const TextStyle(fontSize: 15),
+                        style: TextStyle(fontSize: 15, color: textColor),
                       ),
                       Slider(
                         value: userRating ?? 1.0,
@@ -336,7 +353,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                         max: 5,
                         divisions: 4,
                         label: userRating?.toStringAsFixed(1),
-                        activeColor: Colors.blueAccent,
+                        activeColor: primaryColor,
                       ),
                     ],
                   ),
@@ -344,22 +361,24 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                 Center(
                   child: Text(
                     'Average Rating: ${averageRating.toStringAsFixed(1)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
+                      color: textColor,
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 if (!isGuest)
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: _showConfirmationDialog,
-                      icon: const Icon(Icons.check),
-                      label: const Text('Mark as Completed'),
+                      icon: const Icon(Icons.check, color: Colors.white),
+                      label: const Text('Mark as Completed',
+                          style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor:
+                            isDark ? Colors.grey.shade700 : Colors.blueAccent,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 28, vertical: 12),

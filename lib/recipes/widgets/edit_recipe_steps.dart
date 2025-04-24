@@ -16,15 +16,20 @@ class EditRecipeSteps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? Colors.grey.shade300 : Colors.blueAccent;
+    final fillColor = isDark ? Colors.grey.shade800 : Colors.grey[100];
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Steps",
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.blueAccent,
+            color: primaryColor,
           ),
         ),
         const SizedBox(height: 12),
@@ -40,8 +45,12 @@ class EditRecipeSteps extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: controllers[index],
+                      style: TextStyle(color: textColor),
                       decoration: InputDecoration(
                         labelText: 'Step ${index + 1}',
+                        labelStyle: TextStyle(color: textColor),
+                        filled: true,
+                        fillColor: fillColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -49,14 +58,23 @@ class EditRecipeSteps extends StatelessWidget {
                           horizontal: 16,
                           vertical: 12,
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: primaryColor,
+                            width: 2,
+                          ),
+                        ),
                       ),
                       onChanged: (_) => onChanged(),
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.remove_circle,
-                        color: Colors.redAccent),
+                    icon: const Icon(
+                      Icons.remove_circle,
+                      color: Colors.redAccent,
+                    ),
                     onPressed: () => onRemoveStep(index),
                   ),
                 ],
@@ -71,9 +89,10 @@ class EditRecipeSteps extends StatelessWidget {
             icon: const Icon(Icons.add, color: Colors.white),
             label: const Text('Add Step'),
             style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor:
+                  isDark ? Colors.grey.shade700 : Colors.blueAccent,
               foregroundColor: Colors.white,
-              side: const BorderSide(color: Colors.blueAccent),
+              side: BorderSide(color: primaryColor),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),

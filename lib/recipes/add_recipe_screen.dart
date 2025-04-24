@@ -25,6 +25,14 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   File? _selectedImage;
   bool _isLoading = false;
 
+  Color get primaryColor => Theme.of(context).brightness == Brightness.light
+      ? Colors.blueAccent
+      : Colors.grey.shade700;
+
+  Color get textColor => Theme.of(context).brightness == Brightness.light
+      ? Colors.black87
+      : Colors.white;
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -121,14 +129,19 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            style: TextStyle(
+                fontSize: 16, fontWeight: FontWeight.w600, color: textColor)),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          style: TextStyle(color: textColor),
           decoration: InputDecoration(
             hintText: label,
+            hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
+            fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.1),
+            filled: true,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -144,15 +157,20 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Add New Recipe"),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1E1E1E)
+            : null,
+        flexibleSpace: Theme.of(context).brightness == Brightness.light
+            ? Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              )
+            : null,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -182,7 +200,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                 fit: BoxFit.cover,
                               ),
                             )
-                          : const Text("No image selected"),
+                          : Text("No image selected",
+                              style: TextStyle(color: textColor)),
                       const SizedBox(width: 10),
                       ElevatedButton.icon(
                         onPressed: _pickImage,
@@ -190,7 +209,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         label: const Text('Select Image',
                             style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
+                          backgroundColor: primaryColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                           shape: RoundedRectangleBorder(
@@ -200,9 +219,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     ],
                   ),
                   const SizedBox(height: 30),
-                  const Text("Ingredients",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text("Ingredients",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: textColor)),
                   const SizedBox(height: 10),
                   ...ingredientControllers.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -214,8 +235,15 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           Expanded(
                             child: TextField(
                               controller: controller,
+                              style: TextStyle(color: textColor),
                               decoration: InputDecoration(
                                 labelText: "Ingredient",
+                                labelStyle: TextStyle(color: textColor),
+                                fillColor: Theme.of(context)
+                                    .colorScheme
+                                    .surface
+                                    .withOpacity(0.1),
+                                filled: true,
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10)),
                                 contentPadding: const EdgeInsets.symmetric(
@@ -248,17 +276,18 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       label: const Text('Add Ingredient',
                           style: TextStyle(color: Colors.white)),
                       style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        side: BorderSide.none,
+                        backgroundColor: primaryColor,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
                   ),
                   const SizedBox(height: 30),
-                  const Text("Steps",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text("Steps",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: textColor)),
                   const SizedBox(height: 10),
                   ...stepControllers.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -270,8 +299,15 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           Expanded(
                             child: TextField(
                               controller: controller,
+                              style: TextStyle(color: textColor),
                               decoration: InputDecoration(
                                 labelText: "Step ${index + 1}",
+                                labelStyle: TextStyle(color: textColor),
+                                fillColor: Theme.of(context)
+                                    .colorScheme
+                                    .surface
+                                    .withOpacity(0.1),
+                                filled: true,
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10)),
                                 contentPadding: const EdgeInsets.symmetric(
@@ -304,8 +340,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       label: const Text('Add Step',
                           style: TextStyle(color: Colors.white)),
                       style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        side: BorderSide.none,
+                        backgroundColor: primaryColor,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
@@ -319,7 +354,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       label: const Text("Add Recipe",
                           style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor: primaryColor,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 28, vertical: 14),
                         shape: RoundedRectangleBorder(

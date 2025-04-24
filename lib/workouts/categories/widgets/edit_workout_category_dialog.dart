@@ -137,16 +137,23 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.edit_outlined, color: Colors.blueAccent, size: 28),
+                  Icon(
+                    Icons.edit_outlined,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade300
+                        : Colors.blueAccent,
+                  ),
                   SizedBox(width: 10),
                   Text(
                     'Edit Category',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade300
+                          : Colors.blueAccent,
                     ),
                   ),
                 ],
@@ -159,15 +166,26 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
                   labelText: 'Category Title',
                   counterText: '',
                   filled: true,
-                  fillColor: Colors.grey[100],
-                  prefixIcon: const Icon(Icons.title, color: Colors.blueAccent),
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade800
+                      : Colors.grey[100],
+                  prefixIcon: Icon(
+                    Icons.title,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade300
+                        : Colors.blueAccent,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Colors.blueAccent, width: 2),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade300
+                          : Colors.blueAccent,
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
@@ -178,10 +196,13 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
                   height: 150,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent.withOpacity(0.05),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade800.withOpacity(0.4)
+                        : Colors.blueAccent.withOpacity(0.05),
                     border: Border.all(
-                      color: Colors.blueAccent.withOpacity(0.4),
-                      width: 1.5,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade300.withOpacity(0.4)
+                          : Colors.blueAccent.withOpacity(0.4),
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -213,11 +234,14 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
                       onPressed: _updateCategory,
                       icon: const Icon(
                         Icons.save,
-                        color: Colors.white, // <-- ikon színe fehér
+                        color: Colors.white, // ikon marad fehér
                       ),
                       label: const Text('Update'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade700
+                                : Colors.blueAccent,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                             vertical: 12, horizontal: 16),

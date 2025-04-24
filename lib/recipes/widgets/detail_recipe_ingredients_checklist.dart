@@ -12,26 +12,31 @@ class IngredientChecklist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Ingredients:",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.blueAccent,
+            color: isDark ? Colors.grey.shade300 : Colors.blueAccent,
           ),
         ),
         const SizedBox(height: 8),
         ...ingredientsStatus.keys.map((ingredient) {
           final isChecked = ingredientsStatus[ingredient] ?? false;
+
           return CheckboxListTile(
             title: Text(
               ingredient,
               style: TextStyle(
                 fontSize: 16,
-                color: isChecked ? Colors.grey : Colors.black,
+                color: isChecked
+                    ? (isDark ? Colors.grey.shade600 : Colors.grey)
+                    : (isDark ? Colors.white : Colors.black),
                 decoration: isChecked
                     ? TextDecoration.lineThrough
                     : TextDecoration.none,
@@ -40,7 +45,7 @@ class IngredientChecklist extends StatelessWidget {
             value: isChecked,
             onChanged: (_) => onToggle(ingredient),
             controlAffinity: ListTileControlAffinity.leading,
-            activeColor: Colors.blueAccent,
+            activeColor: isDark ? Colors.grey.shade400 : Colors.blueAccent,
             checkColor: Colors.white,
           );
         }).toList(),

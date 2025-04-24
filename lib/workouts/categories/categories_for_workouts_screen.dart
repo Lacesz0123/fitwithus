@@ -73,18 +73,20 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Categories'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        flexibleSpace: Theme.of(context).brightness == Brightness.dark
+            ? Container(color: const Color(0xFF1E1E1E))
+            : Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(Icons.search, color: Theme.of(context).iconTheme.color),
             onPressed: () {
               showSearch(
                 context: context,
@@ -94,7 +96,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ),
           if (userRole == 'admin')
             IconButton(
-              icon: const Icon(Icons.add),
+              icon: Icon(Icons.add, color: Theme.of(context).iconTheme.color),
               tooltip: 'Add Category',
               onPressed: () => addCategory(context),
             ),

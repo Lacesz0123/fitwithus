@@ -88,147 +88,151 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Additional Information'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+    return Theme(
+        data: ThemeData.light(),
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Additional Information'),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blueAccent, Colors.tealAccent],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Complete Your Profile",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Please enter additional information to finish setting up your account.",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text("Gender"),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: _selectedGender,
-                decoration: InputDecoration(
-                  labelText: "Select Gender",
-                  labelStyle: const TextStyle(color: Colors.blueAccent),
-                  prefixIcon:
-                      const Icon(Icons.person_2, color: Colors.blueAccent),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.blueAccent),
-                    borderRadius: BorderRadius.circular(12),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Complete Your Profile",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.teal, width: 2),
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Please enter additional information to finish setting up your account.",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
                   ),
-                ),
-                icon: const Icon(Icons.arrow_drop_down_rounded,
-                    color: Colors.blueAccent),
-                items: const [
-                  DropdownMenuItem(value: "Male", child: Text("Male")),
-                  DropdownMenuItem(value: "Female", child: Text("Female")),
+                  const SizedBox(height: 20),
+                  const Text("Gender"),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedGender,
+                    decoration: InputDecoration(
+                      labelText: "Select Gender",
+                      labelStyle: const TextStyle(color: Colors.blueAccent),
+                      prefixIcon:
+                          const Icon(Icons.person_2, color: Colors.blueAccent),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 18, horizontal: 12),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.blueAccent),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.teal, width: 2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.arrow_drop_down_rounded,
+                        color: Colors.blueAccent),
+                    items: const [
+                      DropdownMenuItem(value: "Male", child: Text("Male")),
+                      DropdownMenuItem(value: "Female", child: Text("Female")),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedGender = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _weightController,
+                    hintText: "Your Weight (kg)",
+                    icon: Icons.fitness_center,
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _heightController,
+                    hintText: "Your Height (cm)",
+                    icon: Icons.height,
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text("Date of Birth"),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _selectBirthDate(context),
+                      icon: const Icon(Icons.calendar_today,
+                          color: Colors.blueAccent),
+                      label: Text(
+                        _birthDate == null
+                            ? "Select Date of Birth"
+                            : _birthDate!.toLocal().toString().split(' ')[0],
+                        style: const TextStyle(
+                            fontSize: 16, color: Colors.blueAccent),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[100],
+                        elevation: 0,
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Colors.blueAccent),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (_errorMessage.isNotEmpty)
+                    Text(
+                      _errorMessage,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _registerUser,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Register",
+                        style:
+                            TextStyle(fontSize: 18, color: Colors.blueAccent),
+                      ),
+                    ),
+                  ),
                 ],
-                onChanged: (value) {
-                  setState(() {
-                    _selectedGender = value!;
-                  });
-                },
               ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: _weightController,
-                hintText: "Your Weight (kg)",
-                icon: Icons.fitness_center,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: _heightController,
-                hintText: "Your Height (cm)",
-                icon: Icons.height,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              const Text("Date of Birth"),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _selectBirthDate(context),
-                  icon: const Icon(Icons.calendar_today,
-                      color: Colors.blueAccent),
-                  label: Text(
-                    _birthDate == null
-                        ? "Select Date of Birth"
-                        : _birthDate!.toLocal().toString().split(' ')[0],
-                    style:
-                        const TextStyle(fontSize: 16, color: Colors.blueAccent),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[100],
-                    elevation: 0,
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(color: Colors.blueAccent),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              if (_errorMessage.isNotEmpty)
-                Text(
-                  _errorMessage,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _registerUser,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Register",
-                    style: TextStyle(fontSize: 18, color: Colors.blueAccent),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _buildTextField({

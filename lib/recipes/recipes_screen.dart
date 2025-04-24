@@ -38,21 +38,26 @@ class _RecipesScreenState extends State<RecipesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Healthy Recipes"),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        flexibleSpace: Theme.of(context).brightness == Brightness.dark
+            ? Container(color: const Color(0xFF1E1E1E))
+            : Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(
+              Icons.search,
+              color: Theme.of(context).iconTheme.color,
+            ),
             onPressed: () {
               showSearch(
                 context: context,
@@ -105,7 +110,10 @@ class _RecipesScreenState extends State<RecipesScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.blueAccent,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.blueGrey.shade900
+                                    : Colors.blueAccent,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -119,8 +127,13 @@ class _RecipesScreenState extends State<RecipesScreen> {
                         ),
                         if (userRole == 'admin')
                           IconButton(
-                            icon:
-                                const Icon(Icons.add, color: Colors.blueAccent),
+                            icon: Icon(
+                              Icons.add,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.blueAccent,
+                            ),
                             onPressed: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(

@@ -71,105 +71,107 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Basic Information'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+    return Theme(
+        data: ThemeData.light(), // 👈 force always light theme
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Basic Information'),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blueAccent, Colors.tealAccent],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Let's get started!",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Please enter your basic information to create an account.",
-              style: TextStyle(fontSize: 16, color: Colors.black54),
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _emailController,
-              hintText: "Email",
-              icon: Icons.mail,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-            _buildTextField(
-              controller: _usernameController,
-              hintText: "Username",
-              icon: Icons.person,
-            ),
-            const SizedBox(height: 16),
-            _buildTextField(
-              controller: _passwordController,
-              hintText: "Password",
-              icon: Icons.lock,
-              obscureText: !_passwordVisible,
-              toggleVisibility: () {
-                setState(() {
-                  _passwordVisible = !_passwordVisible;
-                });
-              },
-              isPasswordField: true,
-              isVisible: _passwordVisible,
-            ),
-            const SizedBox(height: 16),
-            _buildTextField(
-              controller: _confirmPasswordController,
-              hintText: "Confirm Password",
-              icon: Icons.lock,
-              obscureText: !_confirmPasswordVisible,
-              toggleVisibility: () {
-                setState(() {
-                  _confirmPasswordVisible = !_confirmPasswordVisible;
-                });
-              },
-              isPasswordField: true,
-              isVisible: _confirmPasswordVisible,
-            ),
-            const SizedBox(height: 16),
-            if (_errorMessage.isNotEmpty)
-              Text(
-                _errorMessage,
-                style: const TextStyle(color: Colors.red),
-              ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _continueRegistration,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Let's get started!",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
                   ),
                 ),
-                child: const Text(
-                  "Continue",
-                  style: TextStyle(fontSize: 18, color: Colors.blueAccent),
+                const SizedBox(height: 10),
+                const Text(
+                  "Please enter your basic information to create an account.",
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
                 ),
-              ),
+                const SizedBox(height: 20),
+                _buildTextField(
+                  controller: _emailController,
+                  hintText: "Email",
+                  icon: Icons.mail,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _usernameController,
+                  hintText: "Username",
+                  icon: Icons.person,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _passwordController,
+                  hintText: "Password",
+                  icon: Icons.lock,
+                  obscureText: !_passwordVisible,
+                  toggleVisibility: () {
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
+                  isPasswordField: true,
+                  isVisible: _passwordVisible,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _confirmPasswordController,
+                  hintText: "Confirm Password",
+                  icon: Icons.lock,
+                  obscureText: !_confirmPasswordVisible,
+                  toggleVisibility: () {
+                    setState(() {
+                      _confirmPasswordVisible = !_confirmPasswordVisible;
+                    });
+                  },
+                  isPasswordField: true,
+                  isVisible: _confirmPasswordVisible,
+                ),
+                const SizedBox(height: 16),
+                if (_errorMessage.isNotEmpty)
+                  Text(
+                    _errorMessage,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _continueRegistration,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Continue",
+                      style: TextStyle(fontSize: 18, color: Colors.blueAccent),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 
   Widget _buildTextField({

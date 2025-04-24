@@ -187,7 +187,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
             maxWidth: MediaQuery.of(context).size.width * 0.8,
           ),
           decoration: BoxDecoration(
-            color: isMe ? Colors.blueAccent : Colors.grey[200],
+            color: isMe
+                ? (Theme.of(context).brightness == Brightness.dark
+                    ? Colors.blueGrey.shade700
+                    : Colors.blueAccent)
+                : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(16),
               topRight: const Radius.circular(16),
@@ -220,9 +224,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
                             username,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: Colors.teal[700],
+                              fontSize: 16,
+                              color: isMe
+                                  ? Colors.white
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.color,
                             ),
                           ),
                         ),
@@ -259,15 +267,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Community Chat'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        flexibleSpace: Theme.of(context).brightness == Brightness.dark
+            ? Container(color: const Color(0xFF1E1E1E))
+            : Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
       ),
       body: Column(
         children: [
@@ -285,10 +295,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).scaffoldBackgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withOpacity(0.1),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),
@@ -303,7 +313,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       hintText: "Type your message...",
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       filled: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
@@ -318,12 +328,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 ),
                 const SizedBox(width: 10),
                 Ink(
-                  decoration: const ShapeDecoration(
-                    color: Colors.blueAccent,
-                    shape: CircleBorder(),
+                  decoration: ShapeDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade700
+                        : Colors.blueAccent,
+                    shape: const CircleBorder(),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.black),
+                    icon: Icon(
+                      Icons.send,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
                     onPressed: _sendMessage,
                   ),
                 ),

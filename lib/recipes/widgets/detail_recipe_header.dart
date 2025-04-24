@@ -1,5 +1,3 @@
-// lib/recipes/widgets/recipe_header.dart
-
 import 'package:flutter/material.dart';
 
 class RecipeHeader extends StatelessWidget {
@@ -24,6 +22,8 @@ class RecipeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,10 +33,10 @@ class RecipeHeader extends StatelessWidget {
             Expanded(
               child: Text(
                 name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: isDark ? Colors.white : Colors.blueAccent,
                 ),
               ),
             ),
@@ -47,10 +47,15 @@ class RecipeHeader extends StatelessWidget {
                   duration: const Duration(milliseconds: 300),
                   decoration: BoxDecoration(
                     color: isFavorite
-                        ? Colors.yellow.shade100
-                        : Colors.grey.shade200,
+                        ? (isDark
+                            ? Colors.grey.shade700
+                                .withOpacity(0.4) // visszafogott háttér
+                            : Colors.yellow.shade100)
+                        : (isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade200),
                     shape: BoxShape.circle,
-                    boxShadow: isFavorite
+                    boxShadow: !isDark && isFavorite
                         ? [
                             BoxShadow(
                               color: Colors.yellow.shade400,
@@ -63,7 +68,9 @@ class RecipeHeader extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   child: Icon(
                     isFavorite ? Icons.star : Icons.star_border,
-                    color: isFavorite ? Colors.orange : Colors.grey,
+                    color: isFavorite
+                        ? (isDark ? Colors.orange.shade200 : Colors.orange)
+                        : (isDark ? Colors.grey.shade400 : Colors.grey),
                     size: 30,
                   ),
                 ),
@@ -75,13 +82,14 @@ class RecipeHeader extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            const Icon(Icons.access_time, color: Colors.grey),
+            Icon(Icons.access_time,
+                color: isDark ? Colors.grey[400] : Colors.grey),
             const SizedBox(width: 8),
             Text(
               "Preparation Time: $prepTime minutes",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
-                color: Colors.black54,
+                color: isDark ? Colors.grey[300] : Colors.black54,
               ),
             ),
           ],
@@ -89,17 +97,24 @@ class RecipeHeader extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           description,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          style: TextStyle(
+            fontSize: 16,
+            color: isDark ? Colors.white70 : Colors.black87,
+          ),
         ),
         if (calories != null) ...[
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.local_fire_department, color: Colors.red),
+              Icon(Icons.local_fire_department,
+                  color: isDark ? Colors.red.shade300 : Colors.red),
               const SizedBox(width: 8),
               Text(
                 "Calories: $calories kcal",
-                style: const TextStyle(fontSize: 16, color: Colors.black54),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDark ? Colors.grey[300] : Colors.black54,
+                ),
               ),
             ],
           ),

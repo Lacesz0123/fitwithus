@@ -16,13 +16,11 @@ class FavoriteRecipesScreen extends StatelessWidget {
 
       final List<dynamic> favorites = userDoc['favoriteRecipes'] ?? [];
 
-      // Szűrjük ki az üres stringeket a kedvencek közül
       final List<String> validFavorites = favorites
           .where((recipeId) => recipeId is String && recipeId.isNotEmpty)
           .toList()
           .cast<String>();
 
-      // A kedvenc receptek beolvasása az érvényes azonosítók alapján
       if (validFavorites.isNotEmpty) {
         final recipes = await FirebaseFirestore.instance
             .collection('recipes')
@@ -36,18 +34,28 @@ class FavoriteRecipesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color(0xFF2C2C2C) : Colors.white;
+    final shadowColor =
+        isDark ? Colors.transparent : Colors.grey.withOpacity(0.3);
+    final titleColor = isDark ? Colors.grey.shade100 : Colors.blueAccent;
+    final placeholderIconColor = isDark ? Colors.grey.shade600 : Colors.grey;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Favorite Recipes"),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : null,
+        flexibleSpace: !isDark
+            ? Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              )
+            : null,
       ),
       body: FutureBuilder<List<DocumentSnapshot>>(
         future: _getFavoriteRecipes(),
@@ -56,11 +64,23 @@ class FavoriteRecipesScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return const Center(child: Text("Error loading favorite recipes"));
+            return Center(
+              child: Text(
+                "Error loading favorite recipes",
+                style:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+              ),
+            );
           }
           final recipes = snapshot.data ?? [];
           if (recipes.isEmpty) {
-            return const Center(child: Text("No favorite recipes found"));
+            return Center(
+              child: Text(
+                "No favorite recipes found",
+                style:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+              ),
+            );
           }
 
           return ListView.builder(
@@ -85,11 +105,11 @@ class FavoriteRecipesScreen extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: shadowColor,
                         spreadRadius: 2,
                         blurRadius: 5,
                         offset: const Offset(0, 3),
@@ -107,20 +127,20 @@ class FavoriteRecipesScreen extends StatelessWidget {
                                 height: 60,
                                 fit: BoxFit.cover,
                               )
-                            : const Icon(
+                            : Icon(
                                 Icons.fastfood,
                                 size: 60,
-                                color: Colors.grey,
+                                color: placeholderIconColor,
                               ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
                           recipeName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blueAccent,
+                            color: titleColor,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

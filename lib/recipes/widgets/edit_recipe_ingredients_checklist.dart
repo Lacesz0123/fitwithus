@@ -16,15 +16,20 @@ class EditRecipeIngredients extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? Colors.grey.shade300 : Colors.blueAccent;
+    final fillColor = isDark ? Colors.grey.shade800 : Colors.grey[100];
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Ingredients",
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.blueAccent,
+            color: primaryColor,
           ),
         ),
         const SizedBox(height: 12),
@@ -41,13 +46,24 @@ class EditRecipeIngredients extends StatelessWidget {
                     child: TextField(
                       controller: controllers[index],
                       onChanged: (_) => onChanged(),
+                      style: TextStyle(color: textColor),
                       decoration: InputDecoration(
                         labelText: "Ingredient",
+                        labelStyle: TextStyle(color: textColor),
+                        filled: true,
+                        fillColor: fillColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 12),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: primaryColor,
+                            width: 2,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -69,9 +85,10 @@ class EditRecipeIngredients extends StatelessWidget {
             icon: const Icon(Icons.add, color: Colors.white),
             label: const Text("Add Ingredient"),
             style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor:
+                  isDark ? Colors.grey.shade700 : Colors.blueAccent,
               foregroundColor: Colors.white,
-              side: const BorderSide(color: Colors.blueAccent),
+              side: BorderSide(color: primaryColor),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),

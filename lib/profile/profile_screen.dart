@@ -221,7 +221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isGuest = user?.isAnonymous ?? false;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Profile'),
         actions: [
@@ -262,27 +262,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
                 }
               },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
+              itemBuilder: (context) => const [
+                PopupMenuItem(
                   value: 'settings',
                   child: Text('Settings'),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'logout',
                   child: Text('Logout'),
                 ),
               ],
-            )
-        ],
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
             ),
-          ),
-        ),
+        ],
+        flexibleSpace: Theme.of(context).brightness == Brightness.dark
+            ? Container(
+                color:
+                    const Color(0xFF1E1E1E), // Dark mode: egyszínű sötét háttér
+              )
+            : Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
       ),
       body: isGuest
           ? Padding(
@@ -291,15 +296,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.person_outline,
-                      size: 100, color: Colors.blueAccent),
+                  Icon(
+                    Icons.person_outline,
+                    size: 100,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.blueAccent,
+                  ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     "You are currently using the app as a Guest.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.black87,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -310,11 +320,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         MaterialPageRoute(builder: (_) => const LoginScreen()),
                       );
                     },
-                    icon: const Icon(Icons.login, color: Colors.white),
-                    label: const Text("Create account here",
-                        style: TextStyle(color: Colors.white)),
+                    icon: Icon(
+                      Icons.login,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.white,
+                    ),
+                    label: Text(
+                      "Create account here",
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.white,
+                      ),
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
+                      backgroundColor:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey.shade800
+                              : Colors.blueAccent,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 32, vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -387,7 +411,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                         ),
 
-                        // ✅ STATISZTIKÁK IDE KERÜLTEK ÁT
+                        // STATISZTIKÁK IDE KERÜLTEK ÁT
                         const SizedBox(height: 30),
                         WorkoutProgressCard(
                             completedWorkouts: _completedWorkouts),
@@ -400,28 +424,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Update Weight',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blueAccent,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.color,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Theme.of(context).cardColor,
                                   borderRadius: BorderRadius.circular(16),
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                  border: Border.all(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.grey.shade700
+                                        : Colors.grey.shade300,
+                                  ),
+                                  boxShadow: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? []
+                                      : [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.03),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                 ),
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
@@ -429,11 +464,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     TextField(
                                       controller: _weightController,
                                       keyboardType: TextInputType.number,
-                                      decoration: const InputDecoration(
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge
+                                              ?.color),
+                                      decoration: InputDecoration(
                                         hintText: 'Enter weight in kg',
+                                        hintStyle: TextStyle(
+                                          color: Theme.of(context).hintColor,
+                                        ),
                                         border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 14, vertical: 10),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 14, vertical: 10),
+                                        filled: true,
+                                        fillColor: Theme.of(context).cardColor,
                                       ),
                                     ),
                                     const SizedBox(height: 14),
@@ -447,8 +493,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                     .white), // <- ez a kulcs
                                             label: const Text("Add Weight"),
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.blueAccent,
+                                              backgroundColor: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.dark
+                                                  ? Colors.grey.shade700
+                                                  : Colors.blueAccent,
                                               foregroundColor: Colors.white,
                                               padding:
                                                   const EdgeInsets.symmetric(
@@ -495,28 +544,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Daily Calorie Intake',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blueAccent,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.color,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Theme.of(context).cardColor,
                                   borderRadius: BorderRadius.circular(16),
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                  border: Border.all(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.grey.shade700
+                                        : Colors.grey.shade300,
+                                  ),
+                                  boxShadow: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? []
+                                      : [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.03),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                 ),
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
@@ -524,9 +584,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   children: [
                                     Text(
                                       'Current: ${_dailyCalories.toStringAsFixed(0)} kcal',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
+                                        color: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.color,
                                       ),
                                     ),
                                     const SizedBox(height: 16),
@@ -557,8 +621,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 value: progress,
                                                 minHeight: 14,
                                                 backgroundColor:
-                                                    Colors.grey.shade300,
-                                                color: Colors.teal,
+                                                    Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? Colors.grey.shade700
+                                                        : Colors.grey.shade300,
+                                                color: Theme.of(context)
+                                                            .brightness ==
+                                                        Brightness.dark
+                                                    ? Colors.white
+                                                    : Colors.blueAccent,
                                               ),
                                             ),
                                           ],
@@ -572,13 +644,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           child: TextField(
                                             controller: _calorieInputController,
                                             keyboardType: TextInputType.number,
-                                            decoration: const InputDecoration(
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyLarge
+                                                  ?.color,
+                                            ),
+                                            decoration: InputDecoration(
                                               hintText: 'Enter kcal (e.g. 200)',
-                                              border: OutlineInputBorder(),
+                                              hintStyle: TextStyle(
+                                                color:
+                                                    Theme.of(context).hintColor,
+                                              ),
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
                                               contentPadding:
-                                                  EdgeInsets.symmetric(
+                                                  const EdgeInsets.symmetric(
                                                       horizontal: 14,
                                                       vertical: 10),
+                                              filled: true,
+                                              fillColor:
+                                                  Theme.of(context).cardColor,
                                             ),
                                           ),
                                         ),
@@ -596,7 +684,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                   .white), // <- itt a trükk
                                           label: const Text("Add"),
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.blueAccent,
+                                            backgroundColor:
+                                                Theme.of(context).brightness ==
+                                                        Brightness.dark
+                                                    ? Colors.grey.shade700
+                                                    : Colors.blueAccent,
                                             foregroundColor: Colors.white,
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 28, vertical: 12),

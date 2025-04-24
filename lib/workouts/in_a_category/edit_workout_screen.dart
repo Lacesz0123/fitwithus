@@ -30,7 +30,6 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     _titleController = TextEditingController(text: widget.initialTitle);
     _descriptionController =
         TextEditingController(text: widget.initialDescription);
-
     for (String step in widget.initialSteps) {
       _stepsControllers.add(TextEditingController(text: step));
     }
@@ -136,18 +135,29 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color buttonColor = isDark ? Colors.white : Colors.blueAccent;
+    final Color primaryColor =
+        isDark ? Colors.grey.shade700 : Colors.blueAccent;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final Color backgroundColor =
+        isDark ? const Color(0xFF1E1E1E) : Colors.white;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Workout'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        flexibleSpace: isDark
+            ? Container(color: const Color(0xFF1E1E1E))
+            : Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -160,15 +170,18 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Workout Title',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            Text('Workout Title',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor)),
             const SizedBox(height: 6),
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
                 hintText: 'Enter workout title',
+                fillColor: backgroundColor,
+                filled: true,
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 contentPadding:
@@ -176,16 +189,19 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Description',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            Text('Description',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor)),
             const SizedBox(height: 6),
             TextField(
               controller: _descriptionController,
               maxLines: 4,
               decoration: InputDecoration(
                 hintText: 'Enter workout description',
+                fillColor: backgroundColor,
+                filled: true,
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 contentPadding:
@@ -193,10 +209,11 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
               ),
             ),
             const SizedBox(height: 28),
-            const Text(
-              'Steps',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            Text('Steps',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor)),
             const SizedBox(height: 12),
             ListView.builder(
               shrinkWrap: true,
@@ -212,6 +229,8 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
                           controller: _stepsControllers[index],
                           decoration: InputDecoration(
                             labelText: 'Step ${index + 1}',
+                            fillColor: backgroundColor,
+                            filled: true,
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10)),
                             contentPadding: const EdgeInsets.symmetric(
@@ -231,26 +250,28 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
               },
             ),
             const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: _addStep,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Step'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.blueAccent,
-                side: const BorderSide(color: Colors.blueAccent),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: _addStep,
+                icon: Icon(Icons.add, color: buttonColor),
+                label: Text('Add Step', style: TextStyle(color: buttonColor)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: buttonColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton.icon(
                 onPressed: _saveWorkout,
-                icon: const Icon(Icons.save),
-                label: const Text('Save Changes'),
+                icon: const Icon(Icons.save, color: Colors.white),
+                label: const Text('Save Changes',
+                    style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
+                  backgroundColor: primaryColor,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                   shape: RoundedRectangleBorder(

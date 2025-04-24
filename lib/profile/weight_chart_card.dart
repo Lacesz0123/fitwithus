@@ -19,31 +19,37 @@ class WeightChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.blueAccent;
+    final containerColor = isDark ? Colors.grey.shade900 : Colors.white;
+    final borderColor = isDark ? Colors.grey.shade700 : Colors.grey.shade300;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Weight Change Over Time',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.blueAccent,
+              color: textColor,
             ),
           ),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: containerColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: borderColor),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
+                if (!isDark)
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
               ],
             ),
             padding: const EdgeInsets.all(16),
@@ -54,7 +60,12 @@ class WeightChartCard extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No weight data available'));
+                  return Center(
+                    child: Text(
+                      'No weight data available',
+                      style: TextStyle(color: Theme.of(context).hintColor),
+                    ),
+                  );
                 }
 
                 final entries = snapshot.data!;
@@ -75,24 +86,24 @@ class WeightChartCard extends StatelessWidget {
                         drawHorizontalLine: true,
                         horizontalInterval: 5,
                         getDrawingHorizontalLine: (value) => FlLine(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: isDark
+                              ? Colors.white.withOpacity(0.05)
+                              : Colors.grey.withOpacity(0.1),
                           strokeWidth: 1,
                         ),
                         drawVerticalLine: false,
                       ),
-                      borderData: FlBorderData(
-                        show: false,
-                      ),
+                      borderData: FlBorderData(show: false),
                       lineBarsData: [
                         LineChartBarData(
                           spots: spots,
                           isCurved: true,
-                          color: Colors.teal,
+                          color: Colors.grey.shade700,
                           barWidth: 3,
                           isStrokeCapRound: true,
                           belowBarData: BarAreaData(
                             show: true,
-                            color: Colors.teal.withOpacity(0.12),
+                            color: Colors.grey.shade700.withOpacity(0.12),
                           ),
                           dotData: FlDotData(show: false),
                         ),
@@ -105,14 +116,16 @@ class WeightChartCard extends StatelessWidget {
                           sideTitles: SideTitles(
                             showTitles: true,
                             interval: 5,
+                            reservedSize: 40,
                             getTitlesWidget: (value, meta) => Text(
                               '${value.toInt()} kg',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: isDark
+                                    ? Colors.grey.shade300
+                                    : Colors.grey.shade600,
                               ),
                             ),
-                            reservedSize: 40,
                           ),
                         ),
                         rightTitles: AxisTitles(

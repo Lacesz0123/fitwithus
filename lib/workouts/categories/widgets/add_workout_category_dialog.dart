@@ -63,7 +63,13 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? Colors.grey.shade300 : Colors.blueAccent;
+    final backgroundColor = isDark ? Colors.grey.shade900 : Colors.white;
+    final inputFillColor = isDark ? Colors.grey.shade800 : Colors.grey[100];
+
     return Dialog(
+      backgroundColor: backgroundColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: Padding(
@@ -72,17 +78,16 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.add_circle_outline,
-                      color: Colors.blueAccent, size: 28),
-                  SizedBox(width: 10),
+                  Icon(Icons.add_circle_outline, color: primaryColor, size: 28),
+                  const SizedBox(width: 10),
                   Text(
                     'Add New Category',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
+                      color: primaryColor,
                     ),
                   ),
                 ],
@@ -95,15 +100,14 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
                   labelText: 'Category Title',
                   counterText: '',
                   filled: true,
-                  fillColor: Colors.grey[100],
-                  prefixIcon: const Icon(Icons.title, color: Colors.blueAccent),
+                  fillColor: inputFillColor,
+                  prefixIcon: Icon(Icons.title, color: primaryColor),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Colors.blueAccent, width: 2),
+                    borderSide: BorderSide(color: primaryColor, width: 2),
                   ),
                 ),
               ),
@@ -114,9 +118,11 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
                   height: 150,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent.withOpacity(0.05),
+                    color: isDark
+                        ? Colors.grey.shade800.withOpacity(0.4)
+                        : Colors.blueAccent.withOpacity(0.05),
                     border: Border.all(
-                      color: Colors.blueAccent.withOpacity(0.4),
+                      color: primaryColor.withOpacity(0.4),
                       width: 1.5,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -132,19 +138,20 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
                             filterQuality: FilterQuality.high,
                             errorBuilder: (context, error, stackTrace) =>
                                 const Icon(Icons.broken_image),
-                          ))
-                      : const Center(
+                          ),
+                        )
+                      : Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.image_outlined,
-                                  size: 40, color: Colors.blueAccent),
-                              SizedBox(height: 8),
+                                  size: 40, color: primaryColor),
+                              const SizedBox(height: 8),
                               Text(
                                 'Tap to select image',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.blueAccent,
+                                  color: primaryColor,
                                 ),
                               ),
                             ],
@@ -158,16 +165,22 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: Colors.redAccent)),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: _uploadCategory,
-                    icon: const Icon(Icons.check_circle_outline),
+                    icon: const Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.white,
+                    ),
                     label: const Text('Add'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
+                      backgroundColor:
+                          isDark ? Colors.grey.shade700 : Colors.blueAccent,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),

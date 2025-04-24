@@ -63,17 +63,27 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.category} Workouts'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: AppBar(
+          title: Text('${widget.category} Workouts'),
+          automaticallyImplyLeading: true,
+          backgroundColor:
+              isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
+          elevation: 0,
+          flexibleSpace: isDark
+              ? Container(color: const Color(0xFF1E1E1E))
+              : Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blueAccent, Colors.tealAccent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                ),
         ),
       ),
       body: Column(
@@ -118,11 +128,13 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                             horizontal: 12, vertical: 6),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? Colors.grey.shade800 : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
+                              color: isDark
+                                  ? Colors.black26
+                                  : Colors.grey.withOpacity(0.3),
                               spreadRadius: 2,
                               blurRadius: 5,
                               offset: const Offset(0, 3),
@@ -137,18 +149,22 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                                 children: [
                                   Text(
                                     workoutTitle,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.blueAccent,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.blueAccent,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     workoutDescription,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 16,
-                                      color: Colors.black87,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black87,
                                     ),
                                   ),
                                 ],
@@ -156,9 +172,11 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                             ),
                             if (userRole == 'admin')
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.settings,
-                                  color: Colors.blueAccent,
+                                  color: isDark
+                                      ? Colors.grey.shade300
+                                      : Colors.blueAccent,
                                 ),
                                 onPressed: () => editWorkout(context, workout),
                               ),
@@ -186,7 +204,9 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor:
+                        isDark ? Colors.blueGrey.shade700 : Colors.blueAccent,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -195,7 +215,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                   icon: const Icon(Icons.add, color: Colors.white),
                   label: const Text(
                     'Add New',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
               ),

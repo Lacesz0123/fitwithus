@@ -120,21 +120,25 @@ class _AIChatScreenState extends State<AIChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Chat'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        flexibleSpace: Theme.of(context).brightness == Brightness.dark
+            ? Container(color: const Color(0xFF1E1E1E))
+            : Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
         actions: [
-          // Törlés ikon (ha szeretnéd aktiválni)
           IconButton(
-            icon: Icon(Icons.delete_outline),
+            icon: Icon(
+              Icons.delete_outline,
+              color: Theme.of(context).iconTheme.color,
+            ),
             onPressed: _clearChatHistory,
-          )
+          ),
         ],
       ),
       body: Column(
@@ -154,7 +158,11 @@ class _AIChatScreenState extends State<AIChatScreen> {
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.7),
                     decoration: BoxDecoration(
-                      color: isUser ? Colors.blueAccent : Colors.grey[300],
+                      color: isUser
+                          ? (Theme.of(context).brightness == Brightness.dark
+                              ? Colors.blueGrey.shade700
+                              : Colors.blueAccent)
+                          : Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
@@ -167,7 +175,9 @@ class _AIChatScreenState extends State<AIChatScreen> {
                     child: Text(
                       _messages[index]["message"]!,
                       style: TextStyle(
-                        color: isUser ? Colors.white : Colors.black87,
+                        color: isUser
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyMedium?.color,
                         fontSize: 16,
                       ),
                     ),
@@ -184,7 +194,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).scaffoldBackgroundColor,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -200,9 +210,12 @@ class _AIChatScreenState extends State<AIChatScreen> {
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: "Type your message...",
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       filled: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
@@ -222,7 +235,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
                     shape: CircleBorder(),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.black),
+                    icon: Icon(
+                      Icons.send,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
                     onPressed: _sendMessage,
                   ),
                 ),

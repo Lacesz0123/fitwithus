@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '/providers/theme_provider.dart'; // vagy ahova tetted
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -70,7 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return Dialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
           insetPadding:
               const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
           child: Padding(
@@ -81,10 +83,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Text(
                   'Edit $field',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -353,18 +355,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        flexibleSpace: Theme.of(context).brightness == Brightness.dark
+            ? Container(
+                color: const Color(0xFF1E1E1E), // sötét módra egyszínű háttér
+              )
+            : Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -372,12 +379,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Profile Information',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.blueAccent,
                 ),
               ),
               const SizedBox(height: 20),
@@ -393,29 +402,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const Divider(thickness: 1.5),
               _buildProfileItem('Gender', _gender ?? ''),
-              const SizedBox(height: 32),
-              const Text(
+              const SizedBox(height: 30),
+              Text(
                 'Appearance',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.blueAccent,
                 ),
               ),
-              const SizedBox(height: 12),
-              SwitchListTile.adaptive(
-                title: const Text(
-                  'Dark Mode',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                ),
-                value: false, // később majd dinamikus lesz
-                onChanged: (bool newValue) {
-                  // majd később: setState(() { isDarkMode = newValue; })
-                },
-                activeColor: Colors.blueAccent,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: RoundedRectangleBorder(
+              const SizedBox(height: 16),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade800.withOpacity(0.4)
+                      : Colors.blueAccent.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade600
+                        : Colors.blueAccent.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Dark Mode',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                    ),
+                    Switch.adaptive(
+                      value: themeProvider.isDarkMode,
+                      onChanged: (bool newValue) {
+                        themeProvider.toggleTheme(newValue);
+                      },
+                      activeColor: Colors.grey.shade700,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 40),
@@ -453,11 +486,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       subtitle: Text(
         value,
-        style: const TextStyle(fontSize: 16, color: Colors.black87),
+        style: TextStyle(
+          fontSize: 16,
+          color: Theme.of(context).textTheme.bodyMedium?.color,
+        ),
       ),
       trailing: editable
           ? IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blueAccent),
+              icon: Icon(
+                Icons.edit,
+                color: Theme.of(context).iconTheme.color,
+              ),
               onPressed: () => _showEditDialog(field, value),
             )
           : null,

@@ -14,7 +14,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   List<TextEditingController> _stepsControllers = [];
-  bool _sendNotification = false; // UI kapcsolóhoz
+  bool _sendNotification = false;
 
   @override
   void dispose() {
@@ -74,63 +74,72 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? Colors.white : Colors.blueAccent;
+    final buttonColor = isDark ? Colors.grey.shade700 : Colors.blueAccent;
+    final backgroundColor = isDark ? const Color(0xFF1E1E1E) : null;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add New Workout'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        backgroundColor: backgroundColor,
+        flexibleSpace: !isDark
+            ? Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.tealAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              )
+            : null,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Workout Title',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            Text('Workout Title',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor)),
             const SizedBox(height: 6),
             TextField(
               controller: _titleController,
+              style: TextStyle(color: primaryColor),
               decoration: InputDecoration(
                 hintText: 'Enter workout title',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                hintStyle: TextStyle(color: primaryColor.withOpacity(0.5)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Description',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            Text('Description',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor)),
             const SizedBox(height: 6),
             TextField(
               controller: _descriptionController,
               maxLines: 4,
+              style: TextStyle(color: primaryColor),
               decoration: InputDecoration(
                 hintText: 'Enter workout description',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                hintStyle: TextStyle(color: primaryColor.withOpacity(0.5)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 28),
-            const Text(
-              'Steps',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            Text('Steps',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor)),
             const SizedBox(height: 12),
             ListView.builder(
               shrinkWrap: true,
@@ -144,13 +153,12 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                       Expanded(
                         child: TextField(
                           controller: _stepsControllers[index],
+                          style: TextStyle(color: primaryColor),
                           decoration: InputDecoration(
                             labelText: 'Step ${index + 1}',
+                            labelStyle: TextStyle(color: primaryColor),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
+                                borderRadius: BorderRadius.circular(10)),
                           ),
                         ),
                       ),
@@ -166,40 +174,39 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
               },
             ),
             const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: _addStep,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Step'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.blueAccent,
-                side: const BorderSide(color: Colors.blueAccent),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: _addStep,
+                icon: Icon(Icons.add, color: primaryColor),
+                label: Text('Add Step', style: TextStyle(color: primaryColor)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: primaryColor),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
               ),
             ),
+            const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text(
-                'Send push notification to users',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
+              title: Text('Send push notification to users',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: primaryColor)),
               value: _sendNotification,
-              onChanged: (value) {
-                setState(() {
-                  _sendNotification = value;
-                });
-              },
-              activeColor: Colors.blueAccent,
+              onChanged: (value) => setState(() => _sendNotification = value),
+              activeColor: primaryColor,
               contentPadding: EdgeInsets.zero,
             ),
             const SizedBox(height: 16),
             Center(
               child: ElevatedButton.icon(
                 onPressed: _addWorkout,
-                icon: const Icon(Icons.check),
-                label: const Text('Add Workout'),
+                icon: const Icon(Icons.check, color: Colors.white),
+                label: const Text(
+                  'Add Workout',
+                  style: TextStyle(color: Colors.white),
+                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
+                  backgroundColor: buttonColor,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                   shape: RoundedRectangleBorder(

@@ -80,7 +80,9 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     return Scaffold(
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.lightBlueAccent,
+        selectedItemColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.blueAccent,
         unselectedItemColor: Colors.grey,
         currentIndex: _currentIndex,
         onTap: (int newIndex) {

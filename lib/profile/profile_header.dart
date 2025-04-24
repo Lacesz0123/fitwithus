@@ -24,14 +24,21 @@ class ProfileHeader extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Colors.tealAccent, Colors.blueAccent],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade800 // dark mode-hoz sötét háttér
+                  : null, // light mode esetén a gradient
+              gradient: Theme.of(context).brightness == Brightness.dark
+                  ? null
+                  : const LinearGradient(
+                      colors: [Colors.tealAccent, Colors.blueAccent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black.withOpacity(0.6)
+                      : Colors.grey.withOpacity(0.3),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
@@ -45,7 +52,9 @@ class ProfileHeader extends StatelessWidget {
                   : (defaultProfileImageUrl != null
                       ? NetworkImage(defaultProfileImageUrl!)
                       : null),
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade900
+                  : Colors.white,
               child: profileImageUrl == null && defaultProfileImageUrl == null
                   ? const Icon(Icons.person, size: 70, color: Colors.grey)
                   : null,
@@ -55,9 +64,10 @@ class ProfileHeader extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           username,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
           textAlign: TextAlign.center,
         ),
