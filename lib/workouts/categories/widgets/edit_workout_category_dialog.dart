@@ -211,7 +211,10 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _updateCategory,
-                      icon: const Icon(Icons.save),
+                      icon: const Icon(
+                        Icons.save,
+                        color: Colors.white, // <-- ikon színe fehér
+                      ),
                       label: const Text('Update'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
@@ -228,7 +231,10 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _deleteCategory,
-                      icon: const Icon(Icons.delete_forever),
+                      icon: const Icon(
+                        Icons.delete_forever,
+                        color: Colors.white, // <-- biztosan fehér lesz
+                      ),
                       label: const Text('Delete'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
