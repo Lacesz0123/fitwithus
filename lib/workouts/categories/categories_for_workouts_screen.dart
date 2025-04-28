@@ -123,6 +123,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: GridView.builder(
+                    physics: const BouncingScrollPhysics(), // <-- EZ az új sor
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,

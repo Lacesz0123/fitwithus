@@ -350,6 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             )
           : SingleChildScrollView(
+              physics: const BouncingScrollPhysics(), // <-- EZ az új sor
               child: Center(
                 child: FutureBuilder<Map<String, dynamic>?>(
                   future: getUserData(),

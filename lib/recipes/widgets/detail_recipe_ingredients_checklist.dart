@@ -1,18 +1,78 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class IngredientChecklist extends StatelessWidget {
+class IngredientChecklist extends StatefulWidget {
   final Map<String, bool> ingredientsStatus;
-  final void Function(String ingredient) onToggle;
+  final String recipeId;
 
   const IngredientChecklist({
     super.key,
     required this.ingredientsStatus,
-    required this.onToggle,
+    required this.recipeId,
   });
+
+  @override
+  State<IngredientChecklist> createState() => _IngredientChecklistState();
+}
+
+class _IngredientChecklistState extends State<IngredientChecklist> {
+  late Map<String, bool> _localStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeIngredients();
+  }
+
+  @override
+  void didUpdateWidget(covariant IngredientChecklist oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ingredientsStatus != widget.ingredientsStatus &&
+        widget.ingredientsStatus.isNotEmpty) {
+      _initializeIngredients();
+    }
+  }
+
+  Future<void> _initializeIngredients() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getStringList('checkedIngredients_${widget.recipeId}');
+
+    if (saved != null && saved.length == widget.ingredientsStatus.length) {
+      final ingredientKeys = widget.ingredientsStatus.keys.toList();
+      _localStatus = {
+        for (int i = 0; i < ingredientKeys.length; i++)
+          ingredientKeys[i]: saved[i] == 'true'
+      };
+    } else {
+      _localStatus = {...widget.ingredientsStatus};
+      await _saveCheckedIngredients();
+    }
+
+    setState(() {});
+  }
+
+  Future<void> _saveCheckedIngredients() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      'checkedIngredients_${widget.recipeId}',
+      _localStatus.values.map((e) => e.toString()).toList(),
+    );
+  }
+
+  void _toggleIngredient(String ingredient) {
+    setState(() {
+      _localStatus[ingredient] = !(_localStatus[ingredient] ?? false);
+    });
+    _saveCheckedIngredients();
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (_localStatus.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,8 +86,8 @@ class IngredientChecklist extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        ...ingredientsStatus.keys.map((ingredient) {
-          final isChecked = ingredientsStatus[ingredient] ?? false;
+        ..._localStatus.keys.map((ingredient) {
+          final isChecked = _localStatus[ingredient] ?? false;
 
           return CheckboxListTile(
             title: Text(
@@ -43,7 +103,7 @@ class IngredientChecklist extends StatelessWidget {
               ),
             ),
             value: isChecked,
-            onChanged: (_) => onToggle(ingredient),
+            onChanged: (_) => _toggleIngredient(ingredient),
             controlAffinity: ListTileControlAffinity.leading,
             activeColor: isDark ? Colors.grey.shade400 : Colors.blueAccent,
             checkColor: Colors.white,

@@ -106,6 +106,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
                 List<Map<String, dynamic>> workouts = snapshot.data!;
 
                 return ListView.builder(
+                  physics: const BouncingScrollPhysics(),
                   itemCount: workouts.length,
                   itemBuilder: (context, index) {
                     Map<String, dynamic> workout = workouts[index];

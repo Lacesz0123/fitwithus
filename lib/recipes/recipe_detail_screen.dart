@@ -101,12 +101,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }
   }
 
-  void _toggleIngredientStatus(String ingredient) {
-    setState(() {
-      ingredientsStatus[ingredient] = !(ingredientsStatus[ingredient] ?? false);
-    });
-  }
-
   Future<void> _addRecipeCaloriesToDaily() async {
     if (calories == null) return;
     final user = FirebaseAuth.instance.currentUser;
@@ -176,7 +170,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   const SizedBox(height: 20),
                   IngredientChecklist(
                     ingredientsStatus: ingredientsStatus,
-                    onToggle: _toggleIngredientStatus,
+                    recipeId: widget.recipeId,
                   ),
                   const SizedBox(height: 20),
                   if (imageUrl != null) ...[
@@ -191,7 +185,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ),
                     const SizedBox(height: 20),
                   ],
-                  RecipeSteps(steps: steps),
+                  steps.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : RecipeSteps(steps: steps, recipeId: widget.recipeId),
                 ],
               ),
             ),

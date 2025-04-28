@@ -93,6 +93,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           }
 
           return ListView(
+            physics: const BouncingScrollPhysics(), // <-- EZ AZ ÚJ
             children: categorizedRecipes.entries.map((entry) {
               String difficulty = entry.key;
               List<DocumentSnapshot> recipes = entry.value;
@@ -149,6 +150,8 @@ class _RecipesScreenState extends State<RecipesScreen> {
                   SizedBox(
                     height: 180,
                     child: ListView.builder(
+                      physics:
+                          const BouncingScrollPhysics(), // <-- EZT IS hozzáadjuk a belsőhöz!
                       scrollDirection: Axis.horizontal,
                       itemCount: recipes.length,
                       itemBuilder: (context, index) {

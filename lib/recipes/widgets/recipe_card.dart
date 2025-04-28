@@ -44,14 +44,37 @@ class RecipeCard extends StatelessWidget {
                     children: [
                       if (imageUrl != null)
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(15.0),
-                          child: Image.network(
-                            imageUrl,
-                            height: 90,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                            borderRadius: BorderRadius.circular(15.0),
+                            child: Image.network(
+                              imageUrl,
+                              height: 90,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress) {
+                                if (loadingProgress == null) {
+                                  return child; // Ha már betöltött a kép, simán megjelenítjük
+                                } else {
+                                  return Container(
+                                    height: 90,
+                                    width: double.infinity,
+                                    color: Theme.of(context).cardColor,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.white
+                                              : Colors.blueAccent,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            )),
                       const SizedBox(height: 8),
                       Flexible(
                         child: Text(
