@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:async'; // ez kell az időzítéshez
 
 class WorkoutDetailScreen extends StatefulWidget {
   final String workoutId;
@@ -388,11 +389,177 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                       ),
                     ),
                   ),
+                RestTimerWidget(isDark: isDark),
               ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+class RestTimerWidget extends StatefulWidget {
+  final bool isDark;
+
+  const RestTimerWidget({super.key, required this.isDark});
+
+  @override
+  State<RestTimerWidget> createState() => _RestTimerWidgetState();
+}
+
+class _RestTimerWidgetState extends State<RestTimerWidget> {
+  int _selectedMinutes = 1;
+  Duration _remainingTime = const Duration(minutes: 1);
+  Timer? _timer;
+  bool _isRunning = false;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    if (_timer != null) _timer!.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingTime.inSeconds > 0) {
+        setState(() {
+          _remainingTime -= const Duration(seconds: 1);
+        });
+      } else {
+        timer.cancel();
+        setState(() {
+          _isRunning = false;
+        });
+        // Itt adhatsz hangot vagy rezgést
+      }
+    });
+    setState(() {
+      _isRunning = true;
+    });
+  }
+
+  void _pauseTimer() {
+    if (_timer != null) {
+      _timer!.cancel();
+      setState(() {
+        _isRunning = false;
+      });
+    }
+  }
+
+  void _resetTimer() {
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+    setState(() {
+      _remainingTime = Duration(minutes: _selectedMinutes);
+      _isRunning = false;
+    });
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    return '${twoDigits(duration.inMinutes)}:${twoDigits(duration.inSeconds.remainder(60))}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primaryColor = widget.isDark ? Colors.white : Colors.blueAccent;
+    final textColor = widget.isDark ? Colors.white : Colors.black87;
+
+    return Column(
+      children: [
+        const SizedBox(height: 30),
+        Text(
+          'Rest Timer',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: primaryColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: widget.isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color:
+                  widget.isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+            ),
+            boxShadow: !widget.isDark
+                ? [
+                    BoxShadow(
+                      color: Colors.blueAccent.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : [],
+          ),
+          child: Column(
+            children: [
+              Text(
+                _formatDuration(_remainingTime),
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  DropdownButton<int>(
+                    value: _selectedMinutes,
+                    dropdownColor:
+                        widget.isDark ? Colors.grey.shade800 : Colors.white,
+                    style: TextStyle(color: textColor),
+                    items: [1, 2, 3, 4, 5]
+                        .map((minute) => DropdownMenuItem(
+                              value: minute,
+                              child: Text('$minute min'),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      if (!_isRunning && value != null) {
+                        setState(() {
+                          _selectedMinutes = value;
+                          _remainingTime = Duration(minutes: value);
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 20),
+                  ElevatedButton(
+                    onPressed: _isRunning ? _pauseTimer : _startTimer,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isRunning
+                          ? Colors.redAccent
+                          : (widget.isDark ? Colors.grey : Colors.blueAccent),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(_isRunning ? 'Pause' : 'Start'),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _resetTimer,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade700,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Reset'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
