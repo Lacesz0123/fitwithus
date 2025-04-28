@@ -153,7 +153,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     return GestureDetector(
       onLongPress: () {
-        if (!isMe && _userRole == 'admin') {
+        if (_userRole == 'admin') {
           showDialog(
             context: context,
             builder: (_) => AlertDialog(
@@ -168,7 +168,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    _deleteMessage(docId);
+                    _deleteMessage(docId); // ez már jól törli Firestore-ból
                   },
                   child:
                       const Text('Delete', style: TextStyle(color: Colors.red)),
