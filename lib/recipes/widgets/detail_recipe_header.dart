@@ -55,15 +55,7 @@ class RecipeHeader extends StatelessWidget {
                             ? Colors.grey.shade800
                             : Colors.grey.shade200),
                     shape: BoxShape.circle,
-                    boxShadow: !isDark && isFavorite
-                        ? [
-                            BoxShadow(
-                              color: Colors.yellow.shade400,
-                              blurRadius: 10,
-                              spreadRadius: 1,
-                            ),
-                          ]
-                        : [],
+                    boxShadow: [],
                   ),
                   padding: const EdgeInsets.all(8),
                   child: Icon(

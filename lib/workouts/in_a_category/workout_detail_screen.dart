@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // ez kell az időzítéshez
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WorkoutDetailScreen extends StatefulWidget {
   final String workoutId;
@@ -17,6 +18,8 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
   double? userRating;
   double averageRating = 0.0;
   bool isGuest = false;
+  List<dynamic> steps = []; // <-- a globális steps lista
+  List<bool> _checkedSteps = []; // <-- a pipálási állapotok
 
   @override
   void initState() {
@@ -222,175 +225,142 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
           Map<String, dynamic> workoutData = snapshot.data!;
           String title = workoutData['title'] ?? 'No Title';
           String description = workoutData['description'] ?? 'No Description';
-          List<dynamic> steps = workoutData['steps'] ?? [];
+          steps = workoutData['steps'] ?? [];
+          if (_checkedSteps.length != steps.length) {
+            _checkedSteps = List<bool>.filled(steps.length, false);
+          }
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor,
-                        ),
-                      ),
-                    ),
-                    if (!isGuest)
-                      GestureDetector(
-                        onTap: _toggleFavorite,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          decoration: BoxDecoration(
-                            color: isFavorite
-                                ? (isDark
-                                    ? Colors.grey.shade700.withOpacity(0.4)
-                                    : Colors.yellow.shade100)
-                                : (isDark
-                                    ? Colors.grey.shade800
-                                    : Colors.grey.shade200),
-                            shape: BoxShape.circle,
-                            boxShadow: !isDark && isFavorite
-                                ? [
-                                    BoxShadow(
-                                      color: Colors.yellow.shade400,
-                                      blurRadius: 10,
-                                      spreadRadius: 1,
-                                    ),
-                                  ]
-                                : [],
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          child: Icon(
-                            isFavorite ? Icons.star : Icons.star_border,
-                            color: isFavorite
-                                ? (isDark
-                                    ? Colors.orange.shade300
-                                    : Colors.orange)
-                                : (isDark ? Colors.grey.shade400 : Colors.grey),
-                            size: 30,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  description,
-                  style: TextStyle(fontSize: 16, color: textColor),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Steps:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: steps.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.grey.shade900
-                              : Colors.grey.shade100,
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.grey.shade700
-                                : Colors.grey.shade300,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${index + 1}. ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: primaryColor,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                steps[index],
-                                style:
-                                    TextStyle(fontSize: 15.5, color: textColor),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (!isGuest) ...[
-                  Column(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
-                        style: TextStyle(fontSize: 15, color: textColor),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
                       ),
-                      Slider(
-                        value: userRating ?? 1.0,
-                        onChanged: (value) =>
-                            setState(() => userRating = value),
-                        onChangeEnd: _updateRating,
-                        min: 1,
-                        max: 5,
-                        divisions: 4,
-                        label: userRating?.toStringAsFixed(1),
-                        activeColor: primaryColor,
-                      ),
+                      if (!isGuest)
+                        GestureDetector(
+                          onTap: _toggleFavorite,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            decoration: BoxDecoration(
+                              color: isFavorite
+                                  ? (isDark
+                                      ? Colors.grey.shade700.withOpacity(0.4)
+                                      : Colors.yellow.shade100)
+                                  : (isDark
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade200),
+                              shape: BoxShape.circle,
+                              boxShadow: [],
+                            ),
+                            padding: const EdgeInsets.all(8),
+                            child: Icon(
+                              isFavorite ? Icons.star : Icons.star_border,
+                              color: isFavorite
+                                  ? (isDark
+                                      ? Colors.orange.shade300
+                                      : Colors.orange)
+                                  : (isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey),
+                              size: 30,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
-                ],
-                Center(
-                  child: Text(
-                    'Average Rating: ${averageRating.toStringAsFixed(1)}',
+                  const SizedBox(height: 16),
+                  Text(
+                    description,
+                    style: TextStyle(fontSize: 16, color: textColor),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Steps:',
                     style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: primaryColor,
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                if (!isGuest)
-                  Center(
-                    child: ElevatedButton.icon(
-                      onPressed: _showConfirmationDialog,
-                      icon: const Icon(Icons.check, color: Colors.white),
-                      label: const Text('Mark as Completed',
-                          style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            isDark ? Colors.grey.shade700 : Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 28, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                  const SizedBox(height: 12),
+                  StepsList(
+                    steps: steps,
+                    workoutId: widget.workoutId,
+                    isDark: isDark,
+                    primaryColor: primaryColor,
+                    textColor: textColor,
+                  ),
+                  RestTimerWidget(isDark: isDark),
+                  const SizedBox(height: 50),
+                  if (!isGuest) ...[
+                    Column(
+                      children: [
+                        Text(
+                          'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
+                          style: TextStyle(fontSize: 15, color: textColor),
                         ),
+                        Slider(
+                          value: userRating ?? 1.0,
+                          onChanged: (value) =>
+                              setState(() => userRating = value),
+                          onChangeEnd: _updateRating,
+                          min: 1,
+                          max: 5,
+                          divisions: 4,
+                          label: userRating?.toStringAsFixed(1),
+                          activeColor: primaryColor,
+                        ),
+                      ],
+                    ),
+                  ],
+                  Center(
+                    child: Text(
+                      'Average Rating: ${averageRating.toStringAsFixed(1)}',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
                       ),
                     ),
                   ),
-                RestTimerWidget(isDark: isDark),
-              ],
+                  const SizedBox(height: 20),
+                  if (!isGuest)
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: _showConfirmationDialog,
+                        icon: const Icon(Icons.check, color: Colors.white),
+                        label: const Text(
+                          'Mark as Completed',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              isDark ? Colors.grey.shade700 : Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 28, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           );
         },
@@ -560,6 +530,111 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class StepsList extends StatefulWidget {
+  final List<dynamic> steps;
+  final String workoutId;
+  final bool isDark;
+  final Color primaryColor;
+  final Color textColor;
+
+  const StepsList({
+    super.key,
+    required this.steps,
+    required this.workoutId,
+    required this.isDark,
+    required this.primaryColor,
+    required this.textColor,
+  });
+
+  @override
+  State<StepsList> createState() => _StepsListState();
+}
+
+class _StepsListState extends State<StepsList> {
+  List<bool> _checkedSteps = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCheckedSteps();
+  }
+
+  Future<void> _loadCheckedSteps() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>? saved =
+        prefs.getStringList('checkedSteps_${widget.workoutId}');
+    setState(() {
+      if (saved != null) {
+        _checkedSteps = saved.map((e) => e == 'true').toList();
+      } else {
+        _checkedSteps = List<bool>.filled(widget.steps.length, false);
+      }
+    });
+  }
+
+  Future<void> _saveCheckedSteps() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      'checkedSteps_${widget.workoutId}',
+      _checkedSteps.map((e) => e.toString()).toList(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(
+        widget.steps.length,
+        (index) => Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: widget.isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+            border: Border.all(
+              color:
+                  widget.isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              Checkbox(
+                value:
+                    _checkedSteps.length > index ? _checkedSteps[index] : false,
+                onChanged: (value) {
+                  setState(() {
+                    _checkedSteps[index] = value ?? false;
+                  });
+                  _saveCheckedSteps();
+                },
+                fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+                  if (_checkedSteps.length > index && _checkedSteps[index]) {
+                    return widget.isDark ? Colors.grey : Colors.blueAccent;
+                  }
+                  return widget.isDark ? Colors.white : Colors.grey.shade400;
+                }),
+              ),
+              Expanded(
+                child: Text(
+                  '${index + 1}. ${widget.steps[index]}',
+                  style: TextStyle(
+                    fontSize: 15.5,
+                    color: widget.textColor,
+                    decoration:
+                        _checkedSteps.length > index && _checkedSteps[index]
+                            ? TextDecoration.lineThrough
+                            : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
