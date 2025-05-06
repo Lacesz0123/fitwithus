@@ -233,7 +233,6 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -383,6 +382,16 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
   Duration _remainingTime = const Duration(minutes: 1);
   Timer? _timer;
   bool _isRunning = false;
+  late String _prefsStartKey;
+  late String _prefsMinutesKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _prefsStartKey = 'restTimer_start';
+    _prefsMinutesKey = 'restTimer_minutes';
+    _loadTimerState();
+  }
 
   @override
   void dispose() {
@@ -390,9 +399,51 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
     super.dispose();
   }
 
-  void _startTimer() {
-    if (_timer != null) _timer!.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+  Future<void> _saveTimerState(DateTime startTime, int minutes) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefsStartKey, startTime.toIso8601String());
+    await prefs.setInt(_prefsMinutesKey, minutes);
+  }
+
+  Future<void> _clearTimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefsStartKey);
+    await prefs.remove(_prefsMinutesKey);
+  }
+
+  Future<void> _loadTimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final startString = prefs.getString(_prefsStartKey);
+    final minutes = prefs.getInt(_prefsMinutesKey);
+
+    if (startString != null && minutes != null) {
+      final startTime = DateTime.parse(startString);
+      final elapsed = DateTime.now().difference(startTime);
+      final total = Duration(minutes: minutes);
+      final remaining = total - elapsed;
+
+      if (remaining > Duration.zero) {
+        setState(() {
+          _selectedMinutes = minutes;
+          _remainingTime = remaining;
+          _isRunning = true;
+        });
+        _startTimer(resume: true);
+      } else {
+        await _clearTimerState();
+        _resetTimer();
+      }
+    }
+  }
+
+  void _startTimer({bool resume = false}) {
+    _timer?.cancel();
+
+    if (!resume) {
+      _saveTimerState(DateTime.now(), _selectedMinutes);
+    }
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (_remainingTime.inSeconds > 0) {
         setState(() {
           _remainingTime -= const Duration(seconds: 1);
@@ -402,31 +453,30 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
         setState(() {
           _isRunning = false;
         });
-        // Itt adhatsz hangot vagy rezgést
+        await _clearTimerState();
+        // Itt adhatsz majd push notification-t vagy hangot, ha akarod
       }
     });
+
     setState(() {
       _isRunning = true;
     });
   }
 
   void _pauseTimer() {
-    if (_timer != null) {
-      _timer!.cancel();
-      setState(() {
-        _isRunning = false;
-      });
-    }
+    _timer?.cancel();
+    setState(() {
+      _isRunning = false;
+    });
   }
 
   void _resetTimer() {
-    if (_timer != null) {
-      _timer!.cancel();
-    }
+    _timer?.cancel();
     setState(() {
       _remainingTime = Duration(minutes: _selectedMinutes);
       _isRunning = false;
     });
+    _clearTimerState();
   }
 
   String _formatDuration(Duration duration) {
