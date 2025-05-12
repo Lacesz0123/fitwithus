@@ -22,6 +22,7 @@ class EditWorkoutScreen extends StatefulWidget {
 class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
+  final TextEditingController _videoUrlController = TextEditingController();
   List<TextEditingController> _stepsControllers = [];
 
   @override
@@ -33,12 +34,25 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     for (String step in widget.initialSteps) {
       _stepsControllers.add(TextEditingController(text: step));
     }
+
+    // Betöltjük az URL-t Firestore-ból
+    FirebaseFirestore.instance
+        .collection('workouts')
+        .doc(widget.workoutId)
+        .get()
+        .then((doc) {
+      final data = doc.data();
+      if (data != null && data.containsKey('videoUrl')) {
+        _videoUrlController.text = data['videoUrl'];
+      }
+    });
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _videoUrlController.dispose();
     for (var controller in _stepsControllers) {
       controller.dispose();
     }
@@ -61,14 +75,24 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     }
 
     try {
-      await FirebaseFirestore.instance
-          .collection('workouts')
-          .doc(widget.workoutId)
-          .update({
+      final Map<String, dynamic> updatedData = {
         'title': newTitle,
         'description': newDescription,
         'steps': newSteps,
-      });
+      };
+
+      String videoUrl = _videoUrlController.text.trim();
+      if (videoUrl.isNotEmpty) {
+        updatedData['videoUrl'] = videoUrl;
+      } else {
+        updatedData['videoUrl'] =
+            FieldValue.delete(); // törli a mezőt ha korábban volt
+      }
+
+      await FirebaseFirestore.instance
+          .collection('workouts')
+          .doc(widget.workoutId)
+          .update(updatedData);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Workout updated successfully')),
@@ -261,6 +285,25 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+              ),
+            ),
+            const SizedBox(height: 28),
+            Text('Video URL (optional)',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor)),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _videoUrlController,
+              decoration: InputDecoration(
+                hintText: 'https://www.youtube.com/watch?v=...',
+                fillColor: backgroundColor,
+                filled: true,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(height: 30),
