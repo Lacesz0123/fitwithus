@@ -157,8 +157,8 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2, // 2 oszlop
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 0.1,
+                        crossAxisSpacing: 0.1,
                         childAspectRatio:
                             1, // receptkártya arány (tetszés szerint finomítható)
                       ),
