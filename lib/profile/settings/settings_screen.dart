@@ -19,6 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String? _username;
   DateTime? _birthdate;
   String? _gender;
+  int? _height;
 
   @override
   void initState() {
@@ -36,9 +37,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       if (data != null) {
         setState(() {
-          _email = data['email'] ?? user!.email ?? 'No email'; // Email fallback
-          _username = data['username'] ?? 'User'; // Alapértelmezett username
-          _gender = data['gender'] ?? 'Male'; // Alapértelmezett nem
+          _email = data['email'] ?? user!.email ?? 'No email';
+          _username = data['username'] ?? 'User';
+          _gender = data['gender'] ?? 'Male';
+          _height = (data['height'] as num?)?.toInt() ?? 170;
           if (data['birthDate'] != null) {
             if (data['birthDate'] is Timestamp) {
               _birthdate = (data['birthDate'] as Timestamp).toDate();
@@ -46,15 +48,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _birthdate = DateTime.tryParse(data['birthDate']);
             }
           }
-          // Ha nincs birthDate, használjuk az alapértelmezett értéket
           _birthdate ??= DateTime(1990, 1, 1);
         });
       } else {
-        // Ha a dokumentum nem létezik, használjuk az alapértelmezett értékeket
         setState(() {
           _email = user!.email ?? 'No email';
           _username = user!.displayName ?? 'User';
           _gender = 'Male';
+          _height = 170;
           _birthdate = DateTime(1990, 1, 1);
         });
       }
@@ -75,146 +76,196 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showEditDialog(String field, dynamic currentValue) async {
-    TextEditingController controller =
-        TextEditingController(text: currentValue is String ? currentValue : '');
+    TextEditingController controller = TextEditingController(
+        text: currentValue is String
+            ? currentValue
+            : currentValue?.toString() ?? '');
     DateTime? newBirthdate = _birthdate;
     String? newGender = _gender;
+    int newHeight = _height ?? 170; // Ideiglenes változó a szerkesztéshez
     String errorMessage = '';
 
     await showDialog(
       context: context,
       builder: (context) {
-        return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          backgroundColor: Theme.of(context).dialogBackgroundColor,
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Edit $field',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (field == 'Gender')
-                  DropdownButtonFormField<String>(
-                    value: newGender,
-                    items: ['Male', 'Female']
-                        .map((gender) => DropdownMenuItem(
-                              value: gender,
-                              child: Text(gender),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      newGender = value;
-                    },
-                    decoration: const InputDecoration(
-                      labelText: 'Select Gender',
-                      border: OutlineInputBorder(),
-                    ),
-                  )
-                else if (field == 'Birth Date')
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: newBirthdate ?? DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime.now(),
-                        );
-                        if (pickedDate != null) {
-                          newBirthdate = pickedDate;
-                          setState(() {
-                            _birthdate = newBirthdate;
-                          });
-                          Navigator.of(context).pop();
-                          _updateUserData();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        newBirthdate != null
-                            ? DateFormat('yyyy. MM. dd.').format(newBirthdate!)
-                            : 'Select Date',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  )
-                else
-                  TextField(
-                    controller: controller,
-                    decoration: InputDecoration(
-                      labelText: 'Enter $field',
-                      errorText: errorMessage.isNotEmpty ? errorMessage : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              backgroundColor: Theme.of(context).dialogBackgroundColor,
+              insetPadding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.grey.shade600,
+                    Text(
+                      'Edit $field',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                      child: const Text("Cancel"),
                     ),
-                    const SizedBox(width: 16),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (field == 'Username') {
-                          if (!_isValidUsername(controller.text)) {
-                            errorMessage =
-                                'Username must be 5–15 characters long and contain only letters and numbers';
-                            _showMessage(errorMessage);
-                            return;
-                          }
-                          _username = controller.text;
-                          await _updateUsernameInCommunityMessages(_username!);
-                        } else if (field == 'Gender') {
-                          _gender = newGender;
-                        }
-
-                        await _updateUserData();
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 20),
+                    if (field == 'Gender')
+                      DropdownButtonFormField<String>(
+                        value: newGender,
+                        items: ['Male', 'Female']
+                            .map((gender) => DropdownMenuItem(
+                                  value: gender,
+                                  child: Text(gender),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          newGender = value;
+                        },
+                        decoration: const InputDecoration(
+                          labelText: 'Select Gender',
+                          border: OutlineInputBorder(),
+                        ),
+                      )
+                    else if (field == 'Birth Date')
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: newBirthdate ?? DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            );
+                            if (pickedDate != null) {
+                              newBirthdate = pickedDate;
+                              setState(() {
+                                _birthdate = newBirthdate;
+                              });
+                              Navigator.of(context).pop();
+                              _updateUserData();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            newBirthdate != null
+                                ? DateFormat('yyyy. MM. dd.')
+                                    .format(newBirthdate!)
+                                : 'Select Date',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      )
+                    else if (field == 'Height')
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove,
+                                color: Colors.blueAccent),
+                            onPressed: () {
+                              setDialogState(() {
+                                if (newHeight > 60) {
+                                  newHeight--;
+                                }
+                              });
+                            },
+                          ),
+                          Text(
+                            '$newHeight cm',
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.add, color: Colors.blueAccent),
+                            onPressed: () {
+                              setDialogState(() {
+                                if (newHeight < 250) {
+                                  newHeight++;
+                                }
+                              });
+                            },
+                          ),
+                        ],
+                      )
+                    else
+                      TextField(
+                        controller: controller,
+                        decoration: InputDecoration(
+                          labelText: 'Enter $field',
+                          errorText:
+                              errorMessage.isNotEmpty ? errorMessage : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
-                      child: const Text("Save"),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey.shade600,
+                          ),
+                          child: const Text("Cancel"),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (field == 'Username') {
+                              if (!_isValidUsername(controller.text)) {
+                                errorMessage =
+                                    'Username must be 5–15 characters long and contain only letters and numbers';
+                                _showMessage(errorMessage);
+                                return;
+                              }
+                              _username = controller.text;
+                              await _updateUsernameInCommunityMessages(
+                                  _username!);
+                            } else if (field == 'Gender') {
+                              _gender = newGender;
+                            } else if (field == 'Height') {
+                              if (newHeight < 60 || newHeight > 250) {
+                                errorMessage =
+                                    'Height must be an integer between 60 and 250 cm';
+                                _showMessage(errorMessage);
+                                return;
+                              }
+                              _height = newHeight; // Állapot frissítése
+                            }
+
+                            await _updateUserData();
+                            Navigator.of(context).pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Save"),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -255,6 +306,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'birthDate':
             _birthdate != null ? Timestamp.fromDate(_birthdate!) : null,
         'gender': _gender,
+        'height': _height,
       });
 
       await _loadUserData();
@@ -284,7 +336,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (confirmDelete) {
       try {
-        // Profilkép törlés
         final doc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user!.uid)
@@ -419,6 +470,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const Divider(thickness: 1.5),
               _buildProfileItem('Gender', _gender ?? 'Loading...'),
+              const Divider(thickness: 1.5),
+              _buildProfileItem(
+                  'Height', _height != null ? '$_height cm' : 'Loading...'),
               const SizedBox(height: 30),
               Text(
                 'Appearance',
