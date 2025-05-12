@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // ez kell az időzítéshez
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class WorkoutDetailScreen extends StatefulWidget {
   final String workoutId;
@@ -496,13 +498,113 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
   bool _isRunning = false;
   late String _prefsStartKey;
   late String _prefsMinutesKey;
+  late FlutterLocalNotificationsPlugin _notificationsPlugin;
 
   @override
   void initState() {
     super.initState();
     _prefsStartKey = 'restTimer_start';
     _prefsMinutesKey = 'restTimer_minutes';
+    _initializeNotifications();
     _loadTimerState();
+  }
+
+  Future<void> _requestPermissions() async {
+    // Értesítési jogosultság kérése
+    final status = await Permission.notification.status;
+    debugPrint('Notification permission status: $status');
+    if (status.isDenied) {
+      final result = await Permission.notification.request();
+      debugPrint('Notification permission request result: $result');
+    }
+  }
+
+  void _initializeNotifications() async {
+    _notificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    // Android inicializálási beállítások
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    // iOS inicializálási beállítások
+    const iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
+    // Kombinált inicializálási beállítások
+    const initializationSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+
+    // Plugin inicializálása előtérben történő kezeléssel
+    await _notificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        debugPrint('Értesítés megérintve: ${response.payload}');
+      },
+    );
+
+    // Android értesítési csatorna létrehozása
+    const channel = AndroidNotificationChannel(
+      'rest_timer_channel',
+      'Rest Timer Notifications',
+      description: 'Értesítések a pihenőidő időzítő befejezéséhez',
+      importance: Importance.max,
+      playSound: true,
+      showBadge: true,
+      enableVibration: true,
+    );
+
+    final androidPlugin =
+        _notificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.createNotificationChannel(channel);
+    debugPrint('Notification channel created');
+
+    // Jogosultságok kérése
+    await _requestPermissions();
+  }
+
+  Future<void> _showNotification() async {
+    const androidDetails = AndroidNotificationDetails(
+      'rest_timer_channel',
+      'Rest Timer Notifications',
+      channelDescription: 'Notifications for rest timer completion',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'Rest Timer',
+      showWhen: true,
+      autoCancel: true,
+      enableVibration: true,
+      playSound: true,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    try {
+      await _notificationsPlugin.show(
+        0,
+        'Rest Timer Finished',
+        'Your rest period is over!',
+        notificationDetails,
+        payload: 'timer_complete',
+      );
+      debugPrint('Notification sent successfully');
+    } catch (e) {
+      debugPrint('Error sending notification: $e');
+    }
   }
 
   @override
@@ -566,7 +668,7 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
           _isRunning = false;
         });
         await _clearTimerState();
-        // Itt adhatsz majd push notification-t vagy hangot, ha akarod
+        await _showNotification(); // Trigger notification when timer expires
       }
     });
 
