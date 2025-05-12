@@ -146,17 +146,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _addWeight() async {
     if (_weightController.text.isNotEmpty && user != null) {
-      double weight = double.parse(_weightController.text);
+      final input = double.tryParse(_weightController.text);
+      if (input == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid number format')),
+        );
+        return;
+      }
+
+      if (input < 0 || input > 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Weight must be between 0 and 200 kg')),
+        );
+        return;
+      }
+
       await FirebaseFirestore.instance
           .collection('weights')
           .doc(user!.uid)
           .collection('entries')
-          .add({'weight': weight, 'date': Timestamp.now()});
+          .add({'weight': input, 'date': Timestamp.now()});
 
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user!.uid)
-          .update({'weight': weight});
+          .update({'weight': input});
 
       _weightController.clear();
       ScaffoldMessenger.of(context).showSnackBar(
