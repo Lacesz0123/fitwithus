@@ -61,7 +61,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .doc(user!.uid)
           .get();
       Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
-      _profileImageUrl = data?['profileImageUrl'];
+      if (data != null) {
+        _profileImageUrl = data['profileImageUrl'];
+      }
       return data;
     }
     return null;
@@ -96,29 +98,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .collection('users')
           .doc(user!.uid)
           .get();
-      setState(() {
-        _userData = userDoc.data() as Map<String, dynamic>?;
-        _dailyCalories = _userData?['dailyCalories'] ?? 0;
-        _completedWorkouts = _userData?['completedWorkouts'] ?? 0;
-        _calculateCalories();
-      });
+      if (userDoc.exists) {
+        setState(() {
+          _userData = userDoc.data() as Map<String, dynamic>?;
+          _dailyCalories = _userData?['dailyCalories'] ?? 0;
+          _completedWorkouts = _userData?['completedWorkouts'] ?? 0;
+          _calculateCalories();
+        });
+      } else {
+        // Ha valamiért a dokumentum nem létezik, jelezzük
+        print('User document does not exist in Firestore.');
+      }
     }
   }
 
   void _calculateCalories() {
     if (_userData != null &&
-        _userData!['weight'] != null &&
-        _userData!['height'] != null &&
-        _userData!['birthDate'] != null &&
-        _userData!['gender'] != null) {
-      double weight = (_userData!['weight'] as num).toDouble();
-      double height = (_userData!['height'] as num).toDouble();
+        _userData!.containsKey('weight') &&
+        _userData!.containsKey('height') &&
+        _userData!.containsKey('birthDate') &&
+        _userData!.containsKey('gender')) {
+      double weight = (_userData!['weight'] as num?)?.toDouble() ?? 70.0;
+      double height = (_userData!['height'] as num?)?.toDouble() ?? 170.0;
 
       DateTime birthDate;
       if (_userData!['birthDate'] is Timestamp) {
         birthDate = (_userData!['birthDate'] as Timestamp).toDate();
-      } else {
+      } else if (_userData!['birthDate'] is String) {
         birthDate = DateTime.parse(_userData!['birthDate']);
+      } else {
+        birthDate = DateTime(1990, 1, 1); // Fallback születési idő
       }
 
       int age = DateTime.now().year - birthDate.year;
@@ -128,10 +137,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         age--;
       }
 
-      if (_userData!['gender'] == 'Male') {
+      String gender = _userData!['gender'] ?? 'Male';
+      if (gender == 'Male') {
         _rmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
-      } else if (_userData!['gender'] == 'Female') {
+      } else if (gender == 'Female') {
         _rmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+      } else {
+        _rmr = (10 * weight) + (6.25 * height) - (5 * age) - 161; // Fallback
       }
 
       _calorieLevels = {
@@ -140,6 +152,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'Moderate Activity': _rmr * 1.55,
         'High Activity': _rmr * 1.725,
         'Very High Activity': _rmr * 1.9,
+      };
+    } else {
+      // Fallback értékek, ha az adatok hiányoznak
+      _calorieLevels = {
+        'No Activity': 0.0,
+        'Light Activity': 0.0,
+        'Moderate Activity': 0.0,
+        'High Activity': 0.0,
+        'Very High Activity': 0.0,
       };
     }
   }
@@ -290,8 +311,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
         flexibleSpace: Theme.of(context).brightness == Brightness.dark
             ? Container(
-                color:
-                    const Color(0xFF1E1E1E), // Dark mode: egyszínű sötét háttér
+                color: const Color(0xFF1E1E1E),
               )
             : Container(
                 decoration: const BoxDecoration(
@@ -364,7 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             )
           : SingleChildScrollView(
-              physics: const BouncingScrollPhysics(), // <-- EZ az új sor
+              physics: const BouncingScrollPhysics(),
               child: Center(
                 child: FutureBuilder<Map<String, dynamic>?>(
                   future: getUserData(),
@@ -376,7 +396,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       return const Text('Error loading user data');
                     }
                     if (!snapshot.hasData || snapshot.data == null) {
-                      return const Text('No user data found');
+                      // Ha valamiért nincs adat, próbáljuk újra betölteni
+                      _fetchUserData();
+                      return const CircularProgressIndicator();
                     }
 
                     final userData = snapshot.data!;
@@ -425,15 +447,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             );
                           },
                         ),
-
-                        // STATISZTIKÁK IDE KERÜLTEK ÁT
                         const SizedBox(height: 30),
                         WorkoutProgressCard(
                             completedWorkouts: _completedWorkouts),
                         const SizedBox(height: 20),
                         const WeightChartCard(),
                         const SizedBox(height: 20),
-
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
@@ -504,8 +523,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           child: ElevatedButton.icon(
                                             onPressed: _addWeight,
                                             icon: const Icon(Icons.add,
-                                                color: Colors
-                                                    .white), // <- ez a kulcs
+                                                color: Colors.white),
                                             label: const Text("Add Weight"),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Theme.of(context)
@@ -695,8 +713,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ElevatedButton.icon(
                                           onPressed: _addCalories,
                                           icon: const Icon(Icons.add,
-                                              color: Colors
-                                                  .white), // <- itt a trükk
+                                              color: Colors.white),
                                           label: const Text("Add"),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor:

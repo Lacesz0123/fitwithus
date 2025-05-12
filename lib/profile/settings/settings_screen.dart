@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '/providers/theme_provider.dart'; // vagy ahova tetted
+import '/providers/theme_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -35,13 +35,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
 
       if (data != null) {
-        _email = data['email'] ?? '';
-        _username = data['username'] ?? '';
-        _birthdate = data['birthDate'] != null
-            ? DateTime.parse(data['birthDate'])
-            : null;
-        _gender = data['gender'] ?? '';
-        setState(() {});
+        setState(() {
+          _email = data['email'] ?? user!.email ?? 'No email'; // Email fallback
+          _username = data['username'] ?? 'User'; // Alapértelmezett username
+          _gender = data['gender'] ?? 'Male'; // Alapértelmezett nem
+          if (data['birthDate'] != null) {
+            if (data['birthDate'] is Timestamp) {
+              _birthdate = (data['birthDate'] as Timestamp).toDate();
+            } else if (data['birthDate'] is String) {
+              _birthdate = DateTime.tryParse(data['birthDate']);
+            }
+          }
+          // Ha nincs birthDate, használjuk az alapértelmezett értéket
+          _birthdate ??= DateTime(1990, 1, 1);
+        });
+      } else {
+        // Ha a dokumentum nem létezik, használjuk az alapértelmezett értékeket
+        setState(() {
+          _email = user!.email ?? 'No email';
+          _username = user!.displayName ?? 'User';
+          _gender = 'Male';
+          _birthdate = DateTime(1990, 1, 1);
+        });
       }
     }
   }
@@ -196,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: const Text("Save"),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -237,7 +252,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           .update({
         'email': _email,
         'username': _username,
-        'birthDate': _birthdate?.toIso8601String(),
+        'birthDate':
+            _birthdate != null ? Timestamp.fromDate(_birthdate!) : null,
         'gender': _gender,
       });
 
@@ -361,7 +377,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: const Text('Settings'),
         flexibleSpace: Theme.of(context).brightness == Brightness.dark
             ? Container(
-                color: const Color(0xFF1E1E1E), // sötét módra egyszínű háttér
+                color: const Color(0xFF1E1E1E),
               )
             : Container(
                 decoration: const BoxDecoration(
@@ -390,9 +406,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              _buildProfileItem('Email', _email ?? '', editable: false),
+              _buildProfileItem('Email', _email ?? 'Loading...',
+                  editable: false),
               const Divider(thickness: 1.5),
-              _buildProfileItem('Username', _username ?? ''),
+              _buildProfileItem('Username', _username ?? 'Loading...'),
               const Divider(thickness: 1.5),
               _buildProfileItem(
                 'Birth Date',
@@ -401,7 +418,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     : 'Not set',
               ),
               const Divider(thickness: 1.5),
-              _buildProfileItem('Gender', _gender ?? ''),
+              _buildProfileItem('Gender', _gender ?? 'Loading...'),
               const SizedBox(height: 30),
               Text(
                 'Appearance',

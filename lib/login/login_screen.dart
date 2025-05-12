@@ -69,6 +69,25 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() => _errorMessage = '');
+
+    try {
+      UserCredential? userCredential = await _authService.signInWithGoogle();
+      if (userCredential != null && userCredential.user != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const BottomNavScreen()),
+        );
+      } else {
+        setState(() => _errorMessage = 'Google Sign-In was cancelled.');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to sign in with Google: $e';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -270,6 +289,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         label: const Text(
                           "Continue as Guest",
                           style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: _signInWithGoogle,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black87,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.g_mobiledata,
+                            color: Colors.black87),
+                        label: const Text(
+                          "Continue with Google",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
                     ),
