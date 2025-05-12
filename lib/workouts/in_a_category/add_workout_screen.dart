@@ -14,7 +14,6 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   List<TextEditingController> _stepsControllers = [];
-  bool _sendNotification = false;
 
   @override
   void dispose() {
@@ -186,17 +185,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text('Send push notification to users',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600, color: primaryColor)),
-              value: _sendNotification,
-              onChanged: (value) => setState(() => _sendNotification = value),
-              activeColor: primaryColor,
-              contentPadding: EdgeInsets.zero,
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
             Center(
               child: ElevatedButton.icon(
                 onPressed: _addWorkout,
