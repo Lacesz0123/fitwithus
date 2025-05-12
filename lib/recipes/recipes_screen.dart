@@ -147,13 +147,21 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 180,
-                    child: ListView.builder(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: GridView.builder(
                       physics:
-                          const BouncingScrollPhysics(), // <-- EZT IS hozzáadjuk a belsőhöz!
-                      scrollDirection: Axis.horizontal,
+                          const NeverScrollableScrollPhysics(), // ne scrollozzon külön
+                      shrinkWrap: true, // wrapelje be a tartalmat
                       itemCount: recipes.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, // 2 oszlop
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio:
+                            1, // receptkártya arány (tetszés szerint finomítható)
+                      ),
                       itemBuilder: (context, index) {
                         return RecipeCard(
                           recipe: recipes[index],
