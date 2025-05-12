@@ -252,7 +252,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 message,
                 style: TextStyle(
                   fontSize: 16,
-                  color: isMe ? Colors.white : Colors.black87,
+                  color: isMe
+                      ? Colors.white
+                      : (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black87),
                 ),
               ),
             ],
