@@ -16,6 +16,8 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String? imageUrl = profileImageUrl ?? defaultProfileImageUrl;
+
     return Column(
       children: [
         const SizedBox(height: 30),
@@ -25,8 +27,8 @@ class ProfileHeader extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey.shade800 // dark mode-hoz sötét háttér
-                  : null, // light mode esetén a gradient
+                  ? Colors.grey.shade800
+                  : null,
               gradient: Theme.of(context).brightness == Brightness.dark
                   ? null
                   : const LinearGradient(
@@ -47,17 +49,30 @@ class ProfileHeader extends StatelessWidget {
             padding: const EdgeInsets.all(5),
             child: CircleAvatar(
               radius: 65,
-              backgroundImage: profileImageUrl != null
-                  ? NetworkImage(profileImageUrl!)
-                  : (defaultProfileImageUrl != null
-                      ? NetworkImage(defaultProfileImageUrl!)
-                      : null),
               backgroundColor: Theme.of(context).brightness == Brightness.dark
                   ? Colors.grey.shade900
                   : Colors.white,
-              child: profileImageUrl == null && defaultProfileImageUrl == null
-                  ? const Icon(Icons.person, size: 70, color: Colors.grey)
-                  : null,
+              child: imageUrl != null
+                  ? ClipOval(
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        width: 130,
+                        height: 130,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.person,
+                          size: 70,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : const Icon(Icons.person, size: 70, color: Colors.grey),
             ),
           ),
         ),
