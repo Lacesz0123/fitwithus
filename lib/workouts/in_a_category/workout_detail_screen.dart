@@ -187,6 +187,143 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     );
   }
 
+  void _showRatingDialog() {
+    double? selectedRating = userRating;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        final surfaceColor = theme.dialogBackgroundColor;
+        final buttonColor = isDark ? Colors.grey.shade700 : Colors.blueAccent;
+
+        return Dialog(
+          backgroundColor: surfaceColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Rate this Workout',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    /// Vendég felhasználó esetén
+                    if (isGuest) ...[
+                      Text(
+                        'Average Rating: ${averageRating.toStringAsFixed(1)}',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'To rate this workout, please create an account.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.textTheme.bodyMedium?.color
+                              ?.withOpacity(0.75),
+                        ),
+                      ),
+                    ]
+
+                    /// Bejelentkezett felhasználónak
+                    else ...[
+                      Text(
+                        'Select your rating:',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 10),
+                      DropdownButtonFormField<double>(
+                        value: selectedRating,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade200,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                        ),
+                        dropdownColor: surfaceColor,
+                        style: theme.textTheme.bodyLarge,
+                        items: [1, 2, 3, 4, 5]
+                            .map((value) => DropdownMenuItem<double>(
+                                  value: value.toDouble(),
+                                  child: Text('$value'),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() => selectedRating = value);
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Average Rating: ${averageRating.toStringAsFixed(1)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.textTheme.bodySmall?.color
+                              ?.withOpacity(0.85),
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: theme.colorScheme.secondary,
+                          ),
+                          child: const Text('Close'),
+                        ),
+                        if (!isGuest) ...[
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: selectedRating != null
+                                ? () {
+                                    Navigator.of(context).pop();
+                                    _updateRating(selectedRating!);
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: buttonColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text('Submit'),
+                          ),
+                        ]
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -196,6 +333,13 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Details'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.thumb_up_alt_outlined),
+            tooltip: 'Rate Workout',
+            onPressed: _showRatingDialog,
+          ),
+        ],
         backgroundColor: isDark ? const Color(0xFF1E1E1E) : null,
         flexibleSpace: !isDark
             ? Container(
@@ -304,38 +448,6 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                     textColor: textColor,
                   ),
                   RestTimerWidget(isDark: isDark),
-                  const SizedBox(height: 50),
-                  if (!isGuest) ...[
-                    Column(
-                      children: [
-                        Text(
-                          'Your Rating: ${userRating?.toStringAsFixed(1) ?? "Not Rated"}',
-                          style: TextStyle(fontSize: 15, color: textColor),
-                        ),
-                        Slider(
-                          value: userRating ?? 1.0,
-                          onChanged: (value) =>
-                              setState(() => userRating = value),
-                          onChangeEnd: _updateRating,
-                          min: 1,
-                          max: 5,
-                          divisions: 4,
-                          label: userRating?.toStringAsFixed(1),
-                          activeColor: primaryColor,
-                        ),
-                      ],
-                    ),
-                  ],
-                  Center(
-                    child: Text(
-                      'Average Rating: ${averageRating.toStringAsFixed(1)}',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 20),
                   if (!isGuest)
                     Center(
