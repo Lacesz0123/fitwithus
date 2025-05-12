@@ -14,6 +14,7 @@ import 'weight_chart_card.dart';
 import 'workout_progress_card.dart';
 import 'user_management/user_management_screen.dart';
 import 'notes/notes_screen.dart';
+import 'my_workouts/my_workouts_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -422,6 +423,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               MaterialPageRoute(
                                 builder: (context) =>
                                     const FavoriteWorkoutsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        ProfileMenuButton(
+                          title: "My Workouts",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MyWorkoutsScreen(),
                               ),
                             );
                           },
