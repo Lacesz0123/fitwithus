@@ -13,12 +13,14 @@ class AddWorkoutScreen extends StatefulWidget {
 class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _videoUrlController = TextEditingController();
   List<TextEditingController> _stepsControllers = [];
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _videoUrlController.dispose();
     for (var controller in _stepsControllers) {
       controller.dispose();
     }
@@ -36,12 +38,21 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
         steps.isNotEmpty &&
         steps.every((step) => step.isNotEmpty)) {
       try {
-        await FirebaseFirestore.instance.collection('workouts').add({
+        final Map<String, dynamic> workoutData = {
           'title': title,
           'description': description,
           'steps': steps,
           'category': widget.category,
-        });
+        };
+
+        String videoUrl = _videoUrlController.text.trim();
+        if (videoUrl.isNotEmpty) {
+          workoutData['videoUrl'] = videoUrl;
+        }
+
+        await FirebaseFirestore.instance
+            .collection('workouts')
+            .add(workoutData);
 
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -183,6 +194,23 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
+              ),
+            ),
+            const SizedBox(height: 28),
+            Text('Video URL (optional)',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor)),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _videoUrlController,
+              style: TextStyle(color: primaryColor),
+              decoration: InputDecoration(
+                hintText: 'https://www.youtube.com/watch?v=...',
+                hintStyle: TextStyle(color: primaryColor.withOpacity(0.5)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 32),
