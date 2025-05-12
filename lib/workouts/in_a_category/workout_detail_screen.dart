@@ -449,7 +449,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                     primaryColor: primaryColor,
                     textColor: textColor,
                   ),
-                  RestTimerWidget(isDark: isDark),
+                  if (!isGuest) RestTimerWidget(isDark: isDark),
                   const SizedBox(height: 20),
                   if (!isGuest)
                     Center(
