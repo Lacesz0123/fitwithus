@@ -13,6 +13,7 @@ import 'community/community_screen.dart';
 import 'weight_chart_card.dart';
 import 'workout_progress_card.dart';
 import 'user_management/user_management_screen.dart';
+import 'notes/notes_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -444,6 +445,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const CommunityScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        ProfileMenuButton(
+                          title: "Notes",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NotesScreen(),
                               ),
                             );
                           },
