@@ -23,6 +23,7 @@ class FirebaseRegisterService {
 
     User? user = userCredential.user;
     if (user != null) {
+      await user.sendEmailVerification();
       await _users.doc(user.uid).set({
         'email': email,
         'username': username,
@@ -31,7 +32,7 @@ class FirebaseRegisterService {
         'favorites': [],
         'favoriteRecipes': [],
         'gender': gender,
-        'birthDate': birthDate.toIso8601String(),
+        'birthDate': Timestamp.fromDate(birthDate),
         'completedWorkouts': 0,
         'role': 'user',
       });

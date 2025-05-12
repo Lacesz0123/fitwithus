@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../bottom_nav_screen.dart.dart';
 import '../../services/firebase_register_service.dart';
 import '../../utils/validators.dart';
+import 'email_verification_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterStep2Screen extends StatefulWidget {
   final String email;
@@ -41,15 +42,28 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
         );
 
         if (user != null) {
+          await user.sendEmailVerification();
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const BottomNavScreen()),
+            MaterialPageRoute(
+              builder: (context) => const EmailVerificationScreen(),
+            ),
             (Route<dynamic> route) => false,
           );
         }
-      } catch (e) {
-        print("Error during registration: $e");
+      } on FirebaseAuthException catch (e) {
+        String message;
+        if (e.code == 'too-many-requests') {
+          message =
+              "Too many registration attempts from this device. Please try again later.";
+        } else {
+          message = "Registration failed: ${e.message}";
+        }
         setState(() {
-          _errorMessage = "An error occurred during registration.";
+          _errorMessage = message;
+        });
+      } catch (e) {
+        setState(() {
+          _errorMessage = "An unexpected error occurred: $e";
         });
       }
     }
