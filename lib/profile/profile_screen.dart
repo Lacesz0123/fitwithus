@@ -12,6 +12,7 @@ import '../../services/profile_image_service.dart';
 import 'community/community_screen.dart';
 import 'weight_chart_card.dart';
 import 'workout_progress_card.dart';
+import 'user_management/user_management_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -447,6 +448,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             );
                           },
                         ),
+                        if (_userData?['role'] == 'admin')
+                          ProfileMenuButton(
+                            title: "User Management",
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const UserManagementScreen(),
+                                ),
+                              );
+                            },
+                          ),
                         const SizedBox(height: 30),
                         WorkoutProgressCard(
                             completedWorkouts: _completedWorkouts),

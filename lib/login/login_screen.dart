@@ -4,6 +4,7 @@ import '../services/firebase_auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../bottom_nav_screen.dart';
 import '../register/register_step1_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -34,6 +35,23 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (userCredential.user != null) {
+        // Ellenőrzés Firestore-ban, hogy nincs-e letiltva
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
+
+        final userData = userDoc.data();
+        if (userData != null && userData['disabled'] == true) {
+          await FirebaseAuth.instance.signOut();
+          setState(() {
+            _errorMessage =
+                'This account has been disabled by an administrator.';
+          });
+          return;
+        }
+
+        // Minden rendben, továbbengedjük
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const BottomNavScreen()),
         );
