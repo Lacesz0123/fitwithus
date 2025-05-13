@@ -7,6 +7,7 @@ import '../login/login_screen.dart';
 import 'settings/settings_screen.dart';
 import 'favorite_recipes/favorite_recipes_screen.dart';
 import 'profile_header.dart';
+import 'water_tracker_card.dart';
 import 'profile_menu_button.dart';
 import '../../services/profile_image_service.dart';
 import 'community/community_screen.dart';
@@ -813,6 +814,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 30),
+                        const WaterTrackerCard(), // például a WeightChartCard után
                       ],
                     );
                   },
