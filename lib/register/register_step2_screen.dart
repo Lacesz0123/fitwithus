@@ -1,7 +1,7 @@
+import 'package:fitwithus/bottom_nav_screen.dart';
 import 'package:flutter/material.dart';
 import '../../services/firebase_register_service.dart';
 import '../../utils/validators.dart';
-import 'email_verification_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterStep2Screen extends StatefulWidget {
@@ -45,7 +45,7 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
           await user.sendEmailVerification();
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => const EmailVerificationScreen(),
+              builder: (context) => const BottomNavScreen(),
             ),
             (Route<dynamic> route) => false,
           );

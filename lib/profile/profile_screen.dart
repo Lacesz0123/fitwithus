@@ -414,6 +414,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           defaultProfileImageUrl: _defaultProfileImageUrl,
                           onImageTap: _uploadProfileImage,
                           username: userData['username'] ?? 'N/A',
+                          subtitle: user?.emailVerified == false
+                              ? "Email not verified"
+                              : null,
                         ),
                         ProfileMenuButton(
                           title: "Favorite Workouts",

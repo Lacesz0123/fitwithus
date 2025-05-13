@@ -5,14 +5,16 @@ class ProfileHeader extends StatelessWidget {
   final String? defaultProfileImageUrl;
   final VoidCallback onImageTap;
   final String username;
+  final String? subtitle; // <- ÚJ
 
-  const ProfileHeader({
-    super.key,
-    required this.profileImageUrl,
-    required this.defaultProfileImageUrl,
-    required this.onImageTap,
-    required this.username,
-  });
+  const ProfileHeader(
+      {super.key,
+      required this.profileImageUrl,
+      required this.defaultProfileImageUrl,
+      required this.onImageTap,
+      required this.username,
+      this.subtitle // <- ÚJ
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +88,19 @@ class ProfileHeader extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
+        if (subtitle != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              subtitle!,
+              style: const TextStyle(
+                color: Colors.redAccent,
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         const SizedBox(height: 20),
       ],
     );
