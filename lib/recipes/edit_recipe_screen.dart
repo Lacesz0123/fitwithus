@@ -8,6 +8,7 @@ import 'widgets/edit_recipe_header.dart';
 import 'widgets/edit_recipe_ingredients_checklist.dart';
 import 'widgets/edit_recipe_steps.dart';
 import '../../utils/validators.dart';
+import '../../utils/custom_snackbar.dart';
 
 class EditRecipeScreen extends StatefulWidget {
   final String recipeId;
@@ -46,9 +47,8 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
       if (document.exists) {
         final data = document.data() as Map<String, dynamic>;
         if (data['role'] != 'admin') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Only admins can edit recipes.')),
-          );
+          showCustomSnackBar(context, 'Only admins can edit recipes.',
+              isError: true);
           Navigator.of(context).pop();
         }
       }
@@ -166,8 +166,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    showCustomSnackBar(context, message, isError: true);
     setState(() {
       _isLoading = false;
     });
@@ -214,7 +213,10 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
           .doc(widget.recipeId)
           .delete();
 
-      Navigator.of(context).pop();
+      if (mounted) {
+        Navigator.of(context).pop();
+        showCustomSnackBar(context, 'Recipe deleted successfully!');
+      }
     } catch (e) {
       _showError('Failed to delete recipe: $e');
     } finally {

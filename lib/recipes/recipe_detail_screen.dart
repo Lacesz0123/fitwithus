@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import '/utils/custom_snackbar.dart';
 import 'widgets/detail_recipe_header.dart';
 import 'widgets/detail_recipe_ingredients_checklist.dart';
 import 'widgets/detail_recipe_steps.dart';
@@ -116,21 +116,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         SetOptions(merge: true));
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Calories updated!',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.blueAccent,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      showCustomSnackBar(context, 'Calories updated!');
     }
   }
 

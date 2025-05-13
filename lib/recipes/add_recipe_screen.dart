@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../utils/custom_snackbar.dart';
 
 class AddRecipeScreen extends StatefulWidget {
   final String category;
@@ -62,21 +63,15 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         ingredientControllers.any((c) => c.text.isEmpty) ||
         stepControllers.any((c) => c.text.isEmpty) ||
         _selectedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please fill all fields and upload an image."),
-        ),
-      );
+      showCustomSnackBar(context, "Please fill all fields and upload an image.",
+          isError: true);
       return;
     }
 
     int? calories = int.tryParse(caloriesController.text);
     if (calories == null || calories <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Calories must be a valid positive number."),
-        ),
-      );
+      showCustomSnackBar(context, "Calories must be a valid positive number.",
+          isError: true);
       return;
     }
 
@@ -107,13 +102,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       });
 
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Recipe added successfully!")),
-      );
+      showCustomSnackBar(context, "Recipe added successfully!");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to add recipe: $e")),
-      );
+      showCustomSnackBar(context, "Failed to add recipe: $e", isError: true);
     } finally {
       setState(() => _isLoading = false);
     }
