@@ -456,7 +456,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                 if (videoUrl != null && videoUrl.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Text(
-                    'Help:',
+                    'Exercise Guide',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,

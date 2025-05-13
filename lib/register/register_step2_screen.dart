@@ -42,6 +42,7 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
         );
 
         if (user != null) {
+          await Future.delayed(Duration(seconds: 5));
           await user.sendEmailVerification();
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
