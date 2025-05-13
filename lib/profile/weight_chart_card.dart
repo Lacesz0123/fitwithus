@@ -69,22 +69,49 @@ class WeightChartCard extends StatelessWidget {
                 }
 
                 final entries = snapshot.data!;
-                final spots = entries.map((entry) {
-                  final date = (entry['date'] as Timestamp).toDate();
-                  return FlSpot(
-                    date.millisecondsSinceEpoch.toDouble(),
-                    (entry['weight'] as num).toDouble(),
-                  );
-                }).toList();
 
                 return SizedBox(
                   height: 220,
-                  child: LineChart(
-                    LineChartData(
+                  child: BarChart(
+                    BarChartData(
+                      minY: 0,
+                      maxY: 200,
+                      alignment: BarChartAlignment.spaceAround,
+                      barTouchData: BarTouchData(enabled: false),
+                      titlesData: FlTitlesData(
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: false,
+                          ),
+                        ),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            interval: 20,
+                            reservedSize: 50,
+                            getTitlesWidget: (value, meta) => Text(
+                              '${value.toInt()} kg',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: isDark
+                                    ? Colors.grey.shade300
+                                    : Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        topTitles: AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                      ),
                       gridData: FlGridData(
                         show: true,
                         drawHorizontalLine: true,
-                        horizontalInterval: 5,
+                        horizontalInterval: 20,
                         getDrawingHorizontalLine: (value) => FlLine(
                           color: isDark
                               ? Colors.white.withOpacity(0.05)
@@ -94,46 +121,30 @@ class WeightChartCard extends StatelessWidget {
                         drawVerticalLine: false,
                       ),
                       borderData: FlBorderData(show: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: spots,
-                          isCurved: true,
-                          color: Colors.grey.shade700,
-                          barWidth: 3,
-                          isStrokeCapRound: true,
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: Colors.grey.shade700.withOpacity(0.12),
-                          ),
-                          dotData: FlDotData(show: false),
-                        ),
-                      ],
-                      titlesData: FlTitlesData(
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            interval: 5,
-                            reservedSize: 40,
-                            getTitlesWidget: (value, meta) => Text(
-                              '${value.toInt()} kg',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark
-                                    ? Colors.grey.shade300
-                                    : Colors.grey.shade600,
+                      barGroups: List.generate(
+                        entries.length,
+                        (index) {
+                          final entry = entries[index];
+                          final weight = (entry['weight'] as num).toDouble();
+                          return BarChartGroupData(
+                            x: index,
+                            barRods: [
+                              BarChartRodData(
+                                toY: weight,
+                                width: 16,
+                                borderRadius: BorderRadius.circular(6),
+                                color: Colors.blueAccent.withOpacity(0.8),
+                                backDrawRodData: BackgroundBarChartRodData(
+                                  show: true,
+                                  toY: 0,
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.05)
+                                      : Colors.grey.shade200,
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                        rightTitles: AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        topTitles: AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ),
