@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'dart:io'; // Internet-csekkhez szükséges
 
 class WorkoutDetailScreen extends StatefulWidget {
   final String workoutId;
@@ -24,6 +25,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
   List<dynamic> steps = []; // <-- a globális steps lista
   List<bool> _checkedSteps = []; // <-- a pipálási állapotok
   YoutubePlayerController? _videoController;
+  bool hasInternet = true;
 
   @override
   void initState() {
@@ -31,7 +33,21 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     _checkIfGuest();
     _checkIfFavorite();
     _fetchRatings();
-    _initializeVideoController(); // ÚJ!
+    _checkInternet().then((value) {
+      setState(() {
+        hasInternet = value;
+      });
+      if (value) _initializeVideoController();
+    });
+  }
+
+  Future<bool> _checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
   }
 
   void _checkIfGuest() {
@@ -453,7 +469,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                   style: TextStyle(fontSize: 16, color: textColor),
                 ),
                 const SizedBox(height: 24),
-                if (videoUrl != null && videoUrl.isNotEmpty) ...[
+                if (hasInternet && videoUrl != null && videoUrl.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Text(
                     'Exercise Guide',

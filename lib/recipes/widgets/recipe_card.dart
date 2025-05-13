@@ -54,7 +54,7 @@ class RecipeCard extends StatelessWidget {
                                   Widget child,
                                   ImageChunkEvent? loadingProgress) {
                                 if (loadingProgress == null) {
-                                  return child; // Ha már betöltött a kép, simán megjelenítjük
+                                  return child;
                                 } else {
                                   return Container(
                                     height: 90,
@@ -73,6 +73,28 @@ class RecipeCard extends StatelessWidget {
                                     ),
                                   );
                                 }
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                final isDark = Theme.of(context).brightness ==
+                                    Brightness.dark;
+                                return Container(
+                                  height: 90,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.grey[900]
+                                        : Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(15),
+                                    image: const DecorationImage(
+                                      image: AssetImage(
+                                          'assets/offline_placeholder.png'), // ← ez legyen a helyettesítő kép
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  alignment: Alignment.bottomCenter,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 4),
+                                );
                               },
                             )),
                       const SizedBox(height: 8),

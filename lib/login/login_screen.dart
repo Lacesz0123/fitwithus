@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../bottom_nav_screen.dart';
 import '../register/register_step1_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -20,8 +21,24 @@ class _LoginScreenState extends State<LoginScreen> {
   String _errorMessage = '';
   bool _isPasswordVisible = false;
 
+  Future<bool> hasInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   Future<void> _signIn() async {
     setState(() => _errorMessage = '');
+
+    final hasInternet = await hasInternetConnection();
+    if (!hasInternet) {
+      setState(() => _errorMessage =
+          'No internet connection. You can only use the app as a guest.');
+      return;
+    }
 
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() => _errorMessage = 'Please fill in both email and password.');
@@ -73,6 +90,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signInAsGuest() async {
+    final hasInternet = await hasInternetConnection();
+    if (!hasInternet) {
+      setState(() {
+        _errorMessage =
+            'No internet connection. You can only use the app as a guest.';
+      });
+      // Itt nem próbáljuk meg a Firebase Auth-ot elérni!
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const BottomNavScreen()),
+      );
+      return;
+    }
+
     try {
       UserCredential userCredential = await _authService.signInAnonymously();
       if (userCredential.user != null) {
@@ -90,6 +120,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithGoogle() async {
     setState(() => _errorMessage = '');
 
+    final hasInternet = await hasInternetConnection();
+    if (!hasInternet) {
+      setState(() => _errorMessage =
+          'No internet connection. You can only use the app as a guest.');
+      return;
+    }
+
     try {
       UserCredential? userCredential = await _authService.signInWithGoogle();
       if (userCredential != null && userCredential.user != null) {
@@ -99,9 +136,11 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         setState(() => _errorMessage = 'Google Sign-In was cancelled.');
       }
+    } on FirebaseAuthException catch (e) {
+      setState(() => _errorMessage = 'Firebase Auth Error: ${e.message}');
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to sign in with Google: $e';
+        _errorMessage = 'Google Sign-In failed. Please try again.';
       });
     }
   }
@@ -249,7 +288,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: _sendPasswordResetEmail,
+                        onPressed: () async {
+                          final hasInternet = await hasInternetConnection();
+                          if (!hasInternet) {
+                            setState(() {
+                              _errorMessage =
+                                  'No internet connection. You can only use the app as a guest.';
+                            });
+                            return;
+                          }
+                          _sendPasswordResetEmail();
+                        },
                         child: const Text(
                           "Forgot Password?",
                           style: TextStyle(
@@ -282,47 +331,54 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20.0),
-                    SizedBox(
-                      height: 70, // fix magasság a hibaüzenetnek
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: _errorMessage.isNotEmpty
-                            ? Container(
-                                key: ValueKey(
-                                    _errorMessage), // kulcs, hogy váltson animációval
-                                width: double.infinity,
-                                margin: const EdgeInsets.only(bottom: 16.0),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 14.0, horizontal: 16.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.redAccent.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  border: Border.all(color: Colors.redAccent),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.error_outline,
-                                        color: Colors.redAccent),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        _errorMessage,
-                                        style: const TextStyle(
-                                          color: Colors.redAccent,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _errorMessage.isNotEmpty
+                          ? Container(
+                              key: ValueKey(_errorMessage),
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 16.0),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 14.0, horizontal: 16.0),
+                              decoration: BoxDecoration(
+                                color: Colors.redAccent.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12.0),
+                                border: Border.all(color: Colors.redAccent),
+                              ),
+                              child: Row(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start, // fontos!
+                                children: [
+                                  const Icon(Icons.error_outline,
+                                      color: Colors.redAccent),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage,
+                                      style: const TextStyle(
+                                        color: Colors.redAccent,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                     const SizedBox(height: 20.0),
                     Center(
                       child: GestureDetector(
-                        onTap: () {
+                        onTap: () async {
+                          final hasInternet = await hasInternetConnection();
+                          if (!hasInternet) {
+                            setState(() {
+                              _errorMessage =
+                                  'No internet connection. You can only use the app as a guest.';
+                            });
+                            return;
+                          }
+
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const RegisterStep1Screen(),
@@ -341,8 +397,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 text: "Register here.",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors
-                                      .white, // vagy Colors.tealAccent ha jobban ki akarod emelni
+                                  color: Colors.white,
                                 ),
                               ),
                             ],

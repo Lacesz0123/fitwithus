@@ -63,8 +63,9 @@ class WorkoutCategoryCard extends StatelessWidget {
                       ),
                     );
                   },
-                  errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(Icons.broken_image, size: 50),
+                  errorBuilder: (context, error, stackTrace) => Image.asset(
+                    'assets/offline_placeholder.png',
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

@@ -5,6 +5,7 @@ import '/utils/custom_snackbar.dart';
 import 'widgets/detail_recipe_header.dart';
 import 'widgets/detail_recipe_ingredients_checklist.dart';
 import 'widgets/detail_recipe_steps.dart';
+import 'dart:io';
 
 class RecipeDetailScreen extends StatefulWidget {
   final String recipeId;
@@ -17,7 +18,7 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
-  late Map<String, bool> ingredientsStatus = {};
+  Map<String, bool> ingredientsStatus = {};
   String name = '';
   String description = '';
   int prepTime = 0;
@@ -26,13 +27,26 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   String? imageUrl;
   int? calories;
   bool isGuest = false;
+  bool hasInternet = true;
 
   @override
   void initState() {
     super.initState();
+    _checkInternet();
     _fetchRecipeDetails();
     _checkIfFavorite();
     _checkIfGuest();
+  }
+
+  Future<void> _checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      setState(() {
+        hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+      });
+    } on SocketException {
+      setState(() => hasInternet = false);
+    }
   }
 
   Future<void> _checkIfGuest() async {
@@ -159,7 +173,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     recipeId: widget.recipeId,
                   ),
                   const SizedBox(height: 20),
-                  if (imageUrl != null) ...[
+                  if (imageUrl != null && hasInternet) ...[
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Image.network(
