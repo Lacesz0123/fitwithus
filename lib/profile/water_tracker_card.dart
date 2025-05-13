@@ -297,33 +297,37 @@ class _ModernGlassPainter extends CustomPainter {
     final double height = size.height;
     final double fillHeight = height * progress;
 
-    // ✅ Glass path: szélesebb felül, keskenyebb alul
-    Path glassPath = Path()
+    // 🔷 Pohár formája – szélesebb felül, keskenyebb alul
+    final Path glassPath = Path()
       ..moveTo(width * 0.1, 0)
       ..lineTo(width * 0.2, height)
       ..lineTo(width * 0.8, height)
       ..lineTo(width * 0.9, 0)
       ..close();
 
-    // ✅ Fill path: a víz szintje a pohárban
-    Path fillPath = Path()
-      ..moveTo(width * 0.1, height - fillHeight)
+    // 🔷 Víz kitöltés – a pohár szélét követi
+    final double leftX = width * 0.1 + (width * 0.1 * (1 - progress));
+    final double rightX = width * 0.9 - (width * 0.1 * (1 - progress));
+    final double topY = height - fillHeight;
+
+    final Path fillPath = Path()
+      ..moveTo(leftX, topY)
       ..lineTo(width * 0.2, height)
       ..lineTo(width * 0.8, height)
-      ..lineTo(width * 0.9, height - fillHeight)
+      ..lineTo(rightX, topY)
       ..close();
 
-    // Shadow under glass
+    // Árnyék
     canvas.drawShadow(glassPath, Colors.black.withOpacity(0.2), 4, false);
 
-    // Border paint
-    Paint borderPaint = Paint()
+    // Pohár körvonal
+    final Paint borderPaint = Paint()
       ..color = isDark ? Colors.grey.shade400 : Colors.grey.shade600
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
 
-    // Fill paint (vízszín)
-    Paint fillPaint = Paint()
+    // Víz kitöltő festék
+    final Paint fillPaint = Paint()
       ..shader = LinearGradient(
         colors: [
           Colors.blueAccent.withOpacity(0.6),
@@ -334,10 +338,7 @@ class _ModernGlassPainter extends CustomPainter {
       ).createShader(Rect.fromLTWH(0, 0, width, height))
       ..style = PaintingStyle.fill;
 
-    // Rajzoljuk a vizet
     canvas.drawPath(fillPath, fillPaint);
-
-    // Rajzoljuk a poharat
     canvas.drawPath(glassPath, borderPaint);
   }
 
