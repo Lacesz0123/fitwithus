@@ -46,18 +46,23 @@ class FavoriteWorkoutsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorite Workouts'),
-        backgroundColor: isDark ? const Color(0xFF1E1E1E) : null,
-        flexibleSpace: !isDark
-            ? Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : null,
+            gradient: !isDark
+                ? const LinearGradient(
                     colors: [Colors.blueAccent, Colors.tealAccent],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                  ),
-                ),
-              )
-            : null,
+                  )
+                : null,
+          ),
+        ),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: getFavoriteWorkouts(),
