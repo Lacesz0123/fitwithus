@@ -88,7 +88,7 @@ class WeightChartCard extends StatelessWidget {
                           sideTitles: SideTitles(
                             showTitles: true,
                             interval: 20,
-                            reservedSize: 50,
+                            reservedSize: 60,
                             getTitlesWidget: (value, meta) => Text(
                               '${value.toInt()} kg',
                               style: TextStyle(
