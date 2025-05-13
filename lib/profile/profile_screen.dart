@@ -15,6 +15,7 @@ import 'workout_progress_card.dart';
 import 'user_management/user_management_screen.dart';
 import 'notes/notes_screen.dart';
 import 'my_workouts/my_workouts_screen.dart';
+import '/utils/custom_snackbar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -85,13 +86,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profileImageUrl = downloadUrl;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile image updated successfully')),
-      );
+      showCustomSnackBar(context, 'Profile image updated successfully');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error uploading profile image')),
-      );
+      showCustomSnackBar(context, 'Error uploading profile image',
+          isError: true);
     }
   }
 
@@ -172,16 +170,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_weightController.text.isNotEmpty && user != null) {
       final input = double.tryParse(_weightController.text);
       if (input == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid number format')),
-        );
+        showCustomSnackBar(context, 'Invalid number format', isError: true);
         return;
       }
 
       if (input < 0 || input > 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Weight must be between 0 and 200 kg')),
-        );
+        showCustomSnackBar(context, 'Weight must be between 0 and 200 kg',
+            isError: true);
         return;
       }
 
@@ -197,9 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .update({'weight': input});
 
       _weightController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Weight added successfully')),
-      );
+      showCustomSnackBar(context, 'Weight added successfully');
       _fetchUserData();
     }
   }
@@ -246,9 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (snapshot.docs.isNotEmpty) {
         await snapshot.docs.first.reference.delete();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Last weight entry deleted')),
-        );
+        showCustomSnackBar(context, 'Last weight entry deleted');
         _fetchUserData();
       }
     }

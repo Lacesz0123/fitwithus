@@ -44,8 +44,10 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
   }
 
   Future<void> _updateCategory() async {
-    final title = _titleController.text.trim();
-    if (title.isEmpty || title.length > 18) {
+    final newTitle = _titleController.text.trim();
+    final oldTitle = widget.currentTitle;
+
+    if (newTitle.isEmpty || newTitle.length > 18) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Please enter a title (max 18 characters)')),
@@ -65,20 +67,33 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('category_images/categoryImages')
-          .child('$title.jpg');
+          .child('$newTitle.jpg');
 
       await storageRef.putFile(File(_pickedImage!.path));
       imageUrl = await storageRef.getDownloadURL();
     }
 
+    // 1. Kategória frissítése
     await FirebaseFirestore.instance
         .collection('categories')
         .doc(widget.docId)
         .update({
-      'title': title,
-      'title_lower': title.toLowerCase(),
+      'title': newTitle,
+      'title_lower': newTitle.toLowerCase(),
       'image': imageUrl,
     });
+
+    // 2. Edzések frissítése, ha megváltozott a név
+    if (newTitle != oldTitle) {
+      final workoutsQuery = await FirebaseFirestore.instance
+          .collection('workouts')
+          .where('category', isEqualTo: oldTitle)
+          .get();
+
+      for (final doc in workoutsQuery.docs) {
+        await doc.reference.update({'category': newTitle});
+      }
+    }
 
     if (mounted) {
       Navigator.of(context).pop();

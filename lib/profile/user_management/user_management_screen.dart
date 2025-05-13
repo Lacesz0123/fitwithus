@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '/utils/custom_snackbar.dart';
 
 class UserManagementScreen extends StatelessWidget {
   const UserManagementScreen({super.key});
@@ -9,13 +10,9 @@ class UserManagementScreen extends StatelessWidget {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'disabled': true,
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User disabled successfully')),
-      );
+      showCustomSnackBar(context, 'User disabled successfully');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error disabling user: $e')),
-      );
+      showCustomSnackBar(context, 'Error disabling user: $e', isError: true);
     }
   }
 
@@ -24,13 +21,9 @@ class UserManagementScreen extends StatelessWidget {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'disabled': false,
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User enabled successfully')),
-      );
+      showCustomSnackBar(context, 'User enabled successfully');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error enabling user: $e')),
-      );
+      showCustomSnackBar(context, 'Error enabling user: $e', isError: true);
     }
   }
 

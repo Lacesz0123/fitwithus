@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '/providers/theme_provider.dart';
+import '/utils/custom_snackbar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -271,23 +272,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.black),
-        ),
-        backgroundColor: Colors.blueAccent,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        elevation: 6,
-        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+  void _showMessage(String message, {bool isError = false}) {
+    showCustomSnackBar(context, message, isError: isError);
   }
 
   bool _isValidUsername(String username) {
@@ -363,58 +349,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         if (mounted) {
           Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Your account has been successfully deleted.',
-                style: TextStyle(color: Colors.black),
-              ),
-              backgroundColor: Colors.blueAccent,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              elevation: 6,
-              margin: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              duration: Duration(seconds: 3),
-            ),
-          );
+          showCustomSnackBar(
+              context, 'Your account has been successfully deleted.');
         }
       } on FirebaseAuthException catch (e) {
         if (e.code == 'requires-recent-login') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Please log in again to confirm account deletion.',
-                style: TextStyle(color: Colors.black),
-              ),
-              backgroundColor: Colors.blueAccent,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              elevation: 6,
-              margin: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              duration: Duration(seconds: 3),
-            ),
-          );
+          showCustomSnackBar(
+              context, 'Please log in again to confirm account deletion.');
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Error: ${e.message}',
-                style: const TextStyle(color: Colors.black),
-              ),
-              backgroundColor: Colors.blueAccent,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              elevation: 6,
-              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          showCustomSnackBar(context, 'Error: ${e.message}');
         }
       }
     }

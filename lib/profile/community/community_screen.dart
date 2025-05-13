@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import '/utils/custom_snackbar.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -98,13 +99,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
           .doc(docId)
           .delete();
       await _loadMessages();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Message deleted')),
-      );
+      showCustomSnackBar(context, 'Message deleted');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting message: $e')),
-      );
+      showCustomSnackBar(context, 'Error deleting message: $e', isError: true);
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '/utils/custom_snackbar.dart';
 
 class MyWorkoutsScreen extends StatefulWidget {
   const MyWorkoutsScreen({super.key});
@@ -172,10 +173,8 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
                       });
                       Navigator.pop(context);
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text("Please fill in all fields")),
-                      );
+                      showCustomSnackBar(context, "Please fill in all fields",
+                          isError: true);
                     }
                   },
                 ),
@@ -347,10 +346,8 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
                       });
                       Navigator.pop(context);
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text("Please fill in all fields")),
-                      );
+                      showCustomSnackBar(context, "Please fill in all fields",
+                          isError: true);
                     }
                   },
                 ),
