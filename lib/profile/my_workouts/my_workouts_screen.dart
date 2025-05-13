@@ -14,67 +14,352 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
 
   Future<void> _addWorkout() async {
     final titleController = TextEditingController();
-    final stepsController = TextEditingController();
+    final List<TextEditingController> stepsControllers = [];
+
+    void addStepField() {
+      stepsControllers.add(TextEditingController());
+    }
+
+    addStepField(); // Minimum 1 lépés
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? Colors.grey.shade700 : Colors.blueAccent;
+    final bgColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
 
     await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("New Workout"),
-          backgroundColor: Theme.of(context).dialogBackgroundColor,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Workout Title'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: stepsController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Steps (separate by new line)',
+              backgroundColor: bgColor,
+              title: Text(
+                "New Workout",
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.pop(context),
-            ),
-            ElevatedButton(
-              child: const Text("Add"),
-              onPressed: () async {
-                if (titleController.text.isNotEmpty) {
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userId)
-                      .collection('my_workouts')
-                      .add({
-                    'title': titleController.text.trim(),
-                    'steps': stepsController.text.trim().split('\n'),
-                    'createdAt': Timestamp.now(),
-                    'favorite': false,
-                  });
-                }
-                Navigator.pop(context);
-              },
-            ),
-          ],
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      style: TextStyle(color: textColor),
+                      decoration: InputDecoration(
+                        labelText: 'Workout Title',
+                        labelStyle:
+                            TextStyle(color: textColor.withOpacity(0.7)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: primaryColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Steps',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...stepsControllers.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final controller = entry.value;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: controller,
+                                style: TextStyle(color: textColor),
+                                decoration: InputDecoration(
+                                  labelText: 'Step ${index + 1}',
+                                  labelStyle: TextStyle(
+                                      color: textColor.withOpacity(0.6)),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: primaryColor),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle,
+                                  color: Colors.redAccent),
+                              onPressed: () {
+                                setState(() {
+                                  stepsControllers.removeAt(index);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    Align(
+                      alignment: Alignment.center,
+                      child: OutlinedButton.icon(
+                        icon: Icon(Icons.add, color: primaryColor),
+                        label: Text("Add Step",
+                            style: TextStyle(color: primaryColor)),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: primaryColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            addStepField();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actionsPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              actions: [
+                TextButton(
+                  child: Text("Cancel", style: TextStyle(color: textColor)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.check, color: Colors.white),
+                  label:
+                      const Text("Add", style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final title = titleController.text.trim();
+                    final steps = stepsControllers
+                        .map((controller) => controller.text.trim())
+                        .where((step) => step.isNotEmpty)
+                        .toList();
+
+                    if (title.isNotEmpty && steps.isNotEmpty) {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .collection('my_workouts')
+                          .add({
+                        'title': title,
+                        'steps': steps,
+                        'createdAt': Timestamp.now(),
+                      });
+                      Navigator.pop(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Please fill in all fields")),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Future<void> _toggleFavorite(String id, bool current) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('my_workouts')
-        .doc(id)
-        .update({'favorite': !current});
+  Future<void> _editWorkout(
+      String workoutId, String currentTitle, List<String> currentSteps) async {
+    final titleController = TextEditingController(text: currentTitle);
+    final List<TextEditingController> stepsControllers =
+        currentSteps.map((step) => TextEditingController(text: step)).toList();
+
+    void addStepField() {
+      stepsControllers.add(TextEditingController());
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? Colors.grey.shade700 : Colors.blueAccent;
+    final bgColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              backgroundColor: bgColor,
+              title: Text(
+                "Edit Workout",
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      style: TextStyle(color: textColor),
+                      decoration: InputDecoration(
+                        labelText: 'Workout Title',
+                        labelStyle:
+                            TextStyle(color: textColor.withOpacity(0.7)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: primaryColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Steps',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...stepsControllers.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final controller = entry.value;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: controller,
+                                style: TextStyle(color: textColor),
+                                decoration: InputDecoration(
+                                  labelText: 'Step ${index + 1}',
+                                  labelStyle: TextStyle(
+                                      color: textColor.withOpacity(0.6)),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: primaryColor),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle,
+                                  color: Colors.redAccent),
+                              onPressed: () {
+                                setState(() {
+                                  stepsControllers.removeAt(index);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    Align(
+                      alignment: Alignment.center,
+                      child: OutlinedButton.icon(
+                        icon: Icon(Icons.add, color: primaryColor),
+                        label: Text("Add Step",
+                            style: TextStyle(color: primaryColor)),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: primaryColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            addStepField();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actionsPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              actions: [
+                TextButton(
+                  child: Text("Cancel", style: TextStyle(color: textColor)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.save, color: Colors.white),
+                  label:
+                      const Text("Save", style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final updatedTitle = titleController.text.trim();
+                    final updatedSteps = stepsControllers
+                        .map((c) => c.text.trim())
+                        .where((s) => s.isNotEmpty)
+                        .toList();
+
+                    if (updatedTitle.isNotEmpty && updatedSteps.isNotEmpty) {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .collection('my_workouts')
+                          .doc(workoutId)
+                          .update({
+                        'title': updatedTitle,
+                        'steps': updatedSteps,
+                      });
+                      Navigator.pop(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Please fill in all fields")),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _deleteWorkout(String id) async {
@@ -95,13 +380,13 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
         ],
       ),
     );
+
     if (confirm == true) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('my_workouts')
-          .doc(id)
-          .delete();
+      final userRef =
+          FirebaseFirestore.instance.collection('users').doc(userId);
+
+      // Törlés Firestore-ból
+      await userRef.collection('my_workouts').doc(id).delete();
     }
   }
 
@@ -156,7 +441,6 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
               final data = workouts[index].data() as Map<String, dynamic>;
               final title = data['title'] ?? 'Untitled';
               final steps = List<String>.from(data['steps'] ?? []);
-              final favorite = data['favorite'] == true;
 
               return Card(
                 color: cardColor,
@@ -182,16 +466,13 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
                                     ?.copyWith(fontWeight: FontWeight.w600)),
                           ),
                           IconButton(
-                            icon: Icon(
-                              favorite ? Icons.star : Icons.star_border,
-                              color: favorite
-                                  ? (isDark
-                                      ? Colors.orange.shade300
-                                      : Colors.orange)
-                                  : Colors.grey,
+                            icon:
+                                const Icon(Icons.edit, color: Colors.blueGrey),
+                            onPressed: () => _editWorkout(
+                              workouts[index].id,
+                              title,
+                              steps,
                             ),
-                            onPressed: () =>
-                                _toggleFavorite(workouts[index].id, favorite),
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
