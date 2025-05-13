@@ -66,7 +66,7 @@ class FavoriteRecipesScreen extends StatelessWidget {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                "Error loading favorite recipes",
+                "No favorite recipes found",
                 style:
                     TextStyle(color: isDark ? Colors.white70 : Colors.black54),
               ),
