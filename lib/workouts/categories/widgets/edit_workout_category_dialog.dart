@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '/../utils/custom_snackbar.dart';
 
 class EditCategoryDialog extends StatefulWidget {
   final String docId;
@@ -37,9 +38,7 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
       setState(() {
         _pickedImage = image;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Image selected')),
-      );
+      showCustomSnackBar(context, 'Image selected');
     }
   }
 
@@ -48,10 +47,12 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
     final oldTitle = widget.currentTitle;
 
     if (newTitle.isEmpty || newTitle.length > 18) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter a title (max 18 characters)')),
+      showCustomSnackBar(
+        context,
+        'Please enter a title (max 18 characters)',
+        isError: true,
       );
+
       return;
     }
 
@@ -97,9 +98,7 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
 
     if (mounted) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Category updated successfully')),
-      );
+      showCustomSnackBar(context, 'Category updated successfully');
     }
   }
 
@@ -128,15 +127,15 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Category and workouts deleted successfully')),
-        );
+        showCustomSnackBar(
+            context, 'Category and workouts deleted successfully');
       }
     } catch (e) {
       print('Error deleting category and workouts: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error deleting category and workouts')),
+      showCustomSnackBar(
+        context,
+        'Error deleting category and workouts',
+        isError: true,
       );
     }
   }

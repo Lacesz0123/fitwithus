@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/custom_snackbar.dart';
 
 class EditWorkoutScreen extends StatefulWidget {
   final String workoutId;
@@ -68,9 +69,7 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     if (newTitle.isEmpty ||
         newDescription.isEmpty ||
         newSteps.any((step) => step.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+      showCustomSnackBar(context, 'Please fill in all fields', isError: true);
       return;
     }
 
@@ -94,14 +93,10 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
           .doc(widget.workoutId)
           .update(updatedData);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Workout updated successfully')),
-      );
+      showCustomSnackBar(context, 'Workout updated successfully');
       Navigator.of(context).pop();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error updating workout')),
-      );
+      showCustomSnackBar(context, 'Error updating workout', isError: true);
     }
   }
 
@@ -133,14 +128,10 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
             .doc(widget.workoutId)
             .delete();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Workout deleted successfully')),
-        );
+        showCustomSnackBar(context, 'Workout deleted successfully');
         Navigator.of(context).pop();
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error deleting workout')),
-        );
+        showCustomSnackBar(context, 'Error deleting workout', isError: true);
       }
     }
   }

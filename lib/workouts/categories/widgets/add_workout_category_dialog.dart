@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '/../utils/custom_snackbar.dart';
 
 class AddCategoryDialog extends StatefulWidget {
   const AddCategoryDialog({super.key});
@@ -22,19 +23,17 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
       setState(() {
         _pickedImage = image;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Image selected')),
-      );
+      showCustomSnackBar(context, 'Image selected');
     }
   }
 
   Future<void> _uploadCategory() async {
     final title = _titleController.text.trim();
     if (title.isEmpty || title.length > 18 || _pickedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                'Please enter a title (max 18 characters) and select an image')),
+      showCustomSnackBar(
+        context,
+        'Please enter a title (max 18 characters) and select an image',
+        isError: true,
       );
       return;
     }
@@ -55,9 +54,7 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
 
     if (mounted) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Category added successfully')),
-      );
+      showCustomSnackBar(context, 'Category added successfully');
     }
   }
 

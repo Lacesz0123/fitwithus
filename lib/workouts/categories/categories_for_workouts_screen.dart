@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/workout_category_card.dart';
 import 'widgets/add_workout_category_dialog.dart';
 import 'widgets/workout_category_search_delegate.dart';
+import '../../utils/custom_snackbar.dart';
 
 class WorkoutsScreen extends StatefulWidget {
   WorkoutsScreen({super.key});
@@ -37,9 +38,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
   Future<void> addCategory(BuildContext context) async {
     if (userRole != 'admin') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Only admins can add categories')),
-      );
+      showCustomSnackBar(context, 'Only admins can add categories',
+          isError: true);
       return;
     }
 
@@ -52,9 +52,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   Future<void> editCategory(BuildContext context, String docId,
       String currentTitle, String currentImage) async {
     if (userRole != 'admin') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Only admins can edit categories')),
-      );
+      showCustomSnackBar(context, 'Only admins can edit categories',
+          isError: true);
       return;
     }
 

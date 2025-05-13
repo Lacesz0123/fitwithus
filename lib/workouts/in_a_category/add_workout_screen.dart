@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../../utils/custom_snackbar.dart';
 
 class AddWorkoutScreen extends StatefulWidget {
   final String category;
@@ -55,18 +56,12 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
             .add(workoutData);
 
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Workout added successfully')),
-        );
+        showCustomSnackBar(context, 'Workout added successfully');
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error adding workout')),
-        );
+        showCustomSnackBar(context, 'Error adding workout', isError: true);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+      showCustomSnackBar(context, 'Please fill in all fields', isError: true);
     }
   }
 
