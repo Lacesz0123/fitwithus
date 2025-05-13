@@ -106,6 +106,36 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _sendPasswordResetEmail() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your email address.';
+      });
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset email sent. Please check your inbox.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = switch (e.code) {
+          'user-not-found' => 'No user found with this email.',
+          'invalid-email' => 'Invalid email format.',
+          _ => 'Failed to send reset email: ${e.message}',
+        };
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -215,7 +245,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20.0),
+                    const SizedBox(height: 5.0),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _sendPasswordResetEmail,
+                        child: const Text(
+                          "Forgot Password?",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -238,38 +282,43 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20.0),
-                    if (_errorMessage.isNotEmpty)
-                      AnimatedOpacity(
-                        opacity: 1.0,
+                    SizedBox(
+                      height: 70, // fix magasság a hibaüzenetnek
+                      child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
-                        child: Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.only(bottom: 16.0),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14.0, horizontal: 16.0),
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(color: Colors.redAccent),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline,
-                                  color: Colors.redAccent),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _errorMessage,
-                                  style: const TextStyle(
-                                    color: Colors.redAccent,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                        child: _errorMessage.isNotEmpty
+                            ? Container(
+                                key: ValueKey(
+                                    _errorMessage), // kulcs, hogy váltson animációval
+                                width: double.infinity,
+                                margin: const EdgeInsets.only(bottom: 16.0),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 14.0, horizontal: 16.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  border: Border.all(color: Colors.redAccent),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.error_outline,
+                                        color: Colors.redAccent),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _errorMessage,
+                                        style: const TextStyle(
+                                          color: Colors.redAccent,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
+                    ),
                     const SizedBox(height: 20.0),
                     Center(
                       child: GestureDetector(
