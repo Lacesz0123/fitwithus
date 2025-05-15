@@ -385,8 +385,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   future: getUserData(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
+                      return const SizedBox(
+                        height:
+                            400, // vagy MediaQuery.of(context).size.height * 0.5 is lehet
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.blueAccent,
+                          ),
+                        ),
+                      );
                     }
+
                     if (snapshot.hasError) {
                       return const Text('Error loading user data');
                     }

@@ -64,7 +64,9 @@ class ProfileHeader extends StatelessWidget {
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
                           return const Center(
-                            child: CircularProgressIndicator(),
+                            child: CircularProgressIndicator(
+                              color: Colors.blueAccent,
+                            ),
                           );
                         },
                         errorBuilder: (_, __, ___) => const Icon(

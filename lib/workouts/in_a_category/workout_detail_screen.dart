@@ -399,8 +399,14 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
         future: getWorkoutData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const SizedBox(
+              height: 300,
+              child: Center(
+                child: CircularProgressIndicator(color: Colors.blueAccent),
+              ),
+            );
           }
+
           if (snapshot.hasError) {
             return const Center(child: Text('Error loading workout data'));
           }

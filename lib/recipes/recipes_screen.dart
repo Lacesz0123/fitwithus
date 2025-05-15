@@ -71,8 +71,14 @@ class _RecipesScreenState extends State<RecipesScreen> {
         stream: FirebaseFirestore.instance.collection('recipes').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const SizedBox(
+              height: 400,
+              child: Center(
+                child: CircularProgressIndicator(color: Colors.blueAccent),
+              ),
+            );
           }
+
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("No recipes available"));
           }

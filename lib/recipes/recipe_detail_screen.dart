@@ -152,7 +152,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
       ),
       body: name.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const SizedBox(
+              height: 400,
+              child: Center(
+                child: CircularProgressIndicator(color: Colors.blueAccent),
+              ),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -186,7 +191,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     const SizedBox(height: 20),
                   ],
                   steps.isEmpty
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const SizedBox(
+                          height: 200,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                                color: Colors.blueAccent),
+                          ),
+                        )
                       : RecipeSteps(steps: steps, recipeId: widget.recipeId),
                 ],
               ),
