@@ -137,7 +137,40 @@ class _AIChatScreenState extends State<AIChatScreen> {
               Icons.delete_outline,
               color: Theme.of(context).iconTheme.color,
             ),
-            onPressed: _clearChatHistory,
+            onPressed: () async {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final cancelColor = isDark
+                  ? Theme.of(context).textTheme.bodyLarge?.color
+                  : Colors.black;
+
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  title: const Text("Clear Chat History"),
+                  content: const Text(
+                      "Are you sure you want to delete all messages?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child:
+                          Text("Cancel", style: TextStyle(color: cancelColor)),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text("Delete",
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed == true) {
+                await _clearChatHistory();
+              }
+            },
           ),
         ],
       ),
@@ -187,9 +220,13 @@ class _AIChatScreenState extends State<AIChatScreen> {
             ),
           ),
           if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: CircularProgressIndicator(
+                  color: Colors.blueAccent,
+                ),
+              ),
             ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

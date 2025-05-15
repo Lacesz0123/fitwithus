@@ -33,7 +33,9 @@ class RecipeSearchDelegate extends SearchDelegate {
       future: _hasInternet(),
       builder: (context, internetSnapshot) {
         if (!internetSnapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.blueAccent),
+          );
         }
 
         final hasInternet = internetSnapshot.data!;
@@ -46,8 +48,11 @@ class RecipeSearchDelegate extends SearchDelegate {
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.blueAccent),
+              );
             }
+
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return const Center(child: Text("No recipes found"));
             }

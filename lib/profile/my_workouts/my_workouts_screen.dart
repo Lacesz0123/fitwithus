@@ -360,6 +360,8 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
   }
 
   Future<void> _deleteWorkout(String id) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -367,12 +369,22 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
         content: const Text("Are you sure you want to delete this workout?"),
         actions: [
           TextButton(
-            child: const Text("Cancel"),
             onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Cancel",
+              style: TextStyle(
+                color: isDark
+                    ? Theme.of(context).textTheme.bodyLarge?.color
+                    : Colors.black,
+              ),
+            ),
           ),
           TextButton(
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
             onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              "Delete",
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

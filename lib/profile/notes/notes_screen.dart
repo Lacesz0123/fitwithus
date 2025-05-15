@@ -88,6 +88,8 @@ class _NotesScreenState extends State<NotesScreen> {
 
   Future<void> _deleteNote(String noteId) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cancelColor =
+        isDark ? Theme.of(context).textTheme.bodyLarge?.color : Colors.black;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -100,14 +102,11 @@ class _NotesScreenState extends State<NotesScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+            child: Text("Cancel", style: TextStyle(color: cancelColor)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              "Delete",
-              style: TextStyle(color: Colors.redAccent),
-            ),
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

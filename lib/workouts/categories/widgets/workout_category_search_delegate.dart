@@ -32,7 +32,9 @@ class CategorySearchDelegate extends SearchDelegate {
       future: _checkInternet(),
       builder: (context, internetSnapshot) {
         if (!internetSnapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.blueAccent),
+          );
         }
 
         final hasInternet = internetSnapshot.data!;
@@ -46,8 +48,11 @@ class CategorySearchDelegate extends SearchDelegate {
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.blueAccent),
+              );
             }
+
             if (snapshot.hasError) {
               return const Center(child: Text('Error loading categories'));
             }

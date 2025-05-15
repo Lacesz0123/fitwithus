@@ -151,6 +151,12 @@ class _CommunityScreenState extends State<CommunityScreen> {
     return GestureDetector(
       onLongPress: () {
         if (_userRole == 'admin') {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final cancelColor = isDark
+              ? Theme.of(context).textTheme.bodyLarge?.color
+              : Colors.black;
+          final deleteColor = Colors.red;
+
           showDialog(
             context: context,
             builder: (_) => AlertDialog(
@@ -160,15 +166,14 @@ class _CommunityScreenState extends State<CommunityScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text('Cancel', style: TextStyle(color: cancelColor)),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     _deleteMessage(docId); // ez már jól törli Firestore-ból
                   },
-                  child:
-                      const Text('Delete', style: TextStyle(color: Colors.red)),
+                  child: Text('Delete', style: TextStyle(color: deleteColor)),
                 ),
               ],
             ),

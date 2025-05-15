@@ -111,6 +111,8 @@ class _WaterTrackerCardState extends State<WaterTrackerCard> {
   }
 
   void _showResetDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -120,7 +122,14 @@ class _WaterTrackerCardState extends State<WaterTrackerCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark
+                    ? Theme.of(context).textTheme.bodyLarge?.color
+                    : Colors.black,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -129,7 +138,7 @@ class _WaterTrackerCardState extends State<WaterTrackerCard> {
             },
             child: const Text(
               'Reset',
-              style: TextStyle(color: Colors.redAccent),
+              style: TextStyle(color: Colors.red),
             ),
           ),
         ],

@@ -202,24 +202,38 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
   }
 
   void _showConfirmationDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cancelColor =
+        isDark ? Theme.of(context).textTheme.bodyLarge?.color : Colors.black;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           title: const Text('Confirm Completion'),
           content: const Text(
-              'Are you sure you want to mark this workout as completed?'),
+            'Are you sure you want to mark this workout as completed?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: cancelColor),
+              ),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _markWorkoutCompleted();
               },
-              child: const Text('Yes'),
+              child: const Text(
+                'Yes',
+                style: TextStyle(color: Colors.blueAccent),
+              ),
             ),
           ],
         );
