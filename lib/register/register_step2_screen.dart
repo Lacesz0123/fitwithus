@@ -59,13 +59,15 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
           );
         }
       } on FirebaseAuthException catch (e) {
-        String message;
-        if (e.code == 'too-many-requests') {
-          message =
-              "Too many registration attempts from this device. Please try again later.";
-        } else {
-          message = "Registration failed: ${e.message}";
-        }
+        final message = switch (e.code) {
+          'email-already-in-use' => 'This email is already registered.',
+          'invalid-email' => 'Please enter a valid email address.',
+          'operation-not-allowed' => 'Registration is currently not allowed.',
+          'weak-password' =>
+            'Password is too weak. Please choose a stronger one.',
+          'too-many-requests' => 'Too many attempts. Please try again later.',
+          _ => 'Registration failed. Please check your data and try again.',
+        };
         setState(() {
           _errorMessage = message;
         });
