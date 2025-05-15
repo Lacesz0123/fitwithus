@@ -16,7 +16,6 @@ Future<void> main() async {
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown, // opcionális, ha fejjel lefelé is engednéd
   ]);
 
   runApp(

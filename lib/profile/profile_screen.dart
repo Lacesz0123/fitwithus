@@ -358,7 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
       ),
-      body: isGuest
+      body: user == null || isGuest
           ? Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40),

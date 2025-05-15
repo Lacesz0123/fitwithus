@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -17,14 +18,34 @@ class _AIChatScreenState extends State<AIChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final apiKey = dotenv.env['OPENAI_API_KEY'];
   bool _isLoading = false;
+  bool hasInternet = true;
 
   @override
   void initState() {
     super.initState();
+    _checkInternet();
     _loadMessagesFromLocal();
   }
 
+  Future<void> _checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      setState(() {
+        hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+      });
+    } on SocketException {
+      setState(() => hasInternet = false);
+    }
+  }
+
   Future<void> _sendMessage() async {
+    if (!hasInternet) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("You are offline. AI Chat is unavailable.")),
+      );
+      return;
+    }
     if (_controller.text.isEmpty) return;
 
     setState(() {
@@ -236,7 +257,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 5,
-                  offset: Offset(0, -2),
+                  offset: const Offset(0, -2),
                 ),
               ],
             ),
@@ -245,8 +266,12 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    enabled:
+                        hasInternet, // 🔒 csak akkor lehet gépelni, ha van net
                     decoration: InputDecoration(
-                      hintText: "Type your message...",
+                      hintText: hasInternet
+                          ? "Type your message..."
+                          : "Offline – AI Chat unavailable",
                       hintStyle: TextStyle(
                         color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
@@ -276,12 +301,13 @@ class _AIChatScreenState extends State<AIChatScreen> {
                       Icons.send,
                       color: Theme.of(context).iconTheme.color,
                     ),
-                    onPressed: _sendMessage,
+                    onPressed:
+                        hasInternet ? _sendMessage : null, // 🔒 csak ha van net
                   ),
                 ),
               ],
             ),
-          ),
+          )
         ],
       ),
     );
