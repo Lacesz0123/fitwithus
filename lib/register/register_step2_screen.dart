@@ -42,8 +42,15 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
         );
 
         if (user != null) {
-          await Future.delayed(Duration(seconds: 5));
-          await user.sendEmailVerification();
+          // Próbáljuk meg elküldeni a verifikációs emailt, de ha nem sikerül, nem állunk le
+          try {
+            await Future.delayed(const Duration(seconds: 2));
+            await user.sendEmailVerification();
+          } catch (e) {
+            print('Verification email failed: $e');
+          }
+
+          // Akkor is továbbnavigálunk, ha az email küldés nem sikerült
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (context) => const BottomNavScreen(),

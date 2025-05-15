@@ -70,6 +70,7 @@ class FirebaseAuthService {
             'dailyCalories': 0,
             'completedWorkouts': 0,
             'profileImageUrl': null, // Kezdetben nincs profilkép
+            'role': 'user', // <- EZT ADD HOZZÁ
           }, SetOptions(merge: true));
         }
       }
