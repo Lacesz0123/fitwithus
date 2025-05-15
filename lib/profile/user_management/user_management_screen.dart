@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '/utils/custom_snackbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserManagementScreen extends StatelessWidget {
   const UserManagementScreen({super.key});
@@ -24,6 +25,22 @@ class UserManagementScreen extends StatelessWidget {
       showCustomSnackBar(context, 'User enabled successfully');
     } catch (e) {
       showCustomSnackBar(context, 'Error enabling user: $e', isError: true);
+    }
+  }
+
+  Future<void> _toggleUserRole(
+      BuildContext context, String userId, bool isAdmin) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'role': isAdmin ? 'user' : 'admin',
+      });
+      showCustomSnackBar(
+        context,
+        isAdmin ? 'User demoted to regular user' : 'User promoted to admin',
+      );
+    } catch (e) {
+      showCustomSnackBar(context, 'Error updating user role: $e',
+          isError: true);
     }
   }
 
@@ -54,7 +71,10 @@ class UserManagementScreen extends StatelessWidget {
             return const Center(child: Text('No users found'));
           }
 
-          final users = snapshot.data!.docs;
+          final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+          final users = snapshot.data!.docs
+              .where((doc) => doc.id != currentUserId)
+              .toList();
 
           return ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -66,23 +86,48 @@ class UserManagementScreen extends StatelessWidget {
               final username = data['username'] ?? 'Unnamed User';
               final email = data['email'] ?? 'No email';
               final disabled = data['disabled'] == true;
+              final isAdmin = data['role'] == 'admin';
 
               return ListTile(
                 title: Text(username),
                 subtitle: Text(email),
-                trailing: ElevatedButton(
-                  onPressed: () {
-                    if (disabled) {
-                      _enableUser(context, user.id);
-                    } else {
-                      _disableUser(context, user.id);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: disabled ? Colors.green : Colors.redAccent,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: Text(disabled ? 'Enable' : 'Disable'),
+                trailing: Wrap(
+                  spacing: 10,
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      height: 38,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (disabled) {
+                            _enableUser(context, user.id);
+                          } else {
+                            _disableUser(context, user.id);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              disabled ? Colors.green : Colors.redAccent,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text(disabled ? 'Enable' : 'Disable'),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 100,
+                      height: 38,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            _toggleUserRole(context, user.id, isAdmin),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              isAdmin ? Colors.green : Colors.redAccent,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text(isAdmin ? 'Admin' : 'User'),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

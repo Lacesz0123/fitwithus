@@ -130,6 +130,21 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       UserCredential? userCredential = await _authService.signInWithGoogle();
       if (userCredential != null && userCredential.user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
+
+        final userData = userDoc.data();
+        if (userData != null && userData['disabled'] == true) {
+          await FirebaseAuth.instance.signOut();
+          setState(() {
+            _errorMessage =
+                'This account has been disabled by an administrator.';
+          });
+          return;
+        }
+
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const BottomNavScreen()),
         );
