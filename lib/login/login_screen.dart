@@ -76,12 +76,15 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       setState(() {
         _errorMessage = switch (e.code) {
-          'user-not-found' => 'No user found for this email.',
+          'user-not-found' => 'No account exists with this email address.',
           'wrong-password' => 'Incorrect password. Please try again.',
-          'invalid-email' => 'The email address is badly formatted.',
-          'user-disabled' => 'This user has been disabled.',
-          'too-many-requests' => 'Too many login attempts. Try again later.',
-          _ => 'An error occurred: ${e.message}',
+          'invalid-email' => 'Please enter a valid email address.',
+          'user-disabled' => 'This account has been disabled.',
+          'too-many-requests' =>
+            'Too many failed attempts. Please wait and try again.',
+          'network-request-failed' =>
+            'Network error. Please check your connection.',
+          _ => 'Login failed. Please check your email and password.',
         };
       });
     } catch (_) {
@@ -255,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
                           contentPadding: EdgeInsets.all(16.0),
-                          hintText: "User Email",
+                          hintText: "Email",
                           border: InputBorder.none,
                           prefixIcon: Icon(Icons.mail, color: Colors.black54),
                         ),
@@ -279,7 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscureText: !_isPasswordVisible,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.all(16.0),
-                          hintText: "User Password",
+                          hintText: "Password",
                           border: InputBorder.none,
                           prefixIcon:
                               const Icon(Icons.lock, color: Colors.black54),
