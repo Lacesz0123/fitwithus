@@ -1,11 +1,21 @@
-// lib/services/firebase_register_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class FirebaseRegisterService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final CollectionReference _users =
-      FirebaseFirestore.instance.collection('users');
+  final FirebaseAuth _auth;
+  final CollectionReference _users;
+
+  FirebaseRegisterService()
+      : _auth = FirebaseAuth.instance,
+        _users = FirebaseFirestore.instance.collection('users');
+
+  @visibleForTesting
+  FirebaseRegisterService.test({
+    required FirebaseAuth auth,
+    required CollectionReference usersCollection,
+  })  : _auth = auth,
+        _users = usersCollection;
 
   Future<User?> registerUser({
     required String email,
