@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
+import '../utils/custom_snackbar.dart';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -39,13 +40,14 @@ class _AIChatScreenState extends State<AIChatScreen> {
   }
 
   Future<void> _sendMessage() async {
+    await _checkInternet(); // ✅ újraellenőrzés
+
     if (!hasInternet) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("You are offline. AI Chat is unavailable.")),
-      );
+      showCustomSnackBar(context, "You are offline. AI Chat is unavailable.",
+          isError: true);
       return;
     }
+
     if (_controller.text.isEmpty) return;
 
     setState(() {
@@ -68,7 +70,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
       });
     } finally {
       _isLoading = false;
-      await _saveMessagesToLocal(); // mentés minden válasz után
+      await _saveMessagesToLocal();
     }
   }
 
