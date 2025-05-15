@@ -3,10 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // ez kell az időzítéshez
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'dart:io'; // Internet-csekkhez szükséges
+import '/utils/timer_manager.dart'; // Internet-csekkhez szükséges
 
 class WorkoutDetailScreen extends StatefulWidget {
   final String workoutId;
@@ -573,205 +572,19 @@ class RestTimerWidget extends StatefulWidget {
 }
 
 class _RestTimerWidgetState extends State<RestTimerWidget> {
-  int _selectedMinutes = 1;
-  Duration _remainingTime = const Duration(minutes: 1);
-  Timer? _timer;
-  bool _isRunning = false;
-  late String _prefsStartKey;
-  late String _prefsMinutesKey;
-  late FlutterLocalNotificationsPlugin _notificationsPlugin;
+  final TimerManager _timerManager = TimerManager();
 
   @override
   void initState() {
     super.initState();
-    _prefsStartKey = 'restTimer_start';
-    _prefsMinutesKey = 'restTimer_minutes';
-    _initializeNotifications();
-    _loadTimerState();
-  }
-
-  Future<void> _requestPermissions() async {
-    // Értesítési jogosultság kérése
-    final status = await Permission.notification.status;
-    debugPrint('Notification permission status: $status');
-    if (status.isDenied) {
-      final result = await Permission.notification.request();
-      debugPrint('Notification permission request result: $result');
-    }
-  }
-
-  void _initializeNotifications() async {
-    _notificationsPlugin = FlutterLocalNotificationsPlugin();
-
-    // Android inicializálási beállítások
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    // iOS inicializálási beállítások
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
-
-    // Kombinált inicializálási beállítások
-    const initializationSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
-
-    // Plugin inicializálása előtérben történő kezeléssel
-    await _notificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        debugPrint('Értesítés megérintve: ${response.payload}');
-      },
-    );
-
-    // Android értesítési csatorna létrehozása
-    const channel = AndroidNotificationChannel(
-      'rest_timer_channel',
-      'Rest Timer Notifications',
-      description: 'Értesítések a pihenőidő időzítő befejezéséhez',
-      importance: Importance.max,
-      playSound: true,
-      showBadge: true,
-      enableVibration: true,
-    );
-
-    final androidPlugin =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlugin?.createNotificationChannel(channel);
-    debugPrint('Notification channel created');
-
-    // Jogosultságok kérése
-    await _requestPermissions();
-  }
-
-  Future<void> _showNotification() async {
-    const androidDetails = AndroidNotificationDetails(
-      'rest_timer_channel',
-      'Rest Timer Notifications',
-      channelDescription: 'Notifications for rest timer completion',
-      importance: Importance.max,
-      priority: Priority.high,
-      ticker: 'Rest Timer',
-      showWhen: true,
-      autoCancel: true,
-      enableVibration: true,
-      playSound: true,
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    try {
-      await _notificationsPlugin.show(
-        0,
-        'Rest Timer Finished',
-        'Your rest period is over!',
-        notificationDetails,
-        payload: 'timer_complete',
-      );
-      debugPrint('Notification sent successfully');
-    } catch (e) {
-      debugPrint('Error sending notification: $e');
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _saveTimerState(DateTime startTime, int minutes) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefsStartKey, startTime.toIso8601String());
-    await prefs.setInt(_prefsMinutesKey, minutes);
-  }
-
-  Future<void> _clearTimerState() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_prefsStartKey);
-    await prefs.remove(_prefsMinutesKey);
-  }
-
-  Future<void> _loadTimerState() async {
-    final prefs = await SharedPreferences.getInstance();
-    final startString = prefs.getString(_prefsStartKey);
-    final minutes = prefs.getInt(_prefsMinutesKey);
-
-    if (startString != null && minutes != null) {
-      final startTime = DateTime.parse(startString);
-      final elapsed = DateTime.now().difference(startTime);
-      final total = Duration(minutes: minutes);
-      final remaining = total - elapsed;
-
-      if (remaining > Duration.zero) {
-        setState(() {
-          _selectedMinutes = minutes;
-          _remainingTime = remaining;
-          _isRunning = true;
-        });
-        _startTimer(resume: true);
-      } else {
-        await _clearTimerState();
-        _resetTimer();
+    _timerManager.setIsDark(widget.isDark);
+    _timerManager.initializeNotifications();
+    _timerManager.loadTimerState();
+    _timerManager.onTimerUpdate = (remainingTime, isRunning) {
+      if (mounted) {
+        setState(() {});
       }
-    }
-  }
-
-  void _startTimer({bool resume = false}) {
-    _timer?.cancel();
-
-    if (!resume) {
-      _saveTimerState(DateTime.now(), _selectedMinutes);
-    }
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (_remainingTime.inSeconds > 0) {
-        setState(() {
-          _remainingTime -= const Duration(seconds: 1);
-        });
-      } else {
-        timer.cancel();
-        setState(() {
-          _isRunning = false;
-        });
-        await _clearTimerState();
-        await _showNotification(); // Trigger notification when timer expires
-      }
-    });
-
-    setState(() {
-      _isRunning = true;
-    });
-  }
-
-  void _pauseTimer() {
-    _timer?.cancel();
-    setState(() {
-      _isRunning = false;
-    });
-  }
-
-  void _resetTimer() {
-    _timer?.cancel();
-    setState(() {
-      _remainingTime = Duration(minutes: _selectedMinutes);
-      _isRunning = false;
-    });
-    _clearTimerState();
+    };
   }
 
   String _formatDuration(Duration duration) {
@@ -818,7 +631,7 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
           child: Column(
             children: [
               Text(
-                _formatDuration(_remainingTime),
+                _formatDuration(_timerManager.getRemainingTime()),
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
@@ -830,7 +643,7 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   DropdownButton<int>(
-                    value: _selectedMinutes,
+                    value: _timerManager.getSelectedMinutes(),
                     dropdownColor:
                         widget.isDark ? Colors.grey.shade800 : Colors.white,
                     style: TextStyle(color: textColor),
@@ -841,28 +654,28 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
                             ))
                         .toList(),
                     onChanged: (value) {
-                      if (!_isRunning && value != null) {
-                        setState(() {
-                          _selectedMinutes = value;
-                          _remainingTime = Duration(minutes: value);
-                        });
+                      if (value != null) {
+                        _timerManager.setSelectedMinutes(value);
+                        if (mounted) setState(() {});
                       }
                     },
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton(
-                    onPressed: _isRunning ? _pauseTimer : _startTimer,
+                    onPressed: _timerManager.isRunning()
+                        ? _timerManager.pauseTimer
+                        : _timerManager.startTimer,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _isRunning
+                      backgroundColor: _timerManager.isRunning()
                           ? Colors.redAccent
                           : (widget.isDark ? Colors.grey : Colors.blueAccent),
                       foregroundColor: Colors.white,
                     ),
-                    child: Text(_isRunning ? 'Pause' : 'Start'),
+                    child: Text(_timerManager.isRunning() ? 'Pause' : 'Start'),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
-                    onPressed: _resetTimer,
+                    onPressed: _timerManager.resetTimer,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey.shade700,
                       foregroundColor: Colors.white,

@@ -5,10 +5,15 @@ import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart'; // majd a megfelelő mappanév
 import 'login/login_screen.dart'; // <- LoginScreen import
 import 'services/firebase_init.dart'; // <- FirebaseInitializer import
+import 'utils/timer_manager.dart'; // <- TimerManager import
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+
+  // Inicializáld a TimerManager-t
+  TimerManager().initializeNotifications();
+
   runApp(
     MultiProvider(
       providers: [
@@ -22,12 +27,20 @@ Future<void> main() async {
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
+  // Globális NavigatorKey a SnackBar-hoz
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
+    // Állítsd be a TimerManager témáját a themeProvider alapján
+    TimerManager().setIsDark(themeProvider.isDarkMode);
+
     return MaterialApp(
       title: 'FitWithUs',
+      navigatorKey: navigatorKey, // Hozzáadjuk a NavigatorKey-t
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData(
         brightness: Brightness.light,
