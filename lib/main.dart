@@ -110,7 +110,12 @@ class LoadingScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.done) {
             return const LoginScreen();
           }
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Colors.blueAccent,
+              strokeWidth: 3.5, // opcionális
+            ),
+          );
         },
       ),
     );

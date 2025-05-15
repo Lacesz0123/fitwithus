@@ -105,8 +105,13 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         stream: FirebaseFirestore.instance.collection('categories').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.blueAccent,
+              ),
+            );
           }
+
           if (snapshot.hasError) {
             return const Center(child: Text('Error loading categories'));
           }

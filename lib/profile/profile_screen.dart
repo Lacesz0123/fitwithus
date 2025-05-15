@@ -266,29 +266,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 } else if (value == 'logout') {
                   showDialog(
                     context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Logout'),
-                      content: const Text('Are you sure you want to logout?'),
-                      actions: [
-                        TextButton(
-                          child: const Text('Cancel'),
-                          onPressed: () => Navigator.of(context).pop(),
+                    builder: (context) {
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
+                      final backgroundColor =
+                          Theme.of(context).dialogBackgroundColor;
+                      final textColor =
+                          Theme.of(context).textTheme.bodyLarge?.color;
+                      final buttonTextColor =
+                          isDark ? Colors.white : Colors.blueAccent;
+
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                        backgroundColor: backgroundColor,
+                        title: Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        TextButton(
-                          child: const Text('Logout'),
-                          onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            if (context.mounted) {
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginScreen(),
-                                ),
-                              );
-                            }
-                          },
+                        content: Text(
+                          'Are you sure you want to logout?',
+                          style: TextStyle(color: textColor),
                         ),
-                      ],
-                    ),
+                        actionsPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        actionsAlignment: MainAxisAlignment.end,
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: TextButton.styleFrom(
+                              foregroundColor: buttonTextColor,
+                              textStyle:
+                                  const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              await FirebaseAuth.instance.signOut();
+                              if (context.mounted) {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LoginScreen()),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text('Logout'),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 }
               },
