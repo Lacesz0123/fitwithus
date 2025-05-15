@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/theme_provider.dart'; // majd a megfelelő mappanév
 import 'login/login_screen.dart'; // <- LoginScreen import
-import 'services/firebase_init.dart'; // <- FirebaseInitializer import
+import 'package:firebase_core/firebase_core.dart';
 import 'utils/timer_manager.dart'; // <- TimerManager import
 
 Future<void> main() async {
@@ -105,7 +105,7 @@ class LoadingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-        future: FirebaseInitializer.init(),
+        future: Firebase.initializeApp(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return const LoginScreen();

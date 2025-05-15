@@ -1,8 +1,7 @@
 // lib/screens/register/register_step1_screen.dart
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'register_step2_screen.dart';
-import '../../services/firebase_user_service.dart';
 import '../../utils/validators.dart';
 
 class RegisterStep1Screen extends StatefulWidget {
@@ -17,7 +16,6 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final FirebaseUserService _userService = FirebaseUserService();
 
   String _errorMessage = '';
   bool _passwordVisible = false;
@@ -43,8 +41,7 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
     }
 
     try {
-      final emailExists =
-          await _userService.isEmailInUse(_emailController.text);
+      final emailExists = await isEmailInUse(_emailController.text);
 
       if (emailExists) {
         setState(() {
@@ -67,6 +64,15 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
         _errorMessage = 'Error checking email existence: $e';
       });
     }
+  }
+
+  Future<bool> isEmailInUse(String email) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+
+    return querySnapshot.docs.isNotEmpty;
   }
 
   @override
