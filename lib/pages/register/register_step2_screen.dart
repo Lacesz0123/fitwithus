@@ -1,4 +1,4 @@
-import 'package:fitwithus/bottom_nav_screen.dart';
+import 'package:fitwithus/pages/bottom_nav_screen/bottom_nav_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../services/firebase_register_service.dart';
 import '../../../utils/validators.dart';
