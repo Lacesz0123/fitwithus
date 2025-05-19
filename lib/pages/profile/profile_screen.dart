@@ -9,7 +9,7 @@ import 'favorite_recipes/favorite_recipes_screen.dart';
 import 'profile_header.dart';
 import 'water_tracker_card.dart';
 import 'profile_menu_button.dart';
-import '../../services/profile_image_service.dart';
+import '../../../services/profile_image_service.dart';
 import 'community/community_screen.dart';
 import 'weight_chart_card.dart';
 import 'workout_progress_card.dart';

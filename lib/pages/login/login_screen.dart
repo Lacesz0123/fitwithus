@@ -1,8 +1,8 @@
 // lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
-import '../services/firebase_auth_service.dart';
+import '../../services/firebase_auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../bottom_nav_screen.dart';
+import '../../bottom_nav_screen.dart';
 import '../register/register_step1_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';

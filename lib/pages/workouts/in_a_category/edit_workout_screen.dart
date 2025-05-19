@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../utils/custom_snackbar.dart';
+import '../../../utils/custom_snackbar.dart';
 
 class EditWorkoutScreen extends StatefulWidget {
   final String workoutId;

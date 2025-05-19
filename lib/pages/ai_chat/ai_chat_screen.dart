@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
-import '../utils/custom_snackbar.dart';
+import '../../utils/custom_snackbar.dart';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});

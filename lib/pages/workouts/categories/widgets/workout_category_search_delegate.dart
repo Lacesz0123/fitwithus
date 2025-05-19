@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../in_a_category/in_a_category_list_workouts_screen.dart';
+import '../../../../pages/workouts/in_a_category/in_a_category_list_workouts_screen.dart';
 import 'dart:io';
 
 class CategorySearchDelegate extends SearchDelegate {

@@ -2,7 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'register_step2_screen.dart';
-import '../../utils/validators.dart';
+import '../../../utils/validators.dart';
 
 class RegisterStep1Screen extends StatefulWidget {
   const RegisterStep1Screen({super.key});

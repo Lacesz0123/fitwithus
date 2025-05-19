@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/workout_category_card.dart';
 import 'widgets/add_workout_category_dialog.dart';
 import 'widgets/workout_category_search_delegate.dart';
-import '../../utils/custom_snackbar.dart';
+import '../../../utils/custom_snackbar.dart';
 
 class WorkoutsScreen extends StatefulWidget {
   WorkoutsScreen({super.key});

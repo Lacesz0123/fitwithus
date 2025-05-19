@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'providers/theme_provider.dart'; // majd a megfelelő mappanév
-import 'login/login_screen.dart'; // <- LoginScreen import
+import 'pages/login/login_screen.dart'; // <- LoginScreen import
 import 'package:firebase_core/firebase_core.dart';
 import 'utils/timer_manager.dart'; // <- TimerManager import
 

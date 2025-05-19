@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'profile/profile_screen.dart';
-import 'workouts/categories/categories_for_workouts_screen.dart';
-import 'ai_chat/ai_chat_screen.dart';
-import 'recipes/recipes_screen.dart';
+import 'pages/profile/profile_screen.dart';
+import 'pages/workouts/categories/categories_for_workouts_screen.dart';
+import 'pages/ai_chat/ai_chat_screen.dart';
+import 'pages/recipes/recipes_screen.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});

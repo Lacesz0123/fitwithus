@@ -7,8 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/edit_recipe_header.dart';
 import 'widgets/edit_recipe_ingredients_checklist.dart';
 import 'widgets/edit_recipe_steps.dart';
-import '../../utils/validators.dart';
-import '../../utils/custom_snackbar.dart';
+import '../../../utils/validators.dart';
+import '../../../utils/custom_snackbar.dart';
 
 class EditRecipeScreen extends StatefulWidget {
   final String recipeId;

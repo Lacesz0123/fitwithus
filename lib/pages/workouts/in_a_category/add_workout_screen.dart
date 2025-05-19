@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../utils/custom_snackbar.dart';
+import '../../../utils/custom_snackbar.dart';
 
 class AddWorkoutScreen extends StatefulWidget {
   final String category;
