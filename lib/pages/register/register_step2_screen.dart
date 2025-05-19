@@ -47,7 +47,7 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
             await Future.delayed(const Duration(seconds: 2));
             await user.sendEmailVerification();
           } catch (e) {
-            print('Verification email failed: $e');
+            print('Verification email failed.');
           }
 
           // Akkor is továbbnavigálunk, ha az email küldés nem sikerült
