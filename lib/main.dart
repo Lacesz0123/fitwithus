@@ -44,6 +44,7 @@ class MainApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'FitWithUs',
+      debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey, // Hozzáadjuk a NavigatorKey-t
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData(
