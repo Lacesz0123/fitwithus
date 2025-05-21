@@ -1,8 +1,14 @@
-// lib/utils/validators.dart
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 
+/// A `Validators` osztály statikus metódusokat biztosít különböző
+/// bemeneti adatok érvényesítésére, mint például felhasználónév, jelszó,
+/// testsúly, testmagasság, születési dátum, recept mezők stb.
 class Validators {
+  /// Ellenőrzi, hogy a felhasználónév érvényes-e.
+  ///
+  /// A felhasználónév csak angol betűket és számokat tartalmazhat,
+  /// valamint 5 és 15 karakter közötti hosszúságú lehet.
   static bool isUsernameValid(String username) {
     final validCharacters = RegExp(r'^[a-zA-Z0-9]+$');
     return username.length >= 5 &&
@@ -10,21 +16,32 @@ class Validators {
         validCharacters.hasMatch(username);
   }
 
+  /// Ellenőrzi, hogy a jelszó legalább 5 karakter hosszú-e.
   static bool isPasswordValid(String password) {
     return password.length >= 5;
   }
 
+  /// Ellenőrzi, hogy a testsúly érvényes-e.
+  ///
+  /// A súlynak pozitív egész számnak kell lennie, legfeljebb 3 számjeggyel.
   static bool isWeightValid(String weight) {
     final w = int.tryParse(weight);
     return w != null && w > 0 && w <= 999;
   }
 
+  /// Ellenőrzi, hogy a testmagasság érvényes-e.
+  ///
+  /// A magasságnak 60 és 250 cm közé kell esnie.
   static bool isHeightValid(String height) {
     final h = int.tryParse(height);
     return h != null && h >= 60 && h <= 250;
   }
 
-  ///  Kombinált validáció hibaüzenettel
+  /// Kombinált validáció: testsúly, testmagasság és születési dátum ellenőrzése.
+  ///
+  /// Ha bármelyik mező hiányzik, vagy nem megfelelő formátumú,
+  /// egy figyelmeztető szöveges üzenetet ad vissza. Ha minden adat érvényes,
+  /// akkor `null` értékkel tér vissza.
   static String? validateWeightHeightAndBirthDate({
     required String weightText,
     required String heightText,
@@ -45,7 +62,12 @@ class Validators {
     return null; // minden OK
   }
 
-  /// 👤 Kombinált validáció a regisztráció 1. lépéshez
+  /// Regisztráció 1. lépésének validációja.
+  ///
+  /// Ellenőrzi az email-cím formátumát, a felhasználónév hosszát és karaktereit,
+  /// a jelszó hosszát, valamint hogy a jelszavak egyeznek-e.
+  ///
+  /// Hibás adat esetén hibaüzenetet ad vissza, egyébként `null`-t.
   static String? validateRegisterStep1({
     required String email,
     required String username,
@@ -71,7 +93,13 @@ class Validators {
     return null;
   }
 
-  /// 🍲 Recept szerkesztés validálása
+  /// Recept szerkesztési mezők validálása.
+  ///
+  /// Ellenőrzi, hogy a recept neve és leírása nem üres,
+  /// az elkészítési idő és kalóriamennyiség számérték, pozitívak-e,
+  /// valamint hogy legalább egy hozzávaló és egy lépés meg van-e adva.
+  ///
+  /// Hibás adat esetén hibaüzenetet ad vissza, különben `null`-t.
   static String? validateEditedRecipe({
     required String name,
     required String description,

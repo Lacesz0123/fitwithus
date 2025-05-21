@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+/// Egy lebegő stílusú SnackBar megjelenítésére szolgáló segédfüggvény.
+///
+/// A `message` paraméter határozza meg a megjelenítendő szöveget.
+///
+/// Az `isError` opciós paraméter segítségével megadható, hogy
+/// hibajelzésről van-e szó. Ebben az esetben a háttér piros színű lesz.
+
 void showCustomSnackBar(BuildContext context, String message,
     {bool isError = false}) {
   ScaffoldMessenger.of(context).showSnackBar(

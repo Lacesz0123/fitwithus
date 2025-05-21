@@ -3,29 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../main.dart'; // MainApp navigatorKey-éhez szükséges
+import '../main.dart';
 
+/// A `TimerManager` singleton osztály felelős a pihenőidő visszaszámláló
+/// kezeléséért, valamint a helyi értesítések megjelenítéséért.
 class TimerManager {
+  /// Singleton példány
   static final TimerManager _instance = TimerManager._internal();
+
+  /// Gyári konstruktor, amely mindig ugyanazt az egy példányt adja vissza.
   factory TimerManager() => _instance;
+
+  /// Privát belső konstruktor
   TimerManager._internal();
 
   Timer? _timer;
   Duration _remainingTime = const Duration(minutes: 1);
   int _selectedMinutes = 1;
   bool _isRunning = false;
+
   final String _prefsStartKey = 'restTimer_start';
   final String _prefsMinutesKey = 'restTimer_minutes';
-  late FlutterLocalNotificationsPlugin _notificationsPlugin;
-  bool _isDark = false; // Téma tárolása
 
-  // Callback az UI frissítéséhez
+  late FlutterLocalNotificationsPlugin _notificationsPlugin;
+  bool _isDark = false; // Az aktuális téma (sötét mód) tárolása
+
+  /// Callback függvény az UI értesítéséhez időzítő frissítéskor
   Function(Duration, bool)? onTimerUpdate;
 
+  /// A sötét világítási mód beállítása.
   void setIsDark(bool isDark) {
     _isDark = isDark;
   }
 
+  /// Az értesítések inicializálása és engedélykérések kezelése.
   void initializeNotifications() async {
     _notificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -71,6 +82,7 @@ class TimerManager {
     await _requestPermissions();
   }
 
+  /// Értesítési engedélyek lekérése a felhasználótól.
   Future<void> _requestPermissions() async {
     final status = await Permission.notification.status;
     debugPrint('Notification permission status: $status');
@@ -80,6 +92,7 @@ class TimerManager {
     }
   }
 
+  /// Helyi értesítés megjelenítése az időzítő lejártakor.
   Future<void> _showNotification() async {
     const androidDetails = AndroidNotificationDetails(
       'rest_timer_channel',
@@ -120,6 +133,7 @@ class TimerManager {
     }
   }
 
+  /// Az alkalmazáson belüli SnackBar értesítés megjelenítése.
   void _showInAppNotification() {
     final context = MainApp.navigatorKey.currentContext;
     if (context == null) return;
@@ -140,18 +154,23 @@ class TimerManager {
     );
   }
 
+  /// Az időzítő állapotának elmentése a `SharedPreferences`-be.
   Future<void> _saveTimerState(DateTime startTime, int minutes) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefsStartKey, startTime.toIso8601String());
     await prefs.setInt(_prefsMinutesKey, minutes);
   }
 
+  /// Az elmentett időzítő állapot törlése.
   Future<void> _clearTimerState() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefsStartKey);
     await prefs.remove(_prefsMinutesKey);
   }
 
+  /// Az időzítő korábbi állapotának betöltése újraindítás esetén.
+  ///
+  /// Ha az időzítő még nem járt le, automatikusan újraindul a visszaszámlálás.
   Future<void> loadTimerState() async {
     final prefs = await SharedPreferences.getInstance();
     final startString = prefs.getString(_prefsStartKey);
@@ -170,12 +189,15 @@ class TimerManager {
         startTimer(resume: true);
       } else {
         await _clearTimerState();
-        resetTimer(); // Javítva: _resetTimer helyett resetTimer
+        resetTimer();
         await _showNotification();
       }
     }
   }
 
+  /// Az időzítő elindítása.
+  ///
+  /// Ha `resume` igaz, akkor a korábbi állapotból folytatja.
   void startTimer({bool resume = false}) {
     _timer?.cancel();
 
@@ -201,12 +223,14 @@ class TimerManager {
     onTimerUpdate?.call(_remainingTime, _isRunning);
   }
 
+  /// Az időzítő szüneteltetése.
   void pauseTimer() {
     _timer?.cancel();
     _isRunning = false;
     onTimerUpdate?.call(_remainingTime, _isRunning);
   }
 
+  /// Az időzítő visszaállítása az alapértelmezett kiválasztott percre.
   void resetTimer() {
     _timer?.cancel();
     _remainingTime = Duration(minutes: _selectedMinutes);
@@ -215,6 +239,9 @@ class TimerManager {
     onTimerUpdate?.call(_remainingTime, _isRunning);
   }
 
+  /// A kiválasztott idő percben történő beállítása.
+  ///
+  /// Csak akkor állítható, ha az időzítő nem fut.
   void setSelectedMinutes(int minutes) {
     if (!_isRunning) {
       _selectedMinutes = minutes;
@@ -223,7 +250,12 @@ class TimerManager {
     }
   }
 
+  /// Visszaadja a hátralévő időt.
   Duration getRemainingTime() => _remainingTime;
+
+  /// Visszaadja a kiválasztott időzítő hosszát percben.
   int getSelectedMinutes() => _selectedMinutes;
+
+  /// Igazat ad vissza, ha az időzítő épp fut.
   bool isRunning() => _isRunning;
 }

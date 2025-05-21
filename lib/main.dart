@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-import 'providers/theme_provider.dart'; // majd a megfelelő mappanév
-import 'pages/login/login_screen.dart'; // <- LoginScreen import
+import 'providers/theme_provider.dart';
+import 'pages/login/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'utils/timer_manager.dart'; // <- TimerManager import
+import 'utils/timer_manager.dart';
 
+/// Az alkalmazás belépési pontja.
+/// Itt történik a szükséges inicializálás, mint a környezeti változók betöltése,
+/// értesítések inicializálása és az orientáció beállítása.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
-  // Inicializáld a TimerManager-t
+  // TimerManager inicializálása (értesítések)
   TimerManager().initializeNotifications();
 
   await SystemChrome.setPreferredOrientations([
@@ -28,10 +31,12 @@ Future<void> main() async {
   );
 }
 
+/// A fő alkalmazás widget.
+/// Itt történik meg a témák kezelése, valamint a kezdőképernyő betöltése.
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
-  // Globális NavigatorKey a SnackBar-hoz
+  /// Globális Navigator kulcs a SnackBar-ok vagy navigációk kezeléséhez.
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
@@ -39,14 +44,16 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    // Állítsd be a TimerManager témáját a themeProvider alapján
+    // A TimerManager is megkapja a világos/sötét téma beállítást
     TimerManager().setIsDark(themeProvider.isDarkMode);
 
     return MaterialApp(
       title: 'FitWithUs',
       debugShowCheckedModeBanner: false,
-      navigatorKey: navigatorKey, // Hozzáadjuk a NavigatorKey-t
+      navigatorKey: navigatorKey, // Globális navigációs kulcs beállítása
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+
+      /// Világos téma konfiguráció
       theme: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.blue,
@@ -64,6 +71,8 @@ class MainApp extends StatelessWidget {
           iconTheme: IconThemeData(color: Colors.white),
         ),
       ),
+
+      /// Sötét téma konfiguráció
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF121212),
@@ -98,11 +107,15 @@ class MainApp extends StatelessWidget {
           ),
         ),
       ),
+
+      // Kezdőképernyő: a Firebase inicializációját követő betöltőképernyő
       home: const LoadingScreen(),
     );
   }
 }
 
+/// A Firebase inicializációt végző betöltőképernyő.
+/// Amint a Firebase sikeresen elindult, a bejelentkezési képernyőre navigál.
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
 
@@ -112,9 +125,12 @@ class LoadingScreen extends StatelessWidget {
       body: FutureBuilder(
         future: Firebase.initializeApp(),
         builder: (context, snapshot) {
+          // Ha kész a Firebase inicializáció, betöltjük a LoginScreen-t
           if (snapshot.connectionState == ConnectionState.done) {
             return const LoginScreen();
           }
+
+          // Amíg tart a betöltés, egy töltő animáció jelenik meg
           return const Center(
             child: CircularProgressIndicator(
               color: Colors.blueAccent,
