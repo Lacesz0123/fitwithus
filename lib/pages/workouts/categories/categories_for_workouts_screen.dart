@@ -7,6 +7,13 @@ import 'widgets/add_workout_category_dialog.dart';
 import 'widgets/workout_category_search_delegate.dart';
 import '../../../utils/custom_snackbar.dart';
 
+/// Az edzéskategóriákat megjelenítő fő képernyő.
+///
+/// A felhasználó itt böngészhet a létrehozott kategóriák között.
+/// Ha admin jogosultsággal rendelkezik, lehetősége van:
+/// - Új kategória létrehozására
+/// - Kategóriák szerkesztésére
+/// - Kategóriák keresésére
 class WorkoutsScreen extends StatefulWidget {
   WorkoutsScreen({super.key});
 
@@ -23,6 +30,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     _getCurrentUserRole();
   }
 
+  /// Lekéri az aktuális felhasználó szerepkörét (pl. `admin`) a Firestore-ból.
   Future<void> _getCurrentUserRole() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -36,6 +44,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     }
   }
 
+  /// Új kategória hozzáadása dialógusablakban.
+  /// Csak admin szerepkör esetén érhető el.
   Future<void> addCategory(BuildContext context) async {
     if (userRole != 'admin') {
       showCustomSnackBar(context, 'Only admins can add categories',
@@ -49,6 +59,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
     );
   }
 
+  /// Kategória szerkesztése dialógusablakban az adott dokumentum azonosító és adatok alapján.
+  /// Csak admin számára.
   Future<void> editCategory(BuildContext context, String docId,
       String currentTitle, String currentImage) async {
     if (userRole != 'admin') {
@@ -127,7 +139,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: GridView.builder(
-                    physics: const BouncingScrollPhysics(), // <-- EZ az új sor
+                    physics: const BouncingScrollPhysics(),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,

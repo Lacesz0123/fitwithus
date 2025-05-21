@@ -2,6 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../utils/custom_snackbar.dart';
 
+/// Új edzés hozzáadására szolgáló képernyő egy adott kategóriába.
+///
+/// A felhasználó megadhatja az edzés címét, leírását, lépéseit, valamint opcionálisan
+/// egy YouTube-videó URL-t is.
+/// Az adatokat a Firestore `workouts` kollekciójába menti el.
 class AddWorkoutScreen extends StatefulWidget {
   final String category;
 
@@ -17,6 +22,7 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
   final TextEditingController _videoUrlController = TextEditingController();
   List<TextEditingController> _stepsControllers = [];
 
+  /// Felszabadítja a szövegbeviteli vezérlőket, amikor a képernyő megsemmisül.
   @override
   void dispose() {
     _titleController.dispose();
@@ -28,6 +34,10 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
     super.dispose();
   }
 
+  /// Új edzés létrehozása és mentése a Firestore adatbázisba.
+  ///
+  /// Ellenőrzi, hogy minden kötelező mező ki van-e töltve.
+  /// Hibák esetén SnackBar üzenetet jelenít meg.
   Future<void> _addWorkout() async {
     String title = _titleController.text.trim();
     String description = _descriptionController.text.trim();
@@ -65,12 +75,14 @@ class _AddWorkoutScreenState extends State<AddWorkoutScreen> {
     }
   }
 
+  /// Új lépés (TextField) hozzáadása az edzéshez.
   void _addStep() {
     setState(() {
       _stepsControllers.add(TextEditingController());
     });
   }
 
+  /// Adott lépés eltávolítása az index alapján.
   void _removeStep(int index) {
     setState(() {
       _stepsControllers.removeAt(index);

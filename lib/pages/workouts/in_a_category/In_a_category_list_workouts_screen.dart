@@ -5,6 +5,12 @@ import '/../pages/workouts/in_a_category/workout_detail_screen.dart';
 import '/../pages/workouts/in_a_category/add_workout_screen.dart';
 import '/../pages/workouts/in_a_category/edit_workout_screen.dart';
 
+/// Egy adott edzéskategóriába tartozó edzések listázását megjelenítő képernyő.
+///
+/// Ha az aktuális felhasználó admin szerepkörrel rendelkezik, lehetőséget kap
+/// új edzés hozzáadására vagy meglévő edzés szerkesztésére.
+///
+/// A listában kattintással elérhető az edzés részletező képernyő is.
 class CategoryWorkoutsScreen extends StatefulWidget {
   final String category;
 
@@ -23,6 +29,9 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
     _getCurrentUserRole();
   }
 
+  /// Az aktuális felhasználó szerepkörének lekérdezése a Firestore-ból.
+  ///
+  /// A szerepkör (`role`) alapján jelennek meg admin funkciók a felületen.
   Future<void> _getCurrentUserRole() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -36,6 +45,9 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
     }
   }
 
+  /// Visszaadja az adott kategóriába tartozó edzések streamjét.
+  ///
+  /// A stream minden változásnál automatikusan frissül.
   Stream<List<Map<String, dynamic>>> getWorkoutsByCategory() {
     return FirebaseFirestore.instance
         .collection('workouts')
@@ -48,6 +60,7 @@ class _CategoryWorkoutsScreenState extends State<CategoryWorkoutsScreen> {
             }).toList());
   }
 
+  /// Egy meglévő edzés szerkesztése: navigál az EditWorkoutScreen-re.
   void editWorkout(BuildContext context, Map<String, dynamic> workout) {
     Navigator.of(context).push(
       MaterialPageRoute(

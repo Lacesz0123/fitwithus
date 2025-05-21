@@ -5,6 +5,14 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '/../utils/custom_snackbar.dart';
 
+/// Egy dialógus ablak, amely lehetővé teszi egy meglévő edzéskategória szerkesztését vagy törlését.
+///
+/// A felhasználó módosíthatja:
+/// - a kategória címét,
+/// - a hozzárendelt képet.
+///
+/// A frissítés a Firestore `categories` kollekcióját módosítja.
+/// Ha a cím megváltozik, az adott kategóriához tartozó `workouts` dokumentumokban is frissül a mező.
 class EditCategoryDialog extends StatefulWidget {
   final String docId;
   final String currentTitle;
@@ -25,12 +33,14 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
   late TextEditingController _titleController;
   XFile? _pickedImage;
 
+  /// Inicializálja a szövegmezőt az aktuális címmel.
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.currentTitle);
   }
 
+  /// Képkiválasztó megnyitása galériából, majd előnézet és Snackbar visszajelzés.
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
@@ -42,6 +52,10 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
     }
   }
 
+  /// Frissíti a kategóriát a Firestore-ban:
+  /// - Ha új képet választott, feltölti a Firebase Storage-ba
+  /// - Frissíti a címmezőket és a képet
+  /// - Ha a cím változott, frissíti az összes kapcsolódó workout kategóriamezőjét is
   Future<void> _updateCategory() async {
     final newTitle = _titleController.text.trim();
     final oldTitle = widget.currentTitle;
@@ -102,6 +116,10 @@ class _EditCategoryDialogState extends State<EditCategoryDialog> {
     }
   }
 
+  /// Teljes kategóriatörlés:
+  /// - Minden ehhez tartozó `workout` törlése
+  /// - A kategória törlése a `categories` kollekcióból
+  /// - A kapcsolódó kép törlése Firebase Storage-ból
   Future<void> _deleteCategory() async {
     try {
       final workouts = await FirebaseFirestore.instance

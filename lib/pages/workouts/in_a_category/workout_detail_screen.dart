@@ -1,12 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:async'; // ez kell az időzítéshez
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'dart:io'; // Internet-csekkhez szükséges
-import '/utils/timer_manager.dart'; // Internet-csekkhez szükséges
+import 'dart:io';
+import '/utils/timer_manager.dart';
 
+/// Az edzés részleteit megjelenítő képernyő.
+///
+/// Megmutatja az edzés címét, leírását, lépéseit, videóját (ha van),
+/// értékelési lehetőséget, valamint vendég és regisztrált felhasználókhoz igazodó funkciókat.
 class WorkoutDetailScreen extends StatefulWidget {
   final String workoutId;
 
@@ -21,8 +25,8 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
   double? userRating;
   double averageRating = 0.0;
   bool isGuest = false;
-  List<dynamic> steps = []; // <-- a globális steps lista
-  List<bool> _checkedSteps = []; // <-- a pipálási állapotok
+  List<dynamic> steps = [];
+  List<bool> _checkedSteps = [];
   YoutubePlayerController? _videoController;
   bool hasInternet = true;
 
@@ -49,6 +53,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     }
   }
 
+  /// Ellenőrzi, hogy a felhasználó vendégként van-e bejelentkezve.
   void _checkIfGuest() {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && user.isAnonymous) {
@@ -77,6 +82,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     }
   }
 
+  /// Lekéri a workout dokumentumot a Firestore-ból.
   Future<Map<String, dynamic>?> getWorkoutData() async {
     DocumentSnapshot doc = await FirebaseFirestore.instance
         .collection('workouts')
@@ -85,6 +91,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     return doc.data() as Map<String, dynamic>?;
   }
 
+  /// Ellenőrzi, hogy az edzés szerepel-e a felhasználó kedvencei között.
   Future<void> _checkIfFavorite() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null && !user.isAnonymous) {
@@ -102,6 +109,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     }
   }
 
+  /// Értékelések lekérése a Firestore-ból: saját és átlagos érték kiszámítása.
   Future<void> _fetchRatings() async {
     DocumentSnapshot workoutDoc = await FirebaseFirestore.instance
         .collection('workouts')
@@ -132,6 +140,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     }
   }
 
+  /// Új értékelés mentése az adatbázisba, és az átlag frissítése.
   Future<void> _updateRating(double rating) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null || user.isAnonymous) return;
@@ -160,6 +169,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     });
   }
 
+  /// Az edzés kedvencekhez adása vagy eltávolítása.
   Future<void> _toggleFavorite() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null && !user.isAnonymous) {
@@ -188,6 +198,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     }
   }
 
+  /// Az edzés elvégzettként jelölése.
   Future<void> _markWorkoutCompleted() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null && !user.isAnonymous) {
@@ -200,6 +211,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     }
   }
 
+  /// Megjelenít egy megerősítő dialógust az edzés befejezéséhez.
   void _showConfirmationDialog() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cancelColor =
@@ -240,6 +252,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
     );
   }
 
+  /// Értékelési dialógus megjelenítése, vendégek és bejelentkezettek számára.
   void _showRatingDialog() {
     double? selectedRating = userRating;
 
@@ -394,7 +407,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
           ),
         ],
         backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.transparent,
-        elevation: 0, // ez is segít, hogy ne legyen árnyék
+        elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1E1E1E) : null,
@@ -562,6 +575,11 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
   }
 }
 
+/// A pihenőidőt kezelő widget, amely időzítőt jelenít meg és vezérel.
+///
+/// Lehetőség van idő kiválasztására, indításra, szüneteltetésre és nullázásra.
+/// Az állapot megmarad újraindítás után is SharedPreferences és TimerManager segítségével.
+
 class RestTimerWidget extends StatefulWidget {
   final bool isDark;
 
@@ -691,6 +709,10 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
     );
   }
 }
+
+/// Az edzés lépéseit megjelenítő lista, checkbox jelöléssel.
+///
+/// A felhasználó pipálhatja a végrehajtott lépéseket, a bejelölések helyileg elmentésre kerülnek.
 
 class StepsList extends StatefulWidget {
   final List<dynamic> steps;

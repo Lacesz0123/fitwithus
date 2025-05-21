@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fitwithus/pages/workouts/in_a_category/in_a_category_list_workouts_screen.dart';
 
+/// Edzéskategóriát megjelenítő kártya, amely egy háttérképet, kategórianévet,
+/// és (admin felhasználóknak) egy szerkesztés ikont jelenít meg.
+///
+/// Kattintásra navigál a kiválasztott kategória edzéseihez (`CategoryWorkoutsScreen`).
+///
+/// Ha a `userRole` értéke `'admin'`, akkor megjelenik a beállítás (szerkesztés) ikon.
 class WorkoutCategoryCard extends StatelessWidget {
   final String title;
   final String imageUrl;
@@ -10,10 +16,20 @@ class WorkoutCategoryCard extends StatelessWidget {
 
   const WorkoutCategoryCard({
     super.key,
+
+    /// `title` – a kategória neve, megjelenik a képen alul
     required this.title,
+
+    /// `imageUrl` – a háttérkép URL-je (vagy placeholder)
     required this.imageUrl,
+
+    /// `docId` – a Firestore dokumentum azonosítója
     required this.docId,
+
+    /// `userRole` – a felhasználó szerepköre
     required this.userRole,
+
+    /// `onEditTap` – szerkesztés esemény, admin gombhoz
     required this.onEditTap,
   });
 

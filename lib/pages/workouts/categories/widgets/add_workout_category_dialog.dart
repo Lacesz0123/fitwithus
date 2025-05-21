@@ -5,6 +5,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '/../utils/custom_snackbar.dart';
 
+/// Dialógus ablak, amely új edzéskategória hozzáadását teszi lehetővé.
+///
+/// A felhasználó megadja a kategória címét (max. 18 karakter) és kiválaszt egy képet.
+/// A feltöltött adatokat a Firestore `categories` kollekciójába menti, a képet pedig
+/// a Firebase Storage-ba tölti fel.
 class AddCategoryDialog extends StatefulWidget {
   const AddCategoryDialog({super.key});
 
@@ -16,6 +21,7 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
   final TextEditingController _titleController = TextEditingController();
   XFile? _pickedImage;
 
+  /// Galériából történő képkiválasztás, és előnézet beállítása a UI-n.
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
@@ -27,6 +33,10 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
     }
   }
 
+  /// A kategória feltöltése a Firebase-be:
+  /// - A kiválasztott képet feltölti a Firebase Storage-ba
+  /// - A cím és a kép URL-je bekerül a Firestore `categories` kollekciójába
+  /// - Siker esetén bezárja a dialógust és visszajelzést ad
   Future<void> _uploadCategory() async {
     final title = _titleController.text.trim();
     if (title.isEmpty || title.length > 18 || _pickedImage == null) {

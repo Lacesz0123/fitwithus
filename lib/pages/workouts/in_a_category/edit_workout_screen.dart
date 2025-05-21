@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../utils/custom_snackbar.dart';
 
+/// Az edzés szerkesztésére szolgáló képernyő.
+///
+/// Lehetővé teszi az edzés címének, leírásának, lépéseinek és opcionálisan a videó URL-jének módosítását.
+/// Adminisztrátorok számára érhető el.
 class EditWorkoutScreen extends StatefulWidget {
   final String workoutId;
   final String initialTitle;
@@ -26,6 +30,8 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
   final TextEditingController _videoUrlController = TextEditingController();
   List<TextEditingController> _stepsControllers = [];
 
+  /// Inicializálja a vezérlőket a meglévő adatok alapján,
+  /// és betölti a videó URL-t a Firestore-ból.
   @override
   void initState() {
     super.initState();
@@ -49,6 +55,7 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     });
   }
 
+  /// Felszabadítja az összes `TextEditingController` erőforrást.
   @override
   void dispose() {
     _titleController.dispose();
@@ -60,6 +67,10 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     super.dispose();
   }
 
+  /// Elmenti az edzés módosított adatait a Firestore-ba.
+  ///
+  /// Ellenőrzi, hogy minden mező ki van-e töltve.
+  /// Opcionálisan kezeli a videó URL törlését is.
   Future<void> _saveWorkout() async {
     String newTitle = _titleController.text.trim();
     String newDescription = _descriptionController.text.trim();
@@ -100,6 +111,7 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     }
   }
 
+  /// Megerősítő párbeszéd után törli az edzést a Firestore-ból.
   Future<void> _deleteWorkout() async {
     bool confirmDelete = await showDialog(
       context: context,
@@ -136,12 +148,14 @@ class _EditWorkoutScreenState extends State<EditWorkoutScreen> {
     }
   }
 
+  /// Új lépés (TextField) hozzáadása az edzéshez.
   void _addStep() {
     setState(() {
       _stepsControllers.add(TextEditingController());
     });
   }
 
+  /// Egy adott lépés eltávolítása az index alapján.
   void _removeStep(int index) {
     setState(() {
       _stepsControllers.removeAt(index);
