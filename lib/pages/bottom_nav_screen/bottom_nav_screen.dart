@@ -6,6 +6,13 @@ import '/pages/workouts/categories/categories_for_workouts_screen.dart';
 import '/pages/ai_chat/ai_chat_screen.dart';
 import '/pages/recipes/recipes_screen.dart';
 
+/// Ez a képernyő a FitWithUs alkalmazás alsó navigációs sávját és hozzá tartozó oldalváltást valósítja meg.
+///
+/// Vendég felhasználók és bejelentkezett felhasználók eltérő menüpontokat látnak:
+/// - Vendégek: Workouts, Recipes, Profile
+/// - Bejelentkezettek: Workouts, FitBot (AI chat), Recipes, Profile
+///
+/// A `FirebaseAuth.instance.currentUser` alapján állapítja meg, hogy vendég-e a felhasználó.
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
 
@@ -20,6 +27,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   late List<Widget> _pages;
   late List<BottomNavigationBarItem> _items;
 
+  /// Inicializálja az elérhető képernyőket és menüpontokat a felhasználó típusa alapján.
+  /// A `FirebaseAuth.instance.currentUser.isAnonymous` alapján állapítja meg a vendég státuszt.
+  ///
+  /// Beállítja:
+  /// - `_pages`: a képernyők listáját
+  /// - `_items`: a `BottomNavigationBarItem` elemeket
   @override
   void initState() {
     super.initState();
@@ -75,6 +88,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     }
   }
 
+  /// A képernyő megjelenítéséért felelős metódus.
+  /// Megjeleníti:
+  /// - az aktuálisan kiválasztott `_pages[_currentIndex]` képernyőt
+  /// - az alsó navigációs sávot a `_items` elemekkel
+  ///
+  /// A kiválasztott menüpont színét a téma világos/sötét módja alapján állítja be.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
