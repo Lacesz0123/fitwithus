@@ -4,6 +4,15 @@ import 'package:flutter/material.dart';
 import 'register_step2_screen.dart';
 import '../../../utils/validators.dart';
 
+/// A regisztráció első lépését megvalósító képernyő.
+///
+/// A felhasználó itt adja meg:
+/// - e-mail címét,
+/// - felhasználónevét,
+/// - jelszavát,
+/// - jelszó megerősítését.
+///
+/// Ha minden adat valid, a `RegisterStep2Screen` képernyőre navigálunk.
 class RegisterStep1Screen extends StatefulWidget {
   const RegisterStep1Screen({super.key});
 
@@ -12,15 +21,24 @@ class RegisterStep1Screen extends StatefulWidget {
 }
 
 class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
+  /// Szövegmező kontrollerek: email, username, jelszó, megerősítő jelszó
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  /// Hibaüzenet, ami megjelenik validálási vagy Firestore hiba esetén
   String _errorMessage = '';
+
+  /// Jelszó mezők láthatóságának állapota
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
 
+  /// Ellenőrzi a mezők tartalmát a `Validators` osztállyal.
+  /// Ha van hiba, megjeleníti.
+  ///
+  /// Ezután Firestore-ban ellenőrzi, hogy az e-mail cím már foglalt-e.
+  /// Ha minden valid, akkor továbbnavigál a `RegisterStep2Screen`-re.
   Future<void> _continueRegistration() async {
     setState(() {
       _errorMessage = '';
@@ -66,6 +84,7 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
     }
   }
 
+  /// Ellenőrzi, hogy a megadott e-mail cím szerepel-e már a Firestore `users` kollekcióban.
   Future<bool> isEmailInUse(String email) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -180,6 +199,9 @@ class _RegisterStep1ScreenState extends State<RegisterStep1Screen> {
         ));
   }
 
+  /// Egy újrahasznosítható widget, ami szövegbeviteli mezőt épít fel.
+  ///
+  /// Használható jelszómezőként is (toggleVisibility + suffixIcon).
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,

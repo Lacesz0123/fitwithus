@@ -4,7 +4,21 @@ import '../../../services/firebase_register_service.dart';
 import '../../../utils/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+/// A regisztráció második lépését megvalósító képernyő.
+///
+/// A felhasználó itt adja meg a további személyes adatait:
+/// - nem,
+/// - testsúly (kg),
+/// - testmagasság (cm),
+/// - születési dátum.
+///
+/// Ha minden adat érvényes, a Firebase Auth és Firestore segítségével létrejön a felhasználói fiók.
+/// Sikeres regisztráció után az app átnavigál a fő képernyőre (`BottomNavScreen`).
 class RegisterStep2Screen extends StatefulWidget {
+  /// Az előző képernyőről kapott adatok:
+  /// - [email]: felhasználó email címe
+  /// - [username]: választott felhasználónév
+  /// - [password]: jelszó
   final String email;
   final String username;
   final String password;
@@ -27,6 +41,12 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
   DateTime? _birthDate;
   String _errorMessage = '';
 
+  /// Érvényesíti a mezőket, majd regisztrálja a felhasználót a Firebase segítségével.
+  /// - Létrehozza a felhasználót
+  /// - Elküld egy e-mail megerősítést (opcionálisan)
+  /// - Navigál a kezdőképernyőre (`BottomNavScreen`)
+  ///
+  /// Hibakezelés történik `FirebaseAuthException` alapján.
   Future<void> _registerUser() async {
     if (_validateInputs()) {
       try {
@@ -79,6 +99,8 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
     }
   }
 
+  /// Ellenőrzi, hogy a megadott súly, magasság és születési dátum érvényes-e.
+  /// Hibás adat esetén visszatér egy hibaüzenettel.
   bool _validateInputs() {
     final validationMessage = Validators.validateWeightHeightAndBirthDate(
       weightText: _weightController.text,
@@ -96,6 +118,8 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
     return true;
   }
 
+  /// Dátumválasztó megnyitása a születési dátum kiválasztásához.
+  /// A kiválasztott érték eltárolódik a [_birthDate] változóban.
   Future<void> _selectBirthDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -259,6 +283,9 @@ class _RegisterStep2ScreenState extends State<RegisterStep2Screen> {
         ));
   }
 
+  /// Újrafelhasználható szövegmező a súly és magasság beviteléhez.
+  ///
+  /// Paraméterezhető: [controller], [hintText], [icon], [keyboardType]
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
