@@ -7,6 +7,15 @@ import '../register/register_step1_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 
+/// Ez a képernyő a bejelentkezési logikát és a kapcsolódó UI-t valósítja meg.
+///
+/// Lehetőségek:
+/// - Email + jelszavas bejelentkezés
+/// - Vendégként belépés
+/// - Google fiókkal való belépés
+/// - Elfelejtett jelszó esetén jelszó-visszaállító email küldése
+///
+/// Minden esetben ellenőrizzük az internetkapcsolatot, és a Firebase Firestore alapján azt is, hogy a fiók nincs-e letiltva.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -21,6 +30,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String _errorMessage = '';
   bool _isPasswordVisible = false;
 
+  /// Ellenőrzi, van-e aktív internetkapcsolat a `example.com` elérése alapján.
+  /// SocketException esetén `false`-t ad vissza.
   Future<bool> hasInternetConnection() async {
     try {
       final result = await InternetAddress.lookup('example.com');
@@ -30,6 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// E-mail és jelszavas bejelentkezés próbálkozás.
+  /// Ellenőrzi:
+  /// - mezők kitöltöttségét
+  /// - internetkapcsolatot
+  /// - Firebase Auth hitelesítést
+  /// - Firestore `users` dokumentumban nincs-e `disabled` flag beállítva
+  ///
+  /// Siker esetén navigál a [`BottomNavScreen`] kezdőoldalra.
   Future<void> _signIn() async {
     setState(() => _errorMessage = '');
 
@@ -92,6 +111,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// Vendégként történő belépés logikája.
+  /// Internetkapcsolat hiánya esetén is engedélyezett, mivel a vendég mód offline használatra is alkalmas.
+  /// Navigál a [`BottomNavScreen`] kezdőoldalra.
   Future<void> _signInAsGuest() async {
     final hasInternet = await hasInternetConnection();
     if (!hasInternet) {
@@ -120,6 +142,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// Google fiókkal való hitelesítés a Firebase segítségével.
+  /// Sikeres belépés után ellenőrzi, hogy a felhasználó nincs-e letiltva (`disabled == true`)
+  /// Ha nincs, navigál a főképernyőre.
   Future<void> _signInWithGoogle() async {
     setState(() => _errorMessage = '');
 
@@ -163,6 +188,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// Elküldi a jelszó-visszaállító emailt a megadott e-mail címre.
+  /// Ha az email üres vagy érvénytelen, hibaüzenetet jelenít meg.
+  /// A sikeres küldés egy `SnackBar` segítségével visszajelzést ad.
   Future<void> _sendPasswordResetEmail() async {
     final email = _emailController.text.trim();
 
