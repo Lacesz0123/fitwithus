@@ -7,6 +7,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import '../../utils/custom_snackbar.dart';
 
+/// Ez a képernyő a felhasználó és egy OpenAI-alapú AI chatbot közötti beszélgetést teszi lehetővé.
+/// Az AI csak egészséges életmóddal és fitnesz tanácsadással kapcsolatos kérdésekre válaszol.
+///
+/// A beszélgetés lokálisan mentésre kerül (SharedPreferences), és újraindítás után visszatölthető.
+/// Internetkapcsolat nélkül az AI chat nem elérhető.
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
 
@@ -14,6 +19,13 @@ class AIChatScreen extends StatefulWidget {
   _AIChatScreenState createState() => _AIChatScreenState();
 }
 
+/// Az AI chat képernyő állapota.
+/// Kezeli:
+/// - felhasználói üzenetek és AI válaszok listáját,
+/// - betöltést (`_isLoading`),
+/// - internetelérhetőséget,
+/// - szövegmező tartalmát,
+/// - üzenetek lokális tárolását (user-UID alapján külön kulccsal).
 class _AIChatScreenState extends State<AIChatScreen> {
   final List<Map<String, String>> _messages = [];
   final TextEditingController _controller = TextEditingController();
@@ -21,6 +33,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
   bool _isLoading = false;
   bool hasInternet = true;
 
+  /// Az initState ellenőrzi az internetkapcsolatot és betölti a korábban mentett üzeneteket SharedPreferences-ből.
   @override
   void initState() {
     super.initState();
@@ -28,6 +41,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
     _loadMessagesFromLocal();
   }
 
+  /// Egyszerű `example.com` lookup-al ellenőrzi, van-e internetkapcsolat.
   Future<void> _checkInternet() async {
     try {
       final result = await InternetAddress.lookup('example.com');
@@ -39,6 +53,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
     }
   }
 
+  /// Elküldi a felhasználó üzenetét, majd lekéri az AI válaszát az OpenAI API-tól.
+  /// A válasz siker esetén bekerül a listába és mentésre kerül.
   Future<void> _sendMessage() async {
     await _checkInternet(); // ✅ újraellenőrzés
 
@@ -74,6 +90,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
     }
   }
 
+  /// Meghívja a `https://api.openai.com/v1/chat/completions` végpontot a GPT-3.5-tel.
+  /// A rendszerüzenet szűkíti a válaszkört egészséges életmódra és fitneszre.
   Future<String> _getAIResponse(String prompt) async {
     const url = 'https://api.openai.com/v1/chat/completions';
     final headers = {
@@ -104,6 +122,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
     }
   }
 
+  /// Üzenetek elmentése SharedPreferences-ből a felhasználó UID-ja alapján.
+  /// Az üzenetek JSON objektumként kerülnek tárolásra.
   Future<void> _saveMessagesToLocal() async {
     final prefs = await SharedPreferences.getInstance();
     final user = FirebaseAuth.instance.currentUser;
@@ -113,6 +133,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
     await prefs.setStringList(key, jsonList);
   }
 
+  /// Üzenetek betöltése SharedPreferences-ből a felhasználó UID-ja alapján.
+  /// Az üzenetek JSON objektumként kerülnek tárolásra.
   Future<void> _loadMessagesFromLocal() async {
     final prefs = await SharedPreferences.getInstance();
     final user = FirebaseAuth.instance.currentUser;
@@ -128,6 +150,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
     }
   }
 
+  /// Törli a tárolt üzeneteket, és frissíti a képernyőt.
   Future<void> _clearChatHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final user = FirebaseAuth.instance.currentUser;
