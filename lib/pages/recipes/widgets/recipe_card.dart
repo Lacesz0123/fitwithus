@@ -3,6 +3,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../recipe_detail_screen.dart';
 import '../edit_recipe_screen.dart';
 
+/// Egy kártya widget, amely megjelenít egy receptet névvel és képpel.
+///
+/// A `RecipeCard` kártya egy `DocumentSnapshot` típusú `recipe` Firestore dokumentumból
+/// dolgozik, és a `userRole` alapján dönt arról, hogy megjeleníti-e a szerkesztés ikont.
+///
+/// Ha a felhasználó szerepe `admin`, akkor a kártya jobb felső sarkában
+/// egy szerkesztés gomb jelenik meg, amely `EditRecipeScreen`-re navigál.
+///
+/// Ha a kártyára koppintunk, akkor az adott recept részleteit mutató képernyőre (`RecipeDetailScreen`)
+/// navigál.
+///
+/// ### Paraméterek:
+/// - [recipe]: A Firestore-ból lekért recept dokumentum.
+/// - [userRole]: A bejelentkezett felhasználó szerepe (`admin` vagy `user`).
+///
+/// ### Megjelenített elemek:
+/// - Kép (`imageUrl`) – ha nem sikerül betölteni, offline placeholder-t mutat.
+/// - Recept neve – maximum 2 sorban, középre igazítva.
+/// - Admin esetén szerkesztés ikon.
 class RecipeCard extends StatelessWidget {
   final DocumentSnapshot recipe;
   final String userRole;
@@ -87,7 +106,7 @@ class RecipeCard extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(15),
                                     image: const DecorationImage(
                                       image: AssetImage(
-                                          'assets/offline_placeholder.png'), // ← ez legyen a helyettesítő kép
+                                          'assets/offline_placeholder.png'),
                                       fit: BoxFit.cover,
                                     ),
                                   ),

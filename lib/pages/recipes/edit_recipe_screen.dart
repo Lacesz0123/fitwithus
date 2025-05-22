@@ -10,6 +10,34 @@ import 'widgets/edit_recipe_steps.dart';
 import '../../../utils/validators.dart';
 import '../../../utils/custom_snackbar.dart';
 
+/// A `EditRecipeScreen` lehetővé teszi adminisztrátorok számára egy meglévő recept szerkesztését.
+///
+/// ## Funkciók:
+/// - Betölti a kiválasztott recept adatait (`name`, `description`, `prepTime`, `calories`, `ingredients`, `steps`, `imageUrl`).
+/// - Lehetővé teszi:
+///   - A recept címének, leírásának, kalóriaértékének, előkészítési idejének módosítását
+///   - Hozzávalók és lépések dinamikus hozzáadását és eltávolítását
+///   - Új kép feltöltését, meglévő kép törlését
+/// - Valósidejű ellenőrzés: csak admin szerepkörrel rendelkező felhasználók használhatják
+/// - Kép méretkorlát: max. 5MB (ellenőrzés `ImagePicker` után)
+/// - Módosítás után a Firestore-ban frissíti a recept dokumentumát
+/// - A recept teljes törlését is biztosítja (Firestore-ból és Firebase Storage-ból is)
+///
+/// ## Felhasznált Firestore gyűjtemények:
+/// - `recipes/{recipeId}` – a szerkesztendő recept
+/// - `users/{userId}` – a felhasználó szerepkörének ellenőrzéséhez
+///
+/// ## Főbb widgetek:
+/// - [EditRecipeHeader] – Alapadatok (név, leírás, kalóriák, kép) szerkesztéséhez
+/// - [EditRecipeIngredients] – Hozzávalók listájának dinamikus kezelése
+/// - [EditRecipeSteps] – Lépések listájának dinamikus kezelése
+///
+/// ## Biztonsági funkciók:
+/// - Csak admin jogosultsággal használható (egyébként visszanavigál és hibát jelez)
+/// - Kép lecserélése előtt törli a régit a Firebase Storage-ból
+/// - Hibák esetén vizuális snackbar jelenik meg.
+///
+/// Ez a képernyő ideális receptadatok karbantartására egy admin által irányított egészségtudatos alkalmazásban.
 class EditRecipeScreen extends StatefulWidget {
   final String recipeId;
 

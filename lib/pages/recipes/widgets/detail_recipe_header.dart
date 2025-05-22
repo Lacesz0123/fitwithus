@@ -1,5 +1,29 @@
 import 'package:flutter/material.dart';
 
+/// Egy recept fejlécének megjelenítésére szolgáló stateless widget.
+///
+/// A `RecipeHeader` widget a recept címét, leírását, elkészítési idejét és opcionálisan
+/// kalóriatartalmát jeleníti meg. Emellett megjelenít egy csillag ikont is, amely
+/// lehetőséget biztosít a recept kedvencként való megjelölésére vagy annak eltávolítására.
+///
+/// ---
+///
+/// ### Konstruktor paraméterek:
+/// - [name] – A recept neve (kötelező).
+/// - [prepTime] – Az elkészítési idő percekben (kötelező).
+/// - [description] – A recept rövid leírása (kötelező).
+/// - [calories] – A recept kalóriatartalma (opcionális, ha van értelmezve).
+/// - [isFavorite] – Jelzi, hogy a recept kedvencként van-e megjelölve.
+/// - [onToggleFavorite] – A csillag ikon megnyomására hívott visszahívási függvény.
+/// - [showFavoriteButton] – Ha `true`, akkor megjelenik a kedvenc ikon.
+///
+/// ---
+///
+/// ### Funkciók:
+/// - Megjeleníti a recept címét nagy betűkkel, kiemelve a témának megfelelő színnel.
+/// - Feltételesen jeleníti meg a kedvenc (csillag) ikont.
+/// - Feltételesen jeleníti meg a kalóriainformációkat.
+/// - Sötét és világos módhoz illeszkedik.
 class RecipeHeader extends StatelessWidget {
   final String name;
   final int prepTime;
@@ -48,8 +72,7 @@ class RecipeHeader extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isFavorite
                         ? (isDark
-                            ? Colors.grey.shade700
-                                .withOpacity(0.4) // visszafogott háttér
+                            ? Colors.grey.shade700.withOpacity(0.4)
                             : Colors.yellow.shade100)
                         : (isDark
                             ? Colors.grey.shade800

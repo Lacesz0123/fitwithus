@@ -6,6 +6,27 @@ import 'add_recipe_screen.dart';
 import 'widgets/recipe_card.dart';
 import 'widgets/recipe_search_delegate.dart';
 
+/// A [RecipesScreen] képernyő receptkártyák böngészésére és kategorizált megjelenítésére szolgál.
+///
+/// ## Főbb funkciók:
+/// - Receptadatok valós idejű megjelenítése a `recipes` Firestore kollekcióból.
+/// - A receptek `difficulty` mező alapján három kategóriába sorolva jelennek meg: `Easy`, `Intermediate`, `Advanced`.
+/// - Kategóriánként GridView formátumban jelennek meg a receptek.
+/// - A keresés `RecipeSearchDelegate` használatával történik, amelyet az AppBar keresőikonja indít.
+/// - Adminisztrátori szerepkör esetén a kategóriák mellett `+` gomb jelenik meg, amely új recept hozzáadását teszi lehetővé adott kategóriába.
+///
+/// ## Technikai részletek:
+/// - A felhasználó szerepköre (`role`) Firestore `users` kollekciójából kerül betöltésre a `currentUser.uid` alapján.
+/// - Az `initState()` metódus betölti az aktuális felhasználó szerepkörét.
+/// - A receptek StreamBuilder segítségével valós időben frissülnek.
+/// - A `GridView.builder` a `NeverScrollableScrollPhysics`-el van beállítva, így nem scrollozik külön – a `ListView` görgeti az egész oldalt.
+///
+/// ## UI sajátosságok:
+/// - Világos és sötét mód támogatás.
+/// - Modern, anyagszerű dizájn lekerekített gombokkal és színezett címkékkel.
+/// - Animált keresőfelület és reszponzív GridView receptmegjelenítés.
+///
+/// Ez az osztály ideális kiindulási alap egy egészséges életmóddal kapcsolatos receptböngésző képernyőhöz, amely Firebase integrációt használ Flutter alkalmazásban.
 class RecipesScreen extends StatefulWidget {
   const RecipesScreen({Key? key}) : super(key: key);
 
@@ -99,7 +120,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           }
 
           return ListView(
-            physics: const BouncingScrollPhysics(), // <-- EZ AZ ÚJ
+            physics: const BouncingScrollPhysics(),
             children: categorizedRecipes.entries.map((entry) {
               String difficulty = entry.key;
               List<DocumentSnapshot> recipes = entry.value;
@@ -156,17 +177,15 @@ class _RecipesScreenState extends State<RecipesScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: GridView.builder(
-                      physics:
-                          const NeverScrollableScrollPhysics(), // ne scrollozzon külön
-                      shrinkWrap: true, // wrapelje be a tartalmat
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
                       itemCount: recipes.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // 2 oszlop
+                        crossAxisCount: 2,
                         mainAxisSpacing: 0.1,
                         crossAxisSpacing: 0.1,
-                        childAspectRatio:
-                            1, // receptkártya arány (tetszés szerint finomítható)
+                        childAspectRatio: 1,
                       ),
                       itemBuilder: (context, index) {
                         return RecipeCard(

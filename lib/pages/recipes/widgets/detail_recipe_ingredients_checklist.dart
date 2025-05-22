@@ -1,6 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Egy összetevőlista megjelenítésére és kezelésére szolgáló interaktív widget receptoldalon.
+///
+/// Az `IngredientChecklist` widget egy checkbox-listát jelenít meg a megadott összetevőkkel.
+/// A felhasználó kijelölheti, mely összetevőket használta már fel. A bejelölt állapotok
+/// lokálisan mentésre kerülnek a [SharedPreferences] segítségével a megadott [recipeId] alapján.
+///
+/// ---
+///
+/// ### Konstruktor paraméterek:
+/// - [ingredientsStatus] – A recept összetevőit és azok kezdeti (true/false) bejelöltségi állapotát tartalmazó map.
+/// - [recipeId] – Az adott recept azonosítója, amely alapján a mentés és betöltés történik.
+///
+/// ---
+///
+/// ### Funkciók:
+/// - Betölti az előzőleg elmentett állapotokat, ha azok léteznek.
+/// - Lehetővé teszi az összetevők bejelölését (checkbox).
+/// - A kijelölés áthúzott szövegstílussal jelenik meg.
+/// - Automatikusan elmenti a változtatásokat a [SharedPreferences]-be.
+/// - Támogatja a világos és sötét témát is.
 class IngredientChecklist extends StatefulWidget {
   final Map<String, bool> ingredientsStatus;
   final String recipeId;

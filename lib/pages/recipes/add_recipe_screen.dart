@@ -5,6 +5,34 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../utils/custom_snackbar.dart';
 
+/// A `AddRecipeScreen` lehetőséget biztosít új recept hozzáadására az alkalmazásban.
+///
+/// ## Funkciók:
+/// - Új recept adatok bevitele:
+///   - Név
+///   - Leírás
+///   - Elkészítési idő (percben)
+///   - Kalóriák száma (kcal)
+///   - Hozzávalók listája (dinamikusan bővíthető vagy törölhető)
+///   - Elkészítési lépések (dinamikusan bővíthető vagy törölhető)
+///   - Recept képe (kötelező, galériából választható)
+///
+/// - A kép feltöltése Firebase Storage-ba történik.
+/// - Az adatokat a `recipes` Firestore kollekcióban tárolja a következő mezőkkel:
+///   - `name`, `name_lower`, `description`, `prepTime`, `difficulty` (a kapott `category`), `ingredients`, `steps`, `imageUrl`, `calories`
+///
+/// ## Felhasznált technológiák:
+/// - `ImagePicker`: kép kiválasztása
+/// - `FirebaseStorage`: kép feltöltése
+/// - `CloudFirestore`: recept dokumentum létrehozása
+/// - `custom_snackbar.dart`: hibák és visszajelzések megjelenítése
+///
+/// ## További jellemzők:
+/// - Ellenőrzi, hogy minden kötelező mező ki van-e töltve.
+/// - A kalóriaérték validációja számformátum alapján.
+/// - A felület automatikusan reagál a sötét/világos témára.
+///
+/// Ez a képernyő egy jól strukturált, admin számára fenntartott felület új egészséges receptek rögzítésére.
 class AddRecipeScreen extends StatefulWidget {
   final String category;
 

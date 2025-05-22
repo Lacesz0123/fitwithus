@@ -1,5 +1,27 @@
 import 'package:flutter/material.dart';
 
+/// A recept hozzávalóinak szerkesztésére szolgáló widget.
+///
+/// Az `EditRecipeIngredients` egy lista formájában jeleníti meg a szerkeszthető
+/// hozzávalókat, ahol minden egyes hozzávalóhoz tartozik egy `TextField`.
+/// Lehetőség van új hozzávalók hozzáadására és meglévők törlésére.
+///
+/// Ez a komponens általában az `EditRecipeScreen` egyik alkomponense.
+///
+/// ---
+///
+/// ### Paraméterek:
+/// - [controllers]: A hozzávalók `TextEditingController` példányainak listája.
+/// - [onChanged]: Hívódik, ha bármelyik hozzávaló szövege megváltozik.
+/// - [onAddIngredient]: Új hozzávaló hozzáadását kezdeményezi.
+/// - [onRemoveIngredient]: Meglévő hozzávaló eltávolítása adott index alapján.
+///
+/// ---
+///
+/// ### Megjelenítés:
+/// - Minden hozzávalóhoz tartozik egy `TextField`, amely címkéje: `"Ingredient"`
+/// - A sor végén megjelenik egy piros `remove_circle` ikon a törléshez.
+/// - Az új hozzávaló hozzáadása `OutlinedButton.icon` gombbal történik.
 class EditRecipeIngredients extends StatelessWidget {
   final List<TextEditingController> controllers;
   final VoidCallback onChanged;

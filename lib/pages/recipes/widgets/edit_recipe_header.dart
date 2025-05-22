@@ -1,6 +1,33 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
+/// A recept alapadatainak szerkesztésére szolgáló fejléc-komponens.
+///
+/// Az `EditRecipeHeader` megjeleníti a recept legfontosabb szerkeszthető mezőit,
+/// úgymint a név, leírás, kalóriatartalom, elkészítési idő és kép.
+///
+/// A komponens általában az `EditRecipeScreen` részeként használatos.
+///
+/// ---
+///
+/// ### Paraméterek:
+/// - [nameController]: A recept nevének beviteli mezőjét vezérlő controller.
+/// - [descriptionController]: A leírás szövegének controller-e.
+/// - [caloriesController]: A kalóriaértéket vezérlő controller.
+/// - [prepTimeController]: Az elkészítési idő mező controller-e.
+/// - [selectedImage]: A lokálisan kiválasztott kép fájlja.
+/// - [imageUrl]: A meglévő, korábban feltöltött kép URL-je (ha van).
+/// - [onImagePick]: A kép kiválasztását indító callback.
+///
+/// ---
+///
+/// ### Megjelenítés:
+/// - Szövegbeviteli mezők a név, leírás, kalória és idő megadásához.
+/// - Képmegjelenítő rész, amely mutatja:
+///   - A kiválasztott fájlt (`File`),
+///   - Vagy a meglévő kép URL-t (`NetworkImage`),
+///   - Vagy egy ikon, ha nincs kép.
+/// - Kép kiválasztása gomb: `"Select Image"`
 class EditRecipeHeader extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController descriptionController;

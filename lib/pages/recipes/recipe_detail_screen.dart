@@ -7,6 +7,32 @@ import 'widgets/detail_recipe_ingredients_checklist.dart';
 import 'widgets/detail_recipe_steps.dart';
 import 'dart:io';
 
+/// A `RecipeDetailScreen` képernyő egy recept részletes megjelenítésére szolgál a megadott `recipeId` alapján.
+///
+/// ## Funkciók:
+/// - Betölti a recept nevét, leírását, előkészítési idejét, kalóriatartalmát, hozzávalóit, lépéseit és képet a Firestore-ból.
+/// - Képes ellenőrizni az internetkapcsolat meglétét, és csak akkor jeleníti meg a képet, ha elérhető.
+/// - A vendégmódban lévő felhasználók nem tudják kedvencként jelölni a receptet, és nem használhatják a „Megettem” gombot.
+/// - Bejelentkezett felhasználók kedvencként megjelölhetik a receptet (`favoriteRecipes` mező alapján).
+/// - A "Megettem" gomb hozzáadja a recept kalóriáit a napi kalóriaértékhez a Firestore-ban.
+///
+/// ## UI elemek:
+/// - [RecipeHeader]: megjeleníti a recept fő adatait és a kedvenc ikon állapotát.
+/// - [IngredientChecklist]: jelölőlistát biztosít a hozzávalók kipipálásához.
+/// - [RecipeSteps]: a lépések numerikus listában jelennek meg.
+/// - A képet `Image.network` tölti be, biztonsági fallback-ként csak online elérhető.
+///
+/// ## Állapotváltozók:
+/// - `isFavorite`: jelzi, hogy a recept kedvenc-e.
+/// - `isGuest`: vendégmódban van-e a felhasználó.
+/// - `hasInternet`: aktuális internetkapcsolat státusza (képmegjelenítés feltétele).
+/// - `ingredientsStatus`: a hozzávalók kipipálási állapotát tárolja (lásd `Checklist`).
+///
+/// ## Firestore használat:
+/// - Recept: `recipes/{recipeId}`
+/// - Felhasználói adatok: `users/{userId}`
+///
+/// Ez az osztály ideális egy jól strukturált, vizuálisan részletgazdag receptnézethez, amely támogatja a vendég- és regisztrált felhasználói módot is.
 class RecipeDetailScreen extends StatefulWidget {
   final String recipeId;
 

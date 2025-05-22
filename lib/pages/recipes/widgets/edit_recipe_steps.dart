@@ -1,5 +1,26 @@
 import 'package:flutter/material.dart';
 
+/// A recept lépéseinek szerkesztésére szolgáló widget.
+///
+/// Az `EditRecipeSteps` egy szerkeszthető mezősorozatot jelenít meg,
+/// amelyben a felhasználó új lépéseket adhat hozzá, meglévőket szerkeszthet vagy törölhet.
+///
+/// Tipikusan az `EditRecipeScreen` egyik alkomponense.
+///
+/// ---
+///
+/// ### Paraméterek:
+/// - [controllers]: A lépéseket vezérlő `TextEditingController`-ek listája.
+/// - [onChanged]: Hívódik, amikor bármelyik lépés szövege megváltozik.
+/// - [onAddStep]: Hívódik, amikor az „Add Step” gombot megnyomják.
+/// - [onRemoveStep]: Hívódik egy adott indexű lépés törlésekor.
+///
+/// ---
+///
+/// ### Megjelenítés:
+/// - Minden lépés egy `TextField`, melynek címkéje: `Step 1`, `Step 2`, stb.
+/// - A lépések mellett megjelenik egy piros `remove_circle` ikon.
+/// - Az új lépés hozzáadása egy `OutlinedButton.icon` gombbal történik.
 class EditRecipeSteps extends StatelessWidget {
   final List<TextEditingController> controllers;
   final VoidCallback onChanged;
