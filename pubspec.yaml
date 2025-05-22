@@ -34,6 +34,13 @@ dev_dependencies:
   test: ^1.24.0
   mockito: ^5.4.5
   build_runner: ^2.4.15
+  flutter_launcher_icons: ^0.14.3
+
+flutter_icons:
+  android: true
+  image_path: "assets/logo.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/logo_foreground.png"
 
 flutter:
   uses-material-design: true
