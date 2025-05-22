@@ -3,9 +3,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+/// Egy statikus widget, amely egy BarChart (oszlopdiagram) segítségével mutatja a felhasználó súlyváltozását időrendben.
+///
+/// Fő funkciók:
+/// - Lekérdezi az aktuális felhasználó `weights/{uid}/entries` kollekcióját időrendben.
+/// - Minden adatpontot egy oszlopként jelenít meg, a súly (`weight`) értékével.
+/// - Világos és sötét témához igazodik a színvilág.
+///
+/// Megjegyzés:
+/// - Ha nincs adat, egy "No weight data available" üzenet jelenik meg.
+/// - Az oszlopok rögzített maximális magasságig (`maxY: 200`) skálázódnak.
 class WeightChartCard extends StatelessWidget {
   const WeightChartCard({super.key});
 
+  /// A bejelentkezett felhasználó súlybejegyzéseit adja vissza stream formájában.
+  ///
+  /// Visszatérési érték:
+  /// - `Stream<List<Map<String, dynamic>>>`, amely minden bejegyzést egy Map-ként tartalmaz (`weight`, `date` mezőkkel).
+  ///
+  /// A lekérdezés `orderBy('date', ascending)` sorrendben hozza az adatokat.
   Stream<List<Map<String, dynamic>>> _getWeightEntries() {
     final user = FirebaseAuth.instance.currentUser;
     return FirebaseFirestore.instance

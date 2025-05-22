@@ -3,6 +3,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '/utils/custom_snackbar.dart';
 
+/// A [MyWorkoutsScreen] képernyő lehetővé teszi a felhasználók számára,
+/// hogy saját egyedi edzésterveket hozzanak létre, szerkesszenek, megjelenítsenek és töröljenek.
+///
+/// ## Fő funkciók:
+/// - Egyéni edzések listázása valós idejű Firestore stream segítségével.
+/// - Új edzés hozzáadása: cím és lépések dinamikus megadásával.
+/// - Létező edzés szerkesztése: módosítható a cím és a lépések.
+/// - Edzés törlése megerősítő párbeszédablakkal.
+///
+/// ## Technikai részletek:
+/// - Minden edzés a Firestore `users/{userId}/my_workouts` kollekciójában kerül tárolásra.
+/// - A `createdAt` mező alapján időrendben vannak rendezve.
+/// - Sötét és világos mód támogatott (`Theme.of(context).brightness` alapján).
+/// - Az új és szerkesztett edzések adatai `TextEditingController`-ekkel kezeltek.
+///
+/// ## UI jellemzők:
+/// - Edzések `Card` komponensekben jelennek meg, melyek tartalmazzák a címet és a lépéseket.
+/// - Minden edzéshez tartozik szerkesztés és törlés gomb.
+/// - Az „Add Workout” gomb egy `AlertDialog` ablakot nyit meg, ahol dinamikusan hozzáadhatók a lépések.
 class MyWorkoutsScreen extends StatefulWidget {
   const MyWorkoutsScreen({super.key});
 
@@ -21,7 +40,7 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
       stepsControllers.add(TextEditingController());
     }
 
-    addStepField(); // Minimum 1 lépés
+    addStepField();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDark ? Colors.grey.shade700 : Colors.blueAccent;
@@ -394,7 +413,6 @@ class _MyWorkoutsScreenState extends State<MyWorkoutsScreen> {
       final userRef =
           FirebaseFirestore.instance.collection('users').doc(userId);
 
-      // Törlés Firestore-ból
       await userRef.collection('my_workouts').doc(id).delete();
     }
   }

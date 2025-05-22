@@ -4,6 +4,30 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '/utils/custom_snackbar.dart';
 
+/// A [CommunityScreen] egy közösségi chatfelület, ahol a felhasználók üzeneteket küldhetnek egymásnak.
+///
+/// ## Funkciók:
+/// - Valós idejű üzenetküldés (Firestore `community_messages` kollekció).
+/// - Az üzenetek letöltése és listázása érkezési sorrendben.
+/// - Saját üzenetek megkülönböztetése ("Me" megjelölés, más szín).
+/// - Profilkép megjelenítése: saját feltöltött kép vagy alapértelmezett kép.
+/// - Adminisztrátori jogosultság esetén hosszú nyomással üzenet törlése.
+/// - Automatikus scrollozás az utolsó üzenethez.
+///
+/// ## Technikai megvalósítás:
+/// - `initState()` betölti a felhasználó adatait, profilképet és üzeneteket.
+/// - `_buildMessageBubble()` külön kezeli saját és mások üzeneteit, valamint megjeleníti a profilképet.
+/// - `_sendMessage()` új üzenetet tölt fel Firestore-ba.
+/// - `_deleteMessage()` csak admin számára elérhető és Firestore-ból törli az adott üzenetet.
+/// - A küldés gomb és a szövegmező az oldal alján található, modern UI-stílussal.
+///
+/// ## UI jellemzők:
+/// - Sötét és világos mód támogatás.
+/// - Dinamikus profilkép betöltés Firebase Storage-ból.
+/// - Lekerekített üzenetbuborékok, árnyékolással.
+/// - Üres állapotban informatív szöveg jelenik meg.
+///
+/// Ez az osztály egy teljes értékű közösségi beszélgetési felületet nyújt Flutter és Firebase technológiákkal.
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
 
@@ -171,7 +195,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    _deleteMessage(docId); // ez már jól törli Firestore-ból
+                    _deleteMessage(docId);
                   },
                   child: Text('Delete', style: TextStyle(color: deleteColor)),
                 ),

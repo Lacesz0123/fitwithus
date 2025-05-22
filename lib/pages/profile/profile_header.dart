@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 
+/// A [ProfileHeader] egy profilképet és felhasználónevet megjelenítő widget.
+///
+/// - A `profileImageUrl` az aktuális felhasználó profilképének URL-je.
+/// - A `defaultProfileImageUrl` használatos, ha nincs beállítva egyéni kép.
+/// - Az `onImageTap` callback akkor hívódik meg, ha a profilképre kattintanak (pl. képválasztáshoz).
+/// - A `username` jelenik meg a kép alatt.
+/// - A `subtitle` opcionálisan megjelenik a név alatt (pl. "Email not verified").
+///
+/// A widget automatikusan alkalmazkodik a világos/sötét témához, lekerekített,
+/// árnyékos profilkép-kártyával.
 class ProfileHeader extends StatelessWidget {
   final String? profileImageUrl;
   final String? defaultProfileImageUrl;
   final VoidCallback onImageTap;
   final String username;
-  final String? subtitle; // <- ÚJ
+  final String? subtitle;
 
   const ProfileHeader(
       {super.key,
@@ -13,8 +23,7 @@ class ProfileHeader extends StatelessWidget {
       required this.defaultProfileImageUrl,
       required this.onImageTap,
       required this.username,
-      this.subtitle // <- ÚJ
-      });
+      this.subtitle});
 
   @override
   Widget build(BuildContext context) {

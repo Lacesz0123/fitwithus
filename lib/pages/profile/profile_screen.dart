@@ -18,6 +18,18 @@ import 'notes/notes_screen.dart';
 import 'my_workouts/my_workouts_screen.dart';
 import '/utils/custom_snackbar.dart';
 
+/// A [ProfileScreen] a felhasználói profiloldal megjelenítéséért felelős képernyő.
+///
+/// Ez a képernyő biztosítja a felhasználó alapadatainak megjelenítését és szerkesztését, valamint statisztikai kártyák (súly, kalória, vízfogyasztás, edzések) megjelenítését.
+/// A vendégfelhasználók számára korlátozott funkcionalitást nyújt.
+///
+/// Tartalmaz:
+/// - Profilkép feltöltése Firebase Storage-on keresztül
+/// - Kalóriaszámítás a felhasználói adatok alapján (RMR és aktivitási szint)
+/// - Súlybevitel, súlytörténet és törlés
+/// - Napi kalóriabevitel hozzáadása és nullázása
+/// - Vendégmód és hitelesített felhasználói elágazás
+/// - Navigáció kedvenc edzésekhez, receptekhez, közösséghez, jegyzetekhez, saját edzésekhez, admin felülethez
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -426,8 +438,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const SizedBox(
-                        height:
-                            400, // vagy MediaQuery.of(context).size.height * 0.5 is lehet
+                        height: 400,
                         child: Center(
                           child: CircularProgressIndicator(
                             color: Colors.blueAccent,
@@ -879,7 +890,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 30),
-                        const WaterTrackerCard(), // például a WeightChartCard után
+                        const WaterTrackerCard(),
                       ],
                     );
                   },

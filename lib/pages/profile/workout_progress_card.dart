@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 
+/// Egy stateless widget, amely edzéscélok teljesítését mutatja a felhasználó számára.
+///
+/// Paraméterek:
+/// - `completedWorkouts` – az eddig teljesített edzések száma.
+///
+/// Három szintű cél:
+/// - 10 edzés (zöld sáv)
+/// - 50 edzés (narancssárga sáv)
+/// - 100 edzés (piros sáv)
+///
+/// Minden progress bar mellett megjelenik a cím és az aktuális/kitűzött érték.
 class WorkoutProgressCard extends StatelessWidget {
   final int completedWorkouts;
 
@@ -53,6 +64,21 @@ class WorkoutProgressCard extends StatelessWidget {
     );
   }
 
+  /// Egy adott célhoz tartozó progress bar és aláírás megjelenítéséért felelős.
+  ///
+  /// Paraméterek:
+  /// - `label`: a cél elnevezése (pl. "10 Workouts Goal").
+  /// - `completed`: eddig teljesített érték.
+  /// - `goal`: célérték (pl. 10).
+  /// - `color`: az adott sáv színe.
+  /// - `labelColor`: cím színe.
+  /// - `secondaryColor`: arány (`X/Y`) színe.
+  /// - `backgroundColor`: progress bar háttérszíne.
+  ///
+  /// Megjelenítés:
+  /// - Cím (`label`)
+  /// - Progress sáv (`LinearProgressIndicator`)
+  /// - Szöveges arány (`X / Y`)
   Widget _buildProgressBar(
     String label,
     int completed,

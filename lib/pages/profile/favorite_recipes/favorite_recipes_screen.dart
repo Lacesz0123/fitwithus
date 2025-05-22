@@ -3,6 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../recipes/recipe_detail_screen.dart';
 
+/// A [FavoriteRecipesScreen] megjeleníti a felhasználó által kedvencnek jelölt recepteket.
+///
+/// ## Funkciók:
+/// - Lekérdezi a `users/{uid}/favoriteRecipes` listából a kedvenc receptek azonosítóit.
+/// - A `recipes` kollekcióból betölti a megfelelő recepteket `whereIn` szűréssel.
+/// - Minden recept egy kártyán jelenik meg, amely tartalmazza:
+///   - a recept nevét,
+///   - opcionálisan a képét (vagy helyettesítő ikont).
+/// - Kattintásra navigál a [RecipeDetailScreen] képernyőre.
+///
+/// ## Megjelenés:
+/// - Sötét és világos módot is támogat.
+/// - A lista görgethető, üres állapotban pedig egy üzenetet jelenít meg.
+///
+/// ## Technikai részletek:
+/// - Az adatok lekérdezése aszinkron `FutureBuilder` segítségével történik.
+/// - Az üres `favoriteRecipes` lista és hibakezelés is támogatott.
 class FavoriteRecipesScreen extends StatelessWidget {
   const FavoriteRecipesScreen({Key? key}) : super(key: key);
 

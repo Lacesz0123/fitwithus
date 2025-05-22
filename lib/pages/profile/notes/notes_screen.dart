@@ -3,6 +3,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+/// A [NotesScreen] lehetőséget biztosít a felhasználónak saját jegyzetek létrehozására, megjelenítésére, szerkesztésére és törlésére.
+///
+/// Funkcionalitások:
+///
+/// - Új jegyzet hozzáadása szövegmező segítségével.
+/// - Jegyzetek listázása a Firestore valós idejű adatfolyamából.
+/// - Meglévő jegyzet szerkesztése `AlertDialog` használatával.
+/// - Jegyzet törlése megerősítő párbeszédablakkal.
+/// - A jegyzetek `createdAt` mező alapján időrendben vannak rendezve (legújabb elöl).
+///
+/// Technikai jellemzők:
+///
+/// - A jegyzeteket a Firestore `users/{uid}/notes` kollekciójában tárolja.
+/// - Sötét és világos mód támogatás (`Theme.of(context).brightness` alapján).
+/// - Minden jegyzethez menti a létrehozás dátumát és azt formázottan jeleníti meg (`intl` csomaggal).
+/// - A jegyzet szövegének és létrehozási idejének megjelenítése kártyaszerű UI-elemekben történik.
+///
+/// A képernyő biztonságosan kezeli az `userId == null` esetet, és nem hajt végre írási műveletet vendég vagy null felhasználó esetén.
 class NotesScreen extends StatefulWidget {
   const NotesScreen({Key? key}) : super(key: key);
 

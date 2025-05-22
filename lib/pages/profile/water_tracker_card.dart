@@ -3,6 +3,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '/utils/custom_snackbar.dart';
 
+/// Fő widget, amely megjeleníti a napi vízfogyasztási adatokat, célértéket, egy pohárvizet reprezentáló grafikát,
+/// valamint input mezőt és gombokat az interakcióhoz.
+///
+/// Adatok:
+/// - `_dailyWaterIntake`: az aktuálisan elfogyasztott vízmennyiség (ml).
+/// - `_dailyGoal`: automatikusan kiszámolt célérték a testsúly, magasság és nem alapján.
+///
+/// Firestore:
+/// - `users/{uid}.dailyWaterIntake` mező kezelése.
+/// - Testsúly/magasság/nem alapján célérték újrakalkulálás.
 class WaterTrackerCard extends StatefulWidget {
   const WaterTrackerCard({super.key});
 
@@ -41,7 +51,9 @@ class _WaterTrackerCardState extends State<WaterTrackerCard> {
       final double height = (data['height'] as num?)?.toDouble() ?? 170.0;
       final String gender = data['gender'] ?? 'Male';
 
-      /// Egyszerű képlet: testsúly * 35 ml + magasság * 2 ml + nemhez igazítás
+      /// Formula: weight * 35 + height * 2
+      /// - Férfiaknak +200 ml
+      /// - Nőknek –100 ml
       double goal = weight * 35 + height * 2;
       if (gender == 'Male') {
         goal += 200;
@@ -201,14 +213,11 @@ class _WaterTrackerCardState extends State<WaterTrackerCard> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 12),
-// Helyette ez jön:
                 Center(
                   child: WaterGlassIndicator(progress: progress),
                 ),
                 const SizedBox(height: 14),
-
                 const SizedBox(height: 14),
                 Column(
                   children: [
@@ -276,8 +285,16 @@ class _WaterTrackerCardState extends State<WaterTrackerCard> {
   }
 }
 
+/// Egy 60x120 pixeles grafikus widget, amely egy stilizált, függőleges poharat jelenít meg,
+/// és vizuálisan mutatja a progress értéket (0.0–1.0).
+///
+/// - A `progress` a napi bevitt víz arányát jelzi a célhoz képest.
+/// - `CustomPaint` használatával a `Canvas`-re rajzol.
+/// - Árnyék, körvonal és vízkitöltés jelenik meg.
+///
+/// Használja a `_ModernGlassPainter` osztályt.
 class WaterGlassIndicator extends StatelessWidget {
-  final double progress; // 0.0 – 1.0
+  final double progress;
 
   const WaterGlassIndicator({super.key, required this.progress});
 
@@ -294,6 +311,15 @@ class WaterGlassIndicator extends StatelessWidget {
   }
 }
 
+/// CustomPainter osztály, amely megrajzolja a vízpoharat és a benne lévő vízszintet.
+///
+/// - A pohár trapezoid alakú, fentről szélesebb.
+/// - A víz szintje arányosan jelenik meg a progress érték alapján.
+/// - Témafüggő színezést használ (világos/sötét).
+///
+/// Színezés:
+/// - Sötét téma: világosabb szürke körvonal
+/// - Világos téma: sötétebb kontúrvonal, halvány árnyékok
 class _ModernGlassPainter extends CustomPainter {
   final double progress;
   final bool isDark;

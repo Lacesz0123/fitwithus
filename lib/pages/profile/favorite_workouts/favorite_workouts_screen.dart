@@ -3,6 +3,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../workouts/in_a_category/workout_detail_screen.dart';
 
+/// A [FavoriteWorkoutsScreen] képernyő megjeleníti a felhasználó kedvenc edzéseit.
+///
+/// ## Funkciók:
+/// - Lekérdezi a bejelentkezett felhasználó `favorites` listáját a Firestore-ból.
+/// - Betölti a hozzátartozó `workouts` dokumentumokat.
+/// - Megjeleníti őket egy listában, kártyás stílusban.
+/// - Az egyes elemekre kattintva navigál a [WorkoutDetailScreen]-re.
+///
+/// ## Technikai megvalósítás:
+/// - A kedvencek `users/{uid}/favorites` tömbben vannak tárolva (edzésdokumentum-azonosítók).
+/// - A lekérdezés `FutureBuilder`-en keresztül történik.
+/// - Támogatja a sötét és világos témát (`Theme.of(context).brightness` alapján).
+///
+/// ## Megjelenítés:
+/// - Minden edzést kártyaformában jelenít meg: cím, leírás és kategória.
+/// - A listanézet görgethető, és alapértelmezett üzenetet jelenít meg, ha nincsenek kedvencek.
 class FavoriteWorkoutsScreen extends StatelessWidget {
   const FavoriteWorkoutsScreen({super.key});
 

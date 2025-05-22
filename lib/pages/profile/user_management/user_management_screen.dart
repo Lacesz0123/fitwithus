@@ -3,6 +3,17 @@ import 'package:flutter/material.dart';
 import '/utils/custom_snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+/// A [UserManagementScreen] adminisztrációs felület, ahol más felhasználók státusza kezelhető.
+///
+/// Funkciók:
+/// - Felhasználók listázása valós időben (Firestore-ból).
+/// - Bejelentkezett admin felhasználó önmaga nem látható a listában.
+/// - Minden felhasználóhoz két művelet érhető el:
+///   - Aktiválás/letiltás (`Enable` / `Disable` gomb).
+///   - Jogosultság módosítása admin / felhasználó között.
+///
+/// Műveletek végrehajtásakor snackBar értesítést jelenít meg a sikerességről vagy hibáról.
+/// A felület automatikusan alkalmazkodik világos/sötét témához.
 class UserManagementScreen extends StatelessWidget {
   const UserManagementScreen({super.key});
 

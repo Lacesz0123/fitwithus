@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+/// A [ProfileMenuButton] egy egyedi, stílusos gombkomponens, amely a profiloldalon
+/// különböző menüpontokhoz való navigációt tesz lehetővé.
+///
+/// A gomb szövege a [title] paraméterrel adható meg, a lenyomás eseményét pedig az [onPressed]
+/// callback kezeli. A megjelenése a világos/sötét témához igazodik, és árnyékkal, lekerekített
+/// sarkokkal jelenik meg.
 class ProfileMenuButton extends StatelessWidget {
   final String title;
   final VoidCallback onPressed;

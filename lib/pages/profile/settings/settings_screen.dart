@@ -7,6 +7,22 @@ import 'package:provider/provider.dart';
 import '/providers/theme_provider.dart';
 import '/utils/custom_snackbar.dart';
 
+/// A [SettingsScreen] lehetőséget biztosít a felhasználói profiladatok megtekintésére és szerkesztésére.
+///
+/// Funkcionalitás:
+///
+/// - **Profiladatok megjelenítése**: email, felhasználónév, születési dátum, nem, magasság.
+/// - **Szerkesztés lehetősége**: a felhasználó módosíthatja a felhasználónevét, nemét, magasságát, és születési dátumát.
+/// - **Valósidejű adatkezelés**: a módosítások automatikusan frissülnek a Firestore adatbázisban.
+/// - **Sötét mód váltása**: lehetőség van a világos/sötét téma közötti váltásra.
+/// - **Fióktörlés**: a felhasználó véglegesen törölheti saját fiókját, beleértve a Firestore-dokumentumot és a profilképet is.
+///
+/// Az osztály emellett biztosít:
+/// - Validációt a felhasználónévhez és magassághoz.
+/// - Hibakezelést és vizuális visszajelzést `SnackBar` segítségével.
+/// - Dinamikus `showDialog` ablakokat az adatok szerkesztéséhez.
+///
+/// A `ThemeProvider` segítségével kezeli a megjelenítési módokat, és `Provider` segítségével biztosítja a téma állapotának elérését.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -83,7 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             : currentValue?.toString() ?? '');
     DateTime? newBirthdate = _birthdate;
     String? newGender = _gender;
-    int newHeight = _height ?? 170; // Ideiglenes változó a szerkesztéshez
+    int newHeight = _height ?? 170;
     String errorMessage = '';
 
     await showDialog(
@@ -245,7 +261,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 _showMessage(errorMessage);
                                 return;
                               }
-                              _height = newHeight; // Állapot frissítése
+                              _height = newHeight;
                             }
 
                             await _updateUserData();
