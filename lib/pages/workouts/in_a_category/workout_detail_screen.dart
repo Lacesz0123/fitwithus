@@ -543,9 +543,9 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                   primaryColor: primaryColor,
                   textColor: textColor,
                 ),
-                if (!isGuest) RestTimerWidget(isDark: isDark),
+                if (!isGuest && hasInternet) RestTimerWidget(isDark: isDark),
                 const SizedBox(height: 20),
-                if (!isGuest)
+                if (!isGuest && hasInternet)
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: _showConfirmationDialog,
